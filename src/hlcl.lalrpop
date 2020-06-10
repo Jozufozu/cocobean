@@ -1,0 +1,111 @@
+use std::str::FromStr;
+use crate::lexer::{Token, LexicalError};
+use crate::ast::*;
+
+grammar<'input>(input: &'input str);
+
+pub Program: Vec<ProgramPart> = {
+    ProgramPart+ => <>
+}
+
+ProgramPart: ProgramPart = {
+    TypeDefinition => ProgramPart::TypeDefinition(<>),
+}
+
+TypeDefinition: TypeDefinition= {
+    "type" <name:Identifier> ":" <bounds:Type> "{" <members:Comma<MemberVariable>> "}" => TypeDefinition{name, bounds, members}, 
+}
+
+MemberVariable: MemberVariable = {
+    <name:Identifier> ":" <ty:Type> => MemberVariable{name, ty}
+}
+
+Identifier: Identifier = {
+    <l:@L> <n:TokenIdentifier> <r:@R> => Identifier{span: Span{r, l}, name: n.to_string()}
+}
+
+pub Type: Type = {
+    <l:@L> "bool" <r:@R> => Type{span: Span{l,r}, kind: TypeKind::Bool},
+    <l:@L> "string" <r:@R> => Type{span: Span{l,r}, kind: TypeKind::String},
+    <l:@L> "int" <r:@R> => Type{span: Span{l,r}, kind: TypeKind::Int},
+    <l:@L> <ty:ObjectType> <r:@R> => Type{span: Span{l,r}, kind: TypeKind::ObjectType(ty)},
+};
+
+ObjectType: ObjectType = {
+    <l:@L> <ty:Many1<"+", ObjectType1>> <r:@R> => {
+        if ty.len() == 1 {
+            let mut ty = ty;
+            ty.remove(0)
+        } else {
+            ObjectType{span: Span{l,r}, kind: ObjectTypeKind::Compound(ty)}
+        }
+    }
+}
+
+ObjectType1: ObjectType = {
+    <l:@L> "^" <ty:ObjectType0> <r:@R> => ObjectType{span: Span{l,r}, kind: ObjectTypeKind::Parents(Box::new(ty))},
+    <l:@L> "!" <ty:ObjectType0> <r:@R> => ObjectType{span: Span{l,r}, kind: ObjectTypeKind::Not(Box::new(ty))},
+    ObjectType0 => <>
+};
+
+ObjectType0: ObjectType = {
+    <l:@L> <name:Identifier> <r:@R> => ObjectType{span: Span{l,r}, kind: ObjectTypeKind::Base(name)},
+    <l:@L> "(" <ty:ObjectType> ")" <r:@R> => ty,
+};
+
+Comma<T>: Vec<T> = {
+    => Vec::new(),
+    Many1<",", T> => <>,
+};
+
+Many1<SEP, T>: Vec<T> = {
+    <e:T> <v:(SEP <T>)*> => {
+        let mut v = v;
+        v.insert(0, e);
+        v
+    }
+};
+
+Many2<SEP, T>: Vec<T> = {
+    <e:T> <v:(SEP <T>)+> => {
+        let mut v = v;
+        v.insert(0, e);
+        v
+    }
+};
+
+extern {
+    type Location = usize;
+    type Error = LexicalError;
+
+    enum Token<'input> {
+        TokenIdentifier => Token::Identifier(<&'input str>),
+        "true" => Token::True,
+        "false" => Token::False,
+        "const" => Token::Const,
+        "do" => Token::Do,
+        "while" => Token::While,
+        "if" => Token::If,
+        "else" => Token::Else,
+        "string" => Token::String,
+        "bool" => Token::Bool,
+        "int" => Token::Int,
+        "fn" => Token::Fn,
+        "let" => Token::Let,
+        "return" => Token::Return,
+        "type" => Token::Type,
+        "enum" => Token::Enum,
+        "," => Token::Comma,
+        ":" => Token::Colon,
+        "." => Token::Dot,
+        "!" => Token::Exclamation,
+        "^" => Token::Caret,
+        "+" => Token::Plus,
+        "{" => Token::OpenBlock,
+        "}" => Token::CloseBlock,
+        "(" => Token::OpenParen,
+        ")" => Token::CloseParen,
+        "[" => Token::OpenBracket,
+        "]" => Token::CloseBracket,
+    }
+}
