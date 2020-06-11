@@ -9,11 +9,11 @@ pub Program: Vec<ProgramPart> = {
 }
 
 ProgramPart: ProgramPart = {
-    TypeDefinition => ProgramPart::TypeDefinition(<>),
+    StructDefinition => ProgramPart::StructDefinition(<>),
 }
 
-TypeDefinition: TypeDefinition= {
-    "type" <name:Identifier> ":" <bounds:Type> "{" <members:Comma<MemberVariable>> "}" => TypeDefinition{name, bounds, members}, 
+StructDefinition: StructDefinition= {
+    "struct" <name:Identifier> <bounds:(":" <Type>)?> "{" <members:Comma<MemberVariable>> "}" => StructDefinition{name, bounds, members}, 
 }
 
 MemberVariable: MemberVariable = {
@@ -28,34 +28,41 @@ pub Type: Type = {
     <l:@L> "bool" <r:@R> => Type{span: Span{l,r}, kind: TypeKind::Bool},
     <l:@L> "string" <r:@R> => Type{span: Span{l,r}, kind: TypeKind::String},
     <l:@L> "int" <r:@R> => Type{span: Span{l,r}, kind: TypeKind::Int},
-    <l:@L> <ty:ObjectType> <r:@R> => Type{span: Span{l,r}, kind: TypeKind::ObjectType(ty)},
+    <l:@L> "(" ")" <r:@R> => Type{span: Span{l,r}, kind: TypeKind::Unit},
+    <l:@L> <ty:ComplexType> <r:@R> => Type{span: Span{l,r}, kind: TypeKind::Complex(ty)},
 };
 
-ObjectType: ObjectType = {
-    <l:@L> <ty:Many1<"+", ObjectType1>> <r:@R> => {
+ComplexType: ComplexType = {
+    <l:@L> <ty:Many1<"+", ComplexType1>> <r:@R> => {
         if ty.len() == 1 {
             let mut ty = ty;
             ty.remove(0)
         } else {
-            ObjectType{span: Span{l,r}, kind: ObjectTypeKind::Compound(ty)}
+            ComplexType{span: Span{l,r}, kind: ComplexTypeKind::Compound(ty)}
         }
     }
 }
 
-ObjectType1: ObjectType = {
-    <l:@L> "^" <ty:ObjectType0> <r:@R> => ObjectType{span: Span{l,r}, kind: ObjectTypeKind::Parents(Box::new(ty))},
-    <l:@L> "!" <ty:ObjectType0> <r:@R> => ObjectType{span: Span{l,r}, kind: ObjectTypeKind::Not(Box::new(ty))},
-    ObjectType0 => <>
+ComplexType1: ComplexType = {
+    <l:@L> "^" <ty:ComplexType0> <r:@R> => ComplexType{span: Span{l,r}, kind: ComplexTypeKind::Above(Box::new(ty))},
+    <l:@L> "!" <ty:ComplexType0> <r:@R> => ComplexType{span: Span{l,r}, kind: ComplexTypeKind::Not(Box::new(ty))},
+    ComplexType0 => <>
 };
 
-ObjectType0: ObjectType = {
-    <l:@L> <name:Identifier> <r:@R> => ObjectType{span: Span{l,r}, kind: ObjectTypeKind::Base(name)},
-    <l:@L> "(" <ty:ObjectType> ")" <r:@R> => ty,
+ComplexType0: ComplexType = {
+    <l:@L> <name:Identifier> <r:@R> => ComplexType{span: Span{l,r}, kind: ComplexTypeKind::Base(name, ComplexReferent::Infer)},
+    <l:@L> "(" <ty:ComplexType> ")" <r:@R> => ty,
 };
 
 Comma<T>: Vec<T> = {
-    => Vec::new(),
-    Many1<",", T> => <>,
+    <v:(<T> ",")*> <e:T?> => match e {
+        None => v,
+        Some(e) => {
+            let mut v = v;
+            v.push(e);
+            v
+        }
+    }
 };
 
 Many1<SEP, T>: Vec<T> = {
@@ -80,6 +87,7 @@ extern {
 
     enum Token<'input> {
         TokenIdentifier => Token::Identifier(<&'input str>),
+        TokenString => Token::StringLiteral(<&'input str>),
         "true" => Token::True,
         "false" => Token::False,
         "const" => Token::Const,
@@ -93,7 +101,8 @@ extern {
         "fn" => Token::Fn,
         "let" => Token::Let,
         "return" => Token::Return,
-        "type" => Token::Type,
+        "struct" => Token::Struct,
+        "trait" => Token::Trait,
         "enum" => Token::Enum,
         "," => Token::Comma,
         ":" => Token::Colon,
@@ -107,5 +116,6 @@ extern {
         ")" => Token::CloseParen,
         "[" => Token::OpenBracket,
         "]" => Token::CloseBracket,
+        "#" => Token::Hash,
     }
 }

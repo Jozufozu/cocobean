@@ -7,13 +7,13 @@ pub struct Span {
 
 #[derive(Debug)]
 pub enum ProgramPart {
-    TypeDefinition(TypeDefinition)
+    StructDefinition(StructDefinition)
 }
 
 #[derive(Debug)]
-pub struct TypeDefinition {
+pub struct StructDefinition {
     pub name: Identifier,
-    pub bounds: Type,
+    pub bounds: Option<Type>,
     pub members: Vec<MemberVariable>,
 }
 
@@ -40,19 +40,28 @@ pub enum TypeKind {
     Int,
     String,
     Bool,
-    ObjectType(ObjectType)
+    Unit,
+    Complex(ComplexType)
 }
 
 #[derive(Debug)]
-pub struct ObjectType {
+pub struct ComplexType {
     pub span: Span,
-    pub kind: ObjectTypeKind
+    pub kind: ComplexTypeKind
 }
 
 #[derive(Debug)]
-pub enum ObjectTypeKind {
-    Not(Box<ObjectType>),
-    Parents(Box<ObjectType>),
-    Base(Identifier),
-    Compound(Vec<ObjectType>)
+pub enum ComplexTypeKind {
+    Base(Identifier, ComplexReferent),
+    Compound(Vec<ComplexType>),
+    Not(Box<ComplexType>),
+    Above(Box<ComplexType>),
+}
+
+#[derive(Debug, Copy, Clone)]
+pub enum ComplexReferent {
+    Infer,
+    Entity,
+    Struct,
+    Trait
 }

@@ -31,7 +31,7 @@ pub enum Token<'input> {
     Let,
     Return,
 
-    Type,
+    Trait,
     Struct,
     Enum,
 
@@ -53,6 +53,7 @@ pub enum Token<'input> {
     OpenParen,
     CloseParen,
 
+    Hash,
 }
 
 static KEYWORDS: phf::Map<&'static str, Token> = phf_map! {
@@ -69,7 +70,8 @@ static KEYWORDS: phf::Map<&'static str, Token> = phf_map! {
     "fn" => Token::Fn,
     "let" => Token::Let,
     "return" => Token::Return,
-    "type" => Token::Type,
+    "trait" => Token::Trait,
+    "struct" => Token::Struct,
     "enum" => Token::Enum,
 };
 
@@ -144,6 +146,8 @@ impl<'input> Lexer<'input> {
                             )));
                         }
                     }
+
+                    return Some(Ok((start, Token::StringLiteral(&self.input[start..end]), end)))
                 },
                 Some((start, ch)) if ch.is_ascii_digit() => {
 
@@ -160,6 +164,7 @@ impl<'input> Lexer<'input> {
                 Some((i, '}')) => return Some(Ok((i, Token::CloseBlock, i + 1))),
                 Some((i, '[')) => return Some(Ok((i, Token::OpenBracket, i + 1))),
                 Some((i, ']')) => return Some(Ok((i, Token::CloseBracket, i + 1))),
+                Some((i, '#')) => return Some(Ok((i, Token::Hash, i + 1))),
                 Some((_, ch)) if ch.is_whitespace() => (),
                 Some((start, _)) => {
                     let mut end;
