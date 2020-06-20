@@ -5,6 +5,12 @@ pub struct Span {
     pub r: usize,
 }
 
+#[derive(Debug, Clone)]
+pub struct Spanned<T> {
+    pub span: Span,
+    pub val: T,
+}
+
 #[derive(Debug)]
 pub enum ProgramPart {
     StructDefinition(StructDefinition)
@@ -23,17 +29,9 @@ pub struct MemberVariable {
     pub ty: Type
 }
 
-#[derive(Debug)]
-pub struct Identifier {
-    pub span: Span,
-    pub name: String
-}
+pub type Identifier = Spanned<String>;
 
-#[derive(Debug)]
-pub struct Type {
-    pub span: Span,
-    pub kind: TypeKind,
-}
+pub type Type = Spanned<TypeKind>;
 
 #[derive(Debug)]
 pub enum TypeKind {
@@ -44,11 +42,7 @@ pub enum TypeKind {
     Complex(ComplexType)
 }
 
-#[derive(Debug)]
-pub struct ComplexType {
-    pub span: Span,
-    pub kind: ComplexTypeKind
-}
+pub type ComplexType = Spanned<ComplexTypeKind>;
 
 #[derive(Debug)]
 pub enum ComplexTypeKind {
@@ -58,10 +52,50 @@ pub enum ComplexTypeKind {
     Above(Box<ComplexType>),
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 pub enum ComplexReferent {
     Infer,
     Entity,
     Struct,
     Trait
+}
+
+pub type Expr = Spanned<ExprKind>;
+
+#[derive(Debug, Clone)]
+pub enum ExprKind {
+    Lit(LitKind),
+    Variable(Identifier),
+    BinOp(),
+    UnOp(),
+    Call(),
+    MethodCall(),
+    Tuple(Vec<Expr>),
+    Loop(),
+    If(),
+
+    Err
+}
+
+pub type Stmt = Spanned<StmtKind>;
+
+#[derive(Debug, Clone)]
+pub enum StmtKind {
+    Expr(Box<Expr>),
+    Semi(Box<Expr>, Span)
+}
+
+#[derive(Debug, Clone)]
+pub struct Block {
+    span: Span,
+    stmts: Vec<Stmt>,
+}
+
+#[derive(Debug, Clone)]
+pub enum LitKind {
+    Int(i32),
+    Bool(bool),
+    String(String),
+
+    Err
 }

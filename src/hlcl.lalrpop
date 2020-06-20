@@ -1,35 +1,92 @@
 use std::str::FromStr;
-use crate::lexer::{Token, LexicalError};
+use lalrpop_util::{ParseError, ErrorRecovery};
+use crate::lexer::{Token, ParserError};
 use crate::ast::*;
 
-grammar<'input>(input: &'input str);
+grammar<'input, 'err>(input: &'input str, errs: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>);
 
 pub Program: Vec<ProgramPart> = {
     ProgramPart+ => <>
-}
+};
 
 ProgramPart: ProgramPart = {
     StructDefinition => ProgramPart::StructDefinition(<>),
-}
+};
 
 StructDefinition: StructDefinition= {
     "struct" <name:Identifier> <bounds:(":" <Type>)?> "{" <members:Comma<MemberVariable>> "}" => StructDefinition{name, bounds, members}, 
-}
+};
 
 MemberVariable: MemberVariable = {
     <name:Identifier> ":" <ty:Type> => MemberVariable{name, ty}
-}
+};
 
 Identifier: Identifier = {
-    <l:@L> <n:TokenIdentifier> <r:@R> => Identifier{span: Span{r, l}, name: n.to_string()}
-}
+    <l:@L> <n:TokenIdentifier> <r:@R> => Identifier{span: Span{r, l}, val: n.to_string()}
+};
 
-pub Type: Type = {
-    <l:@L> "bool" <r:@R> => Type{span: Span{l,r}, kind: TypeKind::Bool},
-    <l:@L> "string" <r:@R> => Type{span: Span{l,r}, kind: TypeKind::String},
-    <l:@L> "int" <r:@R> => Type{span: Span{l,r}, kind: TypeKind::Int},
-    <l:@L> "(" ")" <r:@R> => Type{span: Span{l,r}, kind: TypeKind::Unit},
-    <l:@L> <ty:ComplexType> <r:@R> => Type{span: Span{l,r}, kind: TypeKind::Complex(ty)},
+pub Stmt: Stmt = {
+    <l:@L> <e:Expr> <semi:(<@L>";"<@R>)?> <r:@R> => {
+        let val = if let Some((l, r)) = semi {
+            StmtKind::Semi(Box::new(e), Span{l,r})
+        } else {
+            StmtKind::Expr(Box::new(e))
+        };
+
+        Stmt{span: Span{l,r}, val}
+    }
+};
+
+pub Expr: Expr = {
+    Expr0
+};
+
+Expr1: Expr = {
+
+};
+
+Expr0: Expr = {
+    <l:@L> <lit:Lit> <r:@R> => Expr{span: Span{l,r}, val: ExprKind::Lit(lit)},
+    <l:@L> <ident:Identifier> <r:@R> => Expr{span: Span{l,r}, val: ExprKind::Variable(ident)},
+    <l:@L> "(" <exprs:Many1<",", Expr>> ")" <r:@R> => {
+        if exprs.len() == 1 {
+            let mut exprs = exprs;
+            exprs.remove(0)
+        } else {
+            Expr{span: Span{l,r}, val: ExprKind::Tuple(exprs)}
+        }
+    },
+    <l:@L> <err:!> <r:@R> => { errs.push(err); Expr{span: Span{l,r}, val: ExprKind::Err} }
+};
+
+Lit: LitKind = {
+    "true" => LitKind::Bool(true),
+    "false" => LitKind::Bool(false),
+    <s:TokenString> => LitKind::String(s.to_string()),
+    <l:@L> <tok:TokenInt> <r:@R> => {
+        let s: String = tok.chars().filter(|v| *v != '_').collect();
+        match i32::from_str(&s) {
+            Ok(i) => LitKind::Int(i),
+            Err(_) => {
+                errs.push(ErrorRecovery {
+                    error: ParseError::User{ 
+                        error: ParserError::IntTooBig(l, r)
+                    },
+                    dropped_tokens: vec![(l, Token::IntLiteral(tok.clone()), r)]
+                });
+
+                LitKind::Err
+            }
+        }
+    }
+};
+
+Type: Type = {
+    <l:@L> "bool" <r:@R> => Type{span: Span{l,r}, val: TypeKind::Bool},
+    <l:@L> "string" <r:@R> => Type{span: Span{l,r}, val: TypeKind::String},
+    <l:@L> "int" <r:@R> => Type{span: Span{l,r}, val: TypeKind::Int},
+    <l:@L> "(" ")" <r:@R> => Type{span: Span{l,r}, val: TypeKind::Unit},
+    <l:@L> <ty:ComplexType> <r:@R> => Type{span: Span{l,r}, val: TypeKind::Complex(ty)},
 };
 
 ComplexType: ComplexType = {
@@ -38,19 +95,19 @@ ComplexType: ComplexType = {
             let mut ty = ty;
             ty.remove(0)
         } else {
-            ComplexType{span: Span{l,r}, kind: ComplexTypeKind::Compound(ty)}
+            ComplexType{span: Span{l,r}, val: ComplexTypeKind::Compound(ty)}
         }
     }
-}
+};
 
 ComplexType1: ComplexType = {
-    <l:@L> "^" <ty:ComplexType0> <r:@R> => ComplexType{span: Span{l,r}, kind: ComplexTypeKind::Above(Box::new(ty))},
-    <l:@L> "!" <ty:ComplexType0> <r:@R> => ComplexType{span: Span{l,r}, kind: ComplexTypeKind::Not(Box::new(ty))},
+    <l:@L> "^" <ty:ComplexType0> <r:@R> => ComplexType{span: Span{l,r}, val: ComplexTypeKind::Above(Box::new(ty))},
+    <l:@L> "!" <ty:ComplexType0> <r:@R> => ComplexType{span: Span{l,r}, val: ComplexTypeKind::Not(Box::new(ty))},
     ComplexType0 => <>
 };
 
 ComplexType0: ComplexType = {
-    <l:@L> <name:Identifier> <r:@R> => ComplexType{span: Span{l,r}, kind: ComplexTypeKind::Base(name, ComplexReferent::Infer)},
+    <l:@L> <name:Identifier> <r:@R> => ComplexType{span: Span{l,r}, val: ComplexTypeKind::Base(name, ComplexReferent::Infer)},
     <l:@L> "(" <ty:ComplexType> ")" <r:@R> => ty,
 };
 
@@ -83,11 +140,12 @@ Many2<SEP, T>: Vec<T> = {
 
 extern {
     type Location = usize;
-    type Error = LexicalError;
+    type Error = ParserError;
 
     enum Token<'input> {
         TokenIdentifier => Token::Identifier(<&'input str>),
         TokenString => Token::StringLiteral(<&'input str>),
+        TokenInt => Token::IntLiteral(<&'input str>),
         "true" => Token::True,
         "false" => Token::False,
         "const" => Token::Const,
@@ -105,11 +163,12 @@ extern {
         "trait" => Token::Trait,
         "enum" => Token::Enum,
         "," => Token::Comma,
+        ";" => Token::Semicolon,
+        "." => Token::Dot,
         ":" => Token::Colon,
         "." => Token::Dot,
         "!" => Token::Exclamation,
         "^" => Token::Caret,
-        "+" => Token::Plus,
         "{" => Token::OpenBlock,
         "}" => Token::CloseBlock,
         "(" => Token::OpenParen,
@@ -117,5 +176,25 @@ extern {
         "[" => Token::OpenBracket,
         "]" => Token::CloseBracket,
         "#" => Token::Hash,
+        "&" => Token::And,
+        "|" => Token::Or,
+        "+" => Token::Plus,
+        "-" => Token::Minus,
+        "*" => Token::Mul,
+        "/" => Token::Div,
+        "%" => Token::Mod,
+        "==" => Token::Eq,
+        "<" => Token::Lt,
+        ">" => Token::Gt,
+        "<=" => Token::Le,
+        ">=" => Token::Ge,
+        "+=" => Token::AddAssign,
+        "-=" => Token::SubAssign,
+        "*=" => Token::MulAssign,
+        "/=" => Token::DivAssign,
+        "%=" => Token::ModAssign,
+        "|=" => Token::OrAssign,
+        "&=" => Token::AndAssign,
+        "!=" => Token::NotAssign,
     }
 }
