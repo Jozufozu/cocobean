@@ -10,11 +10,12 @@ pub Program: Vec<ProgramPart> = {
 };
 
 ProgramPart: ProgramPart = {
+    "mod" <name:Identifier> "{" <p:Program> "}" => ProgramPart::Module(name, p),
     StructDefinition => ProgramPart::StructDefinition(<>),
 };
 
 StructDefinition: StructDefinition= {
-    "struct" <name:Identifier> <bounds:(":" <Type>)?> "{" <members:Comma<MemberVariable>> "}" => StructDefinition{name, bounds, members}, 
+    <b:"builtin"?> "struct" <name:Identifier> <bounds:(":" <Type>)?> "{" <members:Comma<MemberVariable>> "}" => StructDefinition{name, builtin: b.is_some(), bounds, members}, 
 };
 
 MemberVariable: MemberVariable = {
@@ -22,10 +23,10 @@ MemberVariable: MemberVariable = {
 };
 
 Identifier: Identifier = {
-    <l:@L> <n:TokenIdentifier> <r:@R> => Identifier{span: Span{r, l}, val: n.to_string()}
+    <l:@L> <n:TokenIdentifier> <r:@R> => Identifier::new(l, r, n.to_string())
 };
 
-pub Stmt: Stmt = {
+Stmt: Stmt = {
     <l:@L> <e:Expr> <semi:(<@L>";"<@R>)?> <r:@R> => {
         let val = if let Some((l, r)) = semi {
             StmtKind::Semi(Box::new(e), Span{l,r})
@@ -33,30 +34,63 @@ pub Stmt: Stmt = {
             StmtKind::Expr(Box::new(e))
         };
 
-        Stmt{span: Span{l,r}, val}
+        Stmt::new(l, r, val)
     }
 };
 
-pub Expr: Expr = {
-    Expr0
+Spanned<T>: Spanned<T> = {
+    <l:@L> <val:T> <r:@R> => Spanned::new(l, r, val),
+}
+
+BinOpExpr<Op, Next>: Expr = {
+    <l:@L> <lhs:BinOpExpr<Op, Next>> <op:Spanned<Op>> <rhs:Next> <r:@R> => Expr::new(l, r, ExprKind::BinOp(op, bx(lhs), bx(rhs))),
+    Next,
 };
 
-Expr1: Expr = {
+pub Expr: Expr = {
+    Expr6
+};
 
+Expr6: Expr = {
+    <lo:@L> <lhs:Expr5> <l:@L> "=" <r:@R> <rhs:Expr6> <ro:@R> => Expr::new(lo, ro, ExprKind::Assign(Span{l,r}, bx(lhs), bx(rhs))),
+    <l:@L> <lhs:Expr5> <op:Spanned<OpAssign>> <rhs:Expr6> <r:@R> => Expr::new(l, r, ExprKind::AssignOp(op, bx(lhs), bx(rhs))),
+    Expr5,
+};
+OpAssign: BinOpKind = {
+    "+=" => BinOpKind::Add,
+    "-=" => BinOpKind::Sub,
+    "*=" => BinOpKind::Mul,
+    "/=" => BinOpKind::Div,
+    "%=" => BinOpKind::Rem,
+    "&=" => BinOpKind::Rem,
+    "|=" => BinOpKind::Rem,
+};
+
+Expr5 = BinOpExpr<Op5, Expr4>;
+Op5: BinOpKind = {
+    "+" => BinOpKind::Add,
+    "-" => BinOpKind::Sub,
+};
+
+Expr4 = BinOpExpr<Op4, Expr0>;
+Op4: BinOpKind = {
+    "*" => BinOpKind::Mul,
+    "/" => BinOpKind::Div,
+    "%" => BinOpKind::Rem,
 };
 
 Expr0: Expr = {
-    <l:@L> <lit:Lit> <r:@R> => Expr{span: Span{l,r}, val: ExprKind::Lit(lit)},
-    <l:@L> <ident:Identifier> <r:@R> => Expr{span: Span{l,r}, val: ExprKind::Variable(ident)},
+    <l:@L> <lit:Lit> <r:@R> => Expr::new(l, r, ExprKind::Lit(lit)),
+    <l:@L> <ident:Identifier> <r:@R> => Expr::new(l, r, ExprKind::Variable(ident)),
     <l:@L> "(" <exprs:Many1<",", Expr>> ")" <r:@R> => {
         if exprs.len() == 1 {
             let mut exprs = exprs;
             exprs.remove(0)
         } else {
-            Expr{span: Span{l,r}, val: ExprKind::Tuple(exprs)}
+            Expr::new(l, r, ExprKind::Tuple(exprs))
         }
     },
-    <l:@L> <err:!> <r:@R> => { errs.push(err); Expr{span: Span{l,r}, val: ExprKind::Err} }
+    <l:@L> <err:!> <r:@R> => { errs.push(err); Expr::new(l, r, ExprKind::Err) }
 };
 
 Lit: LitKind = {
@@ -82,11 +116,11 @@ Lit: LitKind = {
 };
 
 Type: Type = {
-    <l:@L> "bool" <r:@R> => Type{span: Span{l,r}, val: TypeKind::Bool},
-    <l:@L> "string" <r:@R> => Type{span: Span{l,r}, val: TypeKind::String},
-    <l:@L> "int" <r:@R> => Type{span: Span{l,r}, val: TypeKind::Int},
-    <l:@L> "(" ")" <r:@R> => Type{span: Span{l,r}, val: TypeKind::Unit},
-    <l:@L> <ty:ComplexType> <r:@R> => Type{span: Span{l,r}, val: TypeKind::Complex(ty)},
+    <l:@L> "bool" <r:@R> => Type::new(l, r, TypeKind::Bool),
+    <l:@L> "string" <r:@R> => Type::new(l, r, TypeKind::String),
+    <l:@L> "int" <r:@R> => Type::new(l, r, TypeKind::Int),
+    <l:@L> "(" ")" <r:@R> => Type::new(l, r, TypeKind::Unit),
+    <l:@L> <ty:ComplexType> <r:@R> => Type::new(l, r, TypeKind::Complex(ty)),
 };
 
 ComplexType: ComplexType = {
@@ -95,19 +129,19 @@ ComplexType: ComplexType = {
             let mut ty = ty;
             ty.remove(0)
         } else {
-            ComplexType{span: Span{l,r}, val: ComplexTypeKind::Compound(ty)}
+            ComplexType::new(l, r, ComplexTypeKind::Compound(ty))
         }
     }
 };
 
 ComplexType1: ComplexType = {
-    <l:@L> "^" <ty:ComplexType0> <r:@R> => ComplexType{span: Span{l,r}, val: ComplexTypeKind::Above(Box::new(ty))},
-    <l:@L> "!" <ty:ComplexType0> <r:@R> => ComplexType{span: Span{l,r}, val: ComplexTypeKind::Not(Box::new(ty))},
+    <l:@L> "^" <ty:ComplexType0> <r:@R> => ComplexType::new(l, r, ComplexTypeKind::Above(Box::new(ty))),
+    <l:@L> "!" <ty:ComplexType0> <r:@R> => ComplexType::new(l, r, ComplexTypeKind::Not(Box::new(ty))),
     ComplexType0 => <>
 };
 
 ComplexType0: ComplexType = {
-    <l:@L> <name:Identifier> <r:@R> => ComplexType{span: Span{l,r}, val: ComplexTypeKind::Base(name, ComplexReferent::Infer)},
+    <l:@L> <name:Identifier> <r:@R> => ComplexType::new(l, r, ComplexTypeKind::Base(name, ComplexReferent::Infer)),
     <l:@L> "(" <ty:ComplexType> ")" <r:@R> => ty,
 };
 
@@ -159,9 +193,11 @@ extern {
         "fn" => Token::Fn,
         "let" => Token::Let,
         "return" => Token::Return,
+        "mod" => Token::Mod,
         "struct" => Token::Struct,
         "trait" => Token::Trait,
         "enum" => Token::Enum,
+        "builtin" => Token::Builtin,
         "," => Token::Comma,
         ";" => Token::Semicolon,
         "." => Token::Dot,
@@ -182,19 +218,20 @@ extern {
         "-" => Token::Minus,
         "*" => Token::Mul,
         "/" => Token::Div,
-        "%" => Token::Mod,
+        "%" => Token::Rem,
         "==" => Token::Eq,
+        "!=" => Token::Ne,
         "<" => Token::Lt,
         ">" => Token::Gt,
         "<=" => Token::Le,
         ">=" => Token::Ge,
+        "=" => Token::Assign,
         "+=" => Token::AddAssign,
         "-=" => Token::SubAssign,
         "*=" => Token::MulAssign,
         "/=" => Token::DivAssign,
-        "%=" => Token::ModAssign,
+        "%=" => Token::RemAssign,
         "|=" => Token::OrAssign,
         "&=" => Token::AndAssign,
-        "!=" => Token::NotAssign,
     }
 }

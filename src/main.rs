@@ -7,7 +7,7 @@ mod lexer;
 fn main() {
     let mut errs = Vec::new();
     let input =
-r#"struct Thing: !Other {
+r#"builtin struct player: entity {
     wow: int,
     amazing: bool
 }
@@ -19,11 +19,11 @@ r#"struct Thing: !Other {
     println!("{:?}", program);
 
     let input =
-        r#"(true, fals, 204103____21__5426103);"#;
+        r#"true + false * (2000, heh, "yeet", FUCK SHIT DAMMIT) + 4 % 20"#;
 
     let lex = lexer::Lexer::new(input);
-    let program = hlcl::StmtParser::new().parse(input, &mut errs, lex);
+    let program = hlcl::ExprParser::new().parse(input, &mut errs, lex);
 
     println!("{:?}", errs);
-    println!("{:?}", program);
+    println!("{}", program.unwrap());
 }

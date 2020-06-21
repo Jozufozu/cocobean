@@ -31,9 +31,11 @@ pub enum Token<'input> {
     Let,
     Return,
 
+    Mod,
     Trait,
     Struct,
     Enum,
+    Builtin,
 
     Colon,
     Dot,
@@ -57,13 +59,14 @@ pub enum Token<'input> {
     Minus,
     Mul,
     Div,
-    Mod,
+    Rem,
 
     And,
     Or,
     Exclamation,
 
     Eq,
+    Ne,
     Lt,
     Gt,
     Le,
@@ -75,9 +78,8 @@ pub enum Token<'input> {
     SubAssign,
     MulAssign,
     DivAssign,
-    ModAssign,
+    RemAssign,
 
-    NotAssign,
     AndAssign,
     OrAssign,
 
@@ -102,6 +104,8 @@ static KEYWORDS: phf::Map<&'static str, Token> = phf_map! {
     "trait" => Token::Trait,
     "struct" => Token::Struct,
     "enum" => Token::Enum,
+    "builtin" => Token::Builtin,
+    "mod" => Token::Mod,
 };
 
 pub struct Lexer<'input> {
@@ -232,14 +236,14 @@ impl<'input> Lexer<'input> {
                 Some((i, '%')) => return match self.chars.peek() {
                     Some((_, '=')) => {
                         self.chars.next();
-                        Some(Ok((i, Token::ModAssign, i + 2)))
+                        Some(Ok((i, Token::RemAssign, i + 2)))
                     },
-                    _ => Some(Ok((i, Token::Mod, i + 1)))
+                    _ => Some(Ok((i, Token::Rem, i + 1)))
                 },
                 Some((i, '!')) => return match self.chars.peek() {
                     Some((_, '=')) => {
                         self.chars.next();
-                        Some(Ok((i, Token::NotAssign, i + 2)))
+                        Some(Ok((i, Token::Ne, i + 2)))
                     },
                     _ => Some(Ok((i, Token::Exclamation, i + 1)))
                 },
@@ -256,6 +260,13 @@ impl<'input> Lexer<'input> {
                         Some(Ok((i, Token::OrAssign, i + 2)))
                     },
                     _ => Some(Ok((i, Token::Or, i + 1)))
+                },
+                Some((i, '=')) => return match self.chars.peek() {
+                    Some((_, '=')) => {
+                        self.chars.next();
+                        Some(Ok((i, Token::Eq, i + 2)))
+                    },
+                    _ => Some(Ok((i, Token::Assign, i + 1)))
                 },
                 Some((i, '.')) => return Some(Ok((i, Token::Dot, i + 1))),
                 Some((i, ':')) => return Some(Ok((i, Token::Colon, i + 1))),
