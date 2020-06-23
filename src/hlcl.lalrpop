@@ -1,9 +1,10 @@
 use std::str::FromStr;
+use string_interner::{Sym, StringInterner};
 use lalrpop_util::{ParseError, ErrorRecovery};
 use crate::lexer::{Token, ParserError};
-use crate::ast::*;
+use crate::ast::{*, BinOpKind as BinOp};
 
-grammar<'input, 'err>(input: &'input str, errs: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>);
+grammar<'input, 'err>(input: &'input str, intr: &mut StringInterner<Sym>, errs: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>);
 
 pub Program: Vec<ProgramPart> = {
     ProgramPart+ => <>
@@ -12,6 +13,7 @@ pub Program: Vec<ProgramPart> = {
 ProgramPart: ProgramPart = {
     "mod" <name:Identifier> "{" <p:Program> "}" => ProgramPart::Module(name, p),
     StructDefinition => ProgramPart::StructDefinition(<>),
+    <l:@L> <err:!> <r:@R> => { errs.push(err); ProgramPart::Err },
 };
 
 StructDefinition: StructDefinition= {
@@ -19,11 +21,22 @@ StructDefinition: StructDefinition= {
 };
 
 MemberVariable: MemberVariable = {
-    <name:Identifier> ":" <ty:Type> => MemberVariable{name, ty}
+    <name:Identifier> ":" <ty:Type> => MemberVariable{name, ty},
 };
 
 Identifier: Identifier = {
-    <l:@L> <n:TokenIdentifier> <r:@R> => Identifier::new(l, r, n.to_string())
+    <l:@L> <n:TokenIdentifier> <r:@R> => Identifier::new(l, r, intr.get_or_intern(n))
+};
+
+Path: Path = {
+    <one:Identifier> <v:("::" <Identifier>)*> => {
+        let mut v = v;
+        v.insert(0, one);
+
+        Path {
+            items: v
+        }
+    }
 };
 
 Stmt: Stmt = {
@@ -47,37 +60,73 @@ BinOpExpr<Op, Next>: Expr = {
     Next,
 };
 
-pub Expr: Expr = {
-    Expr6
+UnOpExpr<Op, Next>: Expr = {
+    <l:@L> <op:Spanned<Op>> <rhs:UnOpExpr<Op, Next>> <r:@R> => Expr::new(l, r, ExprKind::UnOp(op, bx(rhs))),
+    Next,
 };
 
-Expr6: Expr = {
-    <lo:@L> <lhs:Expr5> <l:@L> "=" <r:@R> <rhs:Expr6> <ro:@R> => Expr::new(lo, ro, ExprKind::Assign(Span{l,r}, bx(lhs), bx(rhs))),
-    <l:@L> <lhs:Expr5> <op:Spanned<OpAssign>> <rhs:Expr6> <r:@R> => Expr::new(l, r, ExprKind::AssignOp(op, bx(lhs), bx(rhs))),
-    Expr5,
+pub Expr: Expr = {
+    Expr10
 };
-OpAssign: BinOpKind = {
-    "+=" => BinOpKind::Add,
-    "-=" => BinOpKind::Sub,
-    "*=" => BinOpKind::Mul,
-    "/=" => BinOpKind::Div,
-    "%=" => BinOpKind::Rem,
-    "&=" => BinOpKind::Rem,
-    "|=" => BinOpKind::Rem,
+
+Expr10: Expr = {
+    <lo:@L> <lhs:Expr9> <l:@L> "=" <r:@R> <rhs:Expr10> <ro:@R> => Expr::new(lo, ro, ExprKind::Assign(Span{l,r}, bx(lhs), bx(rhs))),
+    <l:@L> <lhs:Expr9> <op:Spanned<OpAssign>> <rhs:Expr10> <r:@R> => Expr::new(l, r, ExprKind::AssignOp(op, bx(lhs), bx(rhs))),
+    Expr9,
+};
+OpAssign: BinOp = {
+    "+=" => BinOp::Add,
+    "-=" => BinOp::Sub,
+    "*=" => BinOp::Mul,
+    "/=" => BinOp::Div,
+    "%=" => BinOp::Rem,
+    "&=" => BinOp::Rem,
+    "|=" => BinOp::Rem,
+};
+
+Expr9 = BinOpExpr<OpOr, Expr8>;
+OpOr: BinOp = {
+    "|" => BinOp::Or,
+};
+
+Expr8 = BinOpExpr<OpAnd, Expr7>;
+OpAnd: BinOp = {
+    "&" => BinOp::And,
+};
+
+Expr7 = BinOpExpr<Op7, Expr6>;
+Op7: BinOp = {
+    "==" => BinOp::Eq,
+    "!=" => BinOp::Ne,
+};
+
+Expr6 = BinOpExpr<Op6, Expr5>;
+Op6: BinOp = {
+    "<" => BinOp::Lt,
+    ">" => BinOp::Gt,
+    "<=" => BinOp::Le,
+    ">=" => BinOp::Ge,
 };
 
 Expr5 = BinOpExpr<Op5, Expr4>;
-Op5: BinOpKind = {
-    "+" => BinOpKind::Add,
-    "-" => BinOpKind::Sub,
+Op5: BinOp = {
+    "+" => BinOp::Add,
+    "-" => BinOp::Sub,
 };
 
-Expr4 = BinOpExpr<Op4, Expr0>;
-Op4: BinOpKind = {
-    "*" => BinOpKind::Mul,
-    "/" => BinOpKind::Div,
-    "%" => BinOpKind::Rem,
+Expr4 = BinOpExpr<Op4, Expr3>;
+Op4: BinOp = {
+    "*" => BinOp::Mul,
+    "/" => BinOp::Div,
+    "%" => BinOp::Rem,
 };
+
+Expr3 = UnOpExpr<Op3, Expr0>;
+Op3: UnOpKind = {
+    "-" => UnOpKind::Neg,
+    "!" => UnOpKind::Not,
+};
+
 
 Expr0: Expr = {
     <l:@L> <lit:Lit> <r:@R> => Expr::new(l, r, ExprKind::Lit(lit)),
@@ -141,7 +190,7 @@ ComplexType1: ComplexType = {
 };
 
 ComplexType0: ComplexType = {
-    <l:@L> <name:Identifier> <r:@R> => ComplexType::new(l, r, ComplexTypeKind::Base(name, ComplexReferent::Infer)),
+    <l:@L> <name:Path> <r:@R> => ComplexType::new(l, r, ComplexTypeKind::Base(name, ComplexReferent::Infer)),
     <l:@L> "(" <ty:ComplexType> ")" <r:@R> => ty,
 };
 
@@ -202,6 +251,7 @@ extern {
         ";" => Token::Semicolon,
         "." => Token::Dot,
         ":" => Token::Colon,
+        "::" => Token::PathSeg,
         "." => Token::Dot,
         "!" => Token::Exclamation,
         "^" => Token::Caret,

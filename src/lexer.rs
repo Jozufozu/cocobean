@@ -38,6 +38,7 @@ pub enum Token<'input> {
     Builtin,
 
     Colon,
+    PathSeg,
     Dot,
     Caret,
 
@@ -268,8 +269,14 @@ impl<'input> Lexer<'input> {
                     },
                     _ => Some(Ok((i, Token::Assign, i + 1)))
                 },
+                Some((i, ':')) => return match self.chars.peek() {
+                    Some((_, ':')) => {
+                        self.chars.next();
+                        Some(Ok((i, Token::PathSeg, i + 2)))
+                    },
+                    _ => Some(Ok((i, Token::Colon, i + 1)))
+                },
                 Some((i, '.')) => return Some(Ok((i, Token::Dot, i + 1))),
-                Some((i, ':')) => return Some(Ok((i, Token::Colon, i + 1))),
                 Some((i, '^')) => return Some(Ok((i, Token::Caret, i + 1))),
                 Some((i, ';')) => return Some(Ok((i, Token::Semicolon, i + 1))),
                 Some((i, ',')) => return Some(Ok((i, Token::Comma, i + 1))),

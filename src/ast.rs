@@ -1,13 +1,14 @@
 use std::fmt::{Display, Formatter};
 use std::fmt;
+use string_interner::{Sym, Symbol};
 
 #[inline]
-pub fn bx<T>(val: T) -> Box<T> {
+pub(crate) fn bx<T>(val: T) -> Box<T> {
     Box::new(val)
 }
 
 #[inline]
-pub fn box_opt<T>(val: Option<T>) -> Option<Box<T>> {
+pub(crate) fn box_opt<T>(val: Option<T>) -> Option<Box<T>> {
     val.map(|v| Box::new(v))
 }
 
@@ -36,10 +37,19 @@ impl<T: Display> Display for Spanned<T> {
     }
 }
 
+pub type Identifier = Spanned<Sym>;
+
+#[derive(Debug)]
+pub struct Path {
+    pub items: Vec<Identifier>,
+}
+
 #[derive(Debug)]
 pub enum ProgramPart {
     Module(Identifier, Vec<ProgramPart>),
     StructDefinition(StructDefinition),
+
+    Err,
 }
 
 #[derive(Debug)]
@@ -56,8 +66,6 @@ pub struct MemberVariable {
     pub ty: Type
 }
 
-pub type Identifier = Spanned<String>;
-
 pub type Type = Spanned<TypeKind>;
 
 #[derive(Debug)]
@@ -73,7 +81,7 @@ pub type ComplexType = Spanned<ComplexTypeKind>;
 
 #[derive(Debug)]
 pub enum ComplexTypeKind {
-    Base(Identifier, ComplexReferent),
+    Base(Path, ComplexReferent),
     Compound(Vec<ComplexType>),
     Not(Box<ComplexType>),
     Above(Box<ComplexType>),
@@ -94,7 +102,7 @@ pub enum ExprKind {
     Lit(LitKind),
     Variable(Identifier),
     BinOp(BinOp, Box<Expr>, Box<Expr>),
-    UnOp(),
+    UnOp(UnOp, Box<Expr>),
     Assign(Span, Box<Expr>, Box<Expr>),
     AssignOp(BinOp, Box<Expr>, Box<Expr>),
     Call(),
@@ -110,8 +118,11 @@ impl Display for ExprKind {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
             ExprKind::Lit(l) => write!(f, "{}", l),
-            ExprKind::Variable(var) => write!(f, "{}", var),
+            ExprKind::Variable(var) => write!(f, "ID[{}]", var.val.to_usize()),
             ExprKind::BinOp(op, lhs, rhs) => write!(f, "({} {} {})", lhs, op, rhs),
+            ExprKind::UnOp(op, arg) => write!(f, "({}{})", op, arg),
+            ExprKind::Assign(_, lhs, rhs) => write!(f, "({} = {})", lhs, rhs),
+            ExprKind::AssignOp(op, lhs, rhs) => write!(f, "({} {}= {})", lhs, op, rhs),
             ExprKind::Tuple(v) => {
                 f.write_str("(")?;
                 let mut iter = v.iter();
@@ -209,6 +220,23 @@ impl Display for BinOpKind {
             BinOpKind::Ne => write!(f, "!="),
             BinOpKind::Ge => write!(f, ">="),
             BinOpKind::Gt => write!(f, ">"),
+        }
+    }
+}
+
+pub type UnOp = Spanned<UnOpKind>;
+
+#[derive(Debug, Copy, Clone)]
+pub enum UnOpKind {
+    Neg,
+    Not,
+}
+
+impl Display for UnOpKind {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            UnOpKind::Neg => write!(f, "-"),
+            UnOpKind::Not => write!(f, "!"),
         }
     }
 }
