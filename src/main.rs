@@ -2,11 +2,7 @@ extern crate static_assertions as sa;
 
 use string_interner::{StringInterner, Sym};
 
-#[allow(clippy::all)]
-#[cfg_attr(rustfmt, rustfmt_skip)]
-mod hlcl;
-mod ast;
-mod lexer;
+mod parse;
 
 fn main() {
     let mut errs = Vec::new();
@@ -55,8 +51,8 @@ fn test(thing: int, other: player) {
 }
 "#;
 
-    let lex = lexer::Lexer::new(input);
-    let program = hlcl::ProgramParser::new().parse(input, &mut interner, &mut errs, lex);
+    let lex = parse::Lexer::new(input);
+    let program = parse::ProgramParser::new().parse(input, &mut interner, &mut errs, lex);
 
     println!("{:?}", program);
     println!("{:?}", errs);

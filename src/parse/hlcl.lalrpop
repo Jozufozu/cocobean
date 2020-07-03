@@ -1,8 +1,8 @@
 use std::str::FromStr;
 use string_interner::{DefaultStringInterner};
 use lalrpop_util::{ParseError, ErrorRecovery};
-use crate::lexer::{Token, ParserError};
-use crate::ast::{*, BinOpKind as BinOp};
+use super::lexer::{Token, ParserError};
+use super::ast::{*, BinOpKind as BinOp};
 
 grammar<'input, 'err>(input: &'input str, intr: &mut DefaultStringInterner, errs: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>);
 

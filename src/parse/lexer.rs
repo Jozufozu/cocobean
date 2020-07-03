@@ -132,7 +132,6 @@ static KEYWORDS: phf::Map<&'static str, Token> = phf_map! {
 pub struct Lexer<'input> {
     input: &'input str,
     chars: Peekable<CharIndices<'input>>,
-    last_tokens: [Option<Token<'input>>; 2],
 }
 
 #[derive(Debug)]
@@ -147,11 +146,15 @@ impl<'input> Lexer<'input> {
         Lexer {
             input,
             chars: input.char_indices().peekable(),
-            last_tokens: [None, None],
         }
     }
+}
 
-    pub fn next(&mut self) -> Option<Spanned<Token<'input>, usize, ParserError>> {
+impl<'input> Iterator for Lexer<'input> {
+    type Item = Spanned<Token<'input>, usize, ParserError>;
+
+    /// Return the next token
+    fn next(&mut self) -> Option<Self::Item> {
         loop {
             match self.chars.next() {
                 Some((start, ch)) if ch == '_' || ch.is_ascii_alphabetic() => {
@@ -348,24 +351,5 @@ impl<'input> Lexer<'input> {
                 None => return None, // End of file
             }
         }
-    }
-}
-
-impl<'input> Iterator for Lexer<'input> {
-    type Item = Spanned<Token<'input>, usize, ParserError>;
-
-    /// Return the next token
-    fn next(&mut self) -> Option<Self::Item> {
-        let token = self.next();
-
-        self.last_tokens = [
-            self.last_tokens[1],
-            match token {
-                Some(Ok((_, n, _))) => Some(n),
-                _ => None,
-            },
-        ];
-
-        token
     }
 }

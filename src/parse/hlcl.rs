@@ -1,10 +1,10 @@
 // auto-generated: "lalrpop 0.19.0"
-// sha256: c09c84bf4ed5f44967fcae3149b8a460d99ac33d3dda99b46bd9d0d775c89
+// sha256: 769cdfb36053cea42f02d224d18d5e090722fecdd8151e0229f22799e9e93
 use std::str::FromStr;
 use string_interner::{DefaultStringInterner};
 use lalrpop_util::{ParseError, ErrorRecovery};
-use crate::lexer::{Token, ParserError};
-use crate::ast::{*, BinOpKind as BinOp};
+use super::lexer::{Token, ParserError};
+use super::ast::{*, BinOpKind as BinOp};
 #[allow(unused_extern_crates)]
 extern crate lalrpop_util as __lalrpop_util;
 #[allow(unused_imports)]
@@ -17,8 +17,8 @@ mod __parse__Program {
     use std::str::FromStr;
     use string_interner::{DefaultStringInterner};
     use lalrpop_util::{ParseError, ErrorRecovery};
-    use crate::lexer::{Token, ParserError};
-    use crate::ast::{*, BinOpKind as BinOp};
+    use super::super::lexer::{Token, ParserError};
+    use super::super::ast::{*, BinOpKind as BinOp};
     #[allow(unused_extern_crates)]
     extern crate lalrpop_util as __lalrpop_util;
     #[allow(unused_imports)]
