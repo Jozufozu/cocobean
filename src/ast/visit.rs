@@ -71,8 +71,8 @@ pub trait Visitor<'ast>: Sized {
     }
 }
 
-pub fn walk_path<'ast, T: Visitor<'ast>>(visitor: &mut T, path: &'ast Path) {
-    walk_list!(visitor, visit_ident, &path.items)
+pub fn walk_path<'ast, T: Visitor<'ast>>(visitor: &mut T, Path { items }: &'ast Path) {
+    walk_list!(visitor, visit_ident, items)
 }
 
 pub fn walk_program<'ast, T: Visitor<'ast>>(visitor: &mut T, Program { items }: &'ast Program) {
