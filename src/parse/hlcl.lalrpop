@@ -2,11 +2,11 @@ use std::str::FromStr;
 use string_interner::{DefaultStringInterner};
 use lalrpop_util::{ParseError, ErrorRecovery};
 use super::lexer::{Token, ParserError};
-use super::ast::{*, BinOpKind as BinOp};
+use crate::ast::{*, BinOpKind as BinOp};
 
 grammar<'input, 'err>(input: &'input str, intr: &mut DefaultStringInterner, errs: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>);
 
-pub Program: Vec<Item> = ProgramPart*;
+pub Program: Program = <items:Item*> => Program { items };
 
 Vis: Visibility = {
     <pb:(<@L> "pub" <@R>)?> => match pb {
@@ -30,7 +30,7 @@ Path: Path = {
     }
 };
 
-ProgramPart: Item = {
+Item: Item = {
     ModDefinition,
     StructDefinition,
     ClassDefinition,
@@ -39,14 +39,14 @@ ProgramPart: Item = {
 };
 
 ModDefinition: Item = {
-    <l:@L> <vis:Vis> "mod" <name:Identifier> "{" <items:Program> "}" <r:@R> => {
+    <l:@L> <vis:Vis> "mod" <name:Identifier> "{" <items:Item*> "}" <r:@R> => {
         Item {
             name,
             vis,
-            kind: ItemKind::Mod {
+            kind: ItemKind::Mod(Mod {
                 items,
                 inline: true,
-            },
+            }),
             span: Span{l,r},
         }
     },
@@ -54,10 +54,10 @@ ModDefinition: Item = {
         Item {
             name,
             vis,
-            kind: ItemKind::Mod {
+            kind: ItemKind::Mod(Mod {
                 items: Vec::with_capacity(0),
                 inline: true,
-            },
+            }),
             span: Span{l,r},
         }
     },
@@ -68,9 +68,9 @@ StructDefinition: Item = {
         Item {
             name,
             vis,
-            kind: ItemKind::Struct {
+            kind: ItemKind::Struct(Struct {
                 members
-            },
+            }),
             span: Span{l,r},
         }
     }, 
@@ -87,18 +87,18 @@ ClassDefinition: Item = {
         Item {
             name,
             vis,
-            kind: ItemKind::Class {
+            kind: ItemKind::Class(Class {
                 builtin: b.map(|(l, r)| Span{l,r}), 
                 bounds, 
                 members
-            },
+            }),
             span: Span{l,r},
         }
     }, 
 };
 
 BranchDefinition: Item = {
-    <l:@L> <vis:Vis> "branch" <name:Identifier> <bounds:(":" <Type>)?> "{" <variants:Comma<BranchItem>> "}" <r:@R> => {
+    <l:@L> <vis:Vis> "branch" <name:Identifier> <bounds:(":" <Type>)?> "{" <variants:Comma<BranchVariant>> "}" <r:@R> => {
         let bounds = if let Some(ty) = bounds {
             ClassBounds::Ty(ty)
         } else {
@@ -108,18 +108,18 @@ BranchDefinition: Item = {
         Item {
             name,
             vis,
-            kind: ItemKind::Branch {
+            kind: ItemKind::Branch(Branch {
                 bounds, 
                 variants
-            },
+            }),
             span: Span{l,r},
         }
     },
 };
 
-BranchItem: BranchItem = {
+BranchVariant: BranchVariant = {
     <l:@L> <name:Identifier> "{" <members:Comma<StructField>> "}" <r:@R> => {
-        BranchItem {
+        BranchVariant {
             span: Span{l,r},
             name,
             members,
@@ -187,6 +187,7 @@ MaybeExprSemi: Option<Expr> = {
 
 
 Stmt: Stmt = {
+    <l:@L> <item:Item> <r:@R> => Stmt::new(l, r, StmtKind::Item(bx(item))),
     <l:@L> "let" <id:Identifier> <ty:(":" <Type>)?> "=" <e:Expr> ";" <r:@R> => Stmt::new(l, r, StmtKind::Let(id, box_opt(ty), bx(e))),
     <l:@L> "return" <e:Expr?> ";" <r:@R> => Stmt::new(l, r, StmtKind::Ret(box_opt(e))),
     <l:@L> "break" <e:Expr?> ";" <r:@R> => Stmt::new(l, r, StmtKind::Break(box_opt(e))),

@@ -3,6 +3,7 @@ extern crate static_assertions as sa;
 use string_interner::{StringInterner, Sym};
 
 mod parse;
+pub mod ast;
 
 fn main() {
     let mut errs = Vec::new();

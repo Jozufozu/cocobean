@@ -2,6 +2,8 @@ use std::fmt::{Display, Formatter};
 use std::fmt;
 use string_interner::{Sym, Symbol};
 
+pub mod visit;
+
 #[inline]
 pub(crate) fn bx<T>(val: T) -> Box<T> {
     Box::new(val)
@@ -51,6 +53,11 @@ pub enum Visibility {
 }
 
 #[derive(Debug)]
+pub struct Program {
+    pub items: Vec<Item>,
+}
+
+#[derive(Debug)]
 pub struct Item {
     pub name: Identifier,
     pub vis: Visibility,
@@ -60,35 +67,47 @@ pub struct Item {
 
 #[derive(Debug)]
 pub enum ItemKind {
-    Mod {
-        items: Vec<Item>,
-        inline: bool,
-    },
-    Struct {
-        members: Vec<StructField>
-    },
-    Class {
-        builtin: Option<Span>,
-        bounds: ClassBounds,
-        members: Vec<StructField>,
-    },
-    Branch {
-        bounds: ClassBounds,
-        variants: Vec<BranchItem>,
-    },
+    Mod(Mod),
+    Struct(Struct),
+    Class(Class),
+    Branch(Branch),
     Fn(FnSig, Option<Block>),
 
     Err,
 }
 
 #[derive(Debug)]
-pub struct BranchItem {
+pub struct Mod {
+    pub items: Vec<Item>,
+    pub inline: bool,
+}
+
+#[derive(Debug)]
+pub struct Struct {
+    pub members: Vec<StructField>
+}
+
+#[derive(Debug)]
+pub struct Class {
+    pub builtin: Option<Span>,
+    pub bounds: ClassBounds,
+    pub members: Vec<StructField>,
+}
+
+#[derive(Debug)]
+pub struct Branch {
+    pub bounds: ClassBounds,
+    pub variants: Vec<BranchVariant>,
+}
+
+#[derive(Debug)]
+pub struct BranchVariant {
     pub span: Span,
     pub name: Identifier,
     pub members: Vec<StructField>
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub enum ClassBounds {
     Default,
     Ty(Type)
@@ -108,13 +127,13 @@ pub struct FnSig {
     pub ret: FnReturn,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub enum FnReturn {
     Default,
     Ty(Type)
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct FnParam {
     pub name: Identifier,
     pub ty: Type,
@@ -122,7 +141,7 @@ pub struct FnParam {
 
 pub type Type = Spanned<TypeKind>;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub enum TypeKind {
     Int,
     String,
@@ -141,7 +160,7 @@ pub type Block = Spanned<Vec<Stmt>>;
 
 pub type Expr = Spanned<ExprKind>;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub enum ExprKind {
     Lit(Lit),
     Variable(Identifier),
@@ -172,8 +191,9 @@ pub enum IsOpKind {
 
 pub type Stmt = Spanned<StmtKind>;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub enum StmtKind {
+    Item(Box<Item>),
     Expr(Box<Expr>),
     Semi(Box<Expr>),
     Let(Identifier, Option<Box<Type>>, Box<Expr>),
