@@ -1,5 +1,4 @@
 use super::*;
-use crate::ast::FnReturn;
 
 #[macro_export]
 macro_rules! walk_list {
@@ -16,7 +15,7 @@ macro_rules! walk_list {
 }
 
 pub trait Visitor<'ast>: Sized {
-    fn visit_ident(&mut self, ident: &'ast Identifier) {}
+    fn visit_ident(&mut self, _ident: &'ast Identifier) {}
 
     fn visit_path(&mut self, path: &'ast Path) {
         walk_path(self, path)
@@ -79,7 +78,7 @@ pub fn walk_program<'ast, T: Visitor<'ast>>(visitor: &mut T, Program { items }: 
     walk_list!(visitor, visit_item, items)
 }
 
-pub fn walk_item<'ast, T: Visitor<'ast>>(visitor: &mut T, Item { name, vis, kind, span: _ }: &'ast Item) {
+pub fn walk_item<'ast, T: Visitor<'ast>>(visitor: &mut T, Item { name, vis: _, kind, span: _ }: &'ast Item) {
     visitor.visit_ident(name);
 
     match kind {
@@ -97,8 +96,8 @@ pub fn walk_item<'ast, T: Visitor<'ast>>(visitor: &mut T, Item { name, vis, kind
             if let Some(Block { span: _, val: stmts }) = block {
                 walk_list!(visitor, visit_stmt, stmts);
             }
-        },
-        ItemKind::Err => {},
+        }
+        ItemKind::Err => {}
     }
 }
 
@@ -157,46 +156,46 @@ pub fn walk_type<'ast, T: Visitor<'ast>>(visitor: &mut T, Type { span: _, val }:
 
 pub fn walk_expr<'ast, T: Visitor<'ast>>(visitor: &mut T, Expr { span: _, val }: &'ast Expr) {
     match &val {
-        ExprKind::Lit(_) => {},
+        ExprKind::Lit(_) => {}
         ExprKind::Variable(name) => visitor.visit_ident(name),
         ExprKind::UnOp(_, expr) => visitor.visit_expr(expr),
         ExprKind::BinOp(_, lhs, rhs)
-         | ExprKind::Assign(_, lhs, rhs)
-         | ExprKind::AssignOp(_, lhs, rhs) => {
+        | ExprKind::Assign(_, lhs, rhs)
+        | ExprKind::AssignOp(_, lhs, rhs) => {
             visitor.visit_expr(lhs);
             visitor.visit_expr(rhs);
-        },
+        }
         ExprKind::Is(_, expr, ty) => {
             visitor.visit_expr(expr);
             visitor.visit_type(ty);
-        },
+        }
         ExprKind::Call(path, args) => {
             visitor.visit_path(path);
             walk_list!(visitor, visit_expr, args)
-        },
-        ExprKind::MethodCall() => {},
+        }
+        ExprKind::MethodCall() => {}
         ExprKind::FieldAccess(expr, path, ident) => {
             visitor.visit_expr(expr);
             if let Some(path) = path {
                 visitor.visit_path(path)
             }
             visitor.visit_ident(ident);
-        },
+        }
         ExprKind::Tuple(items) => walk_list!(visitor, visit_expr, items),
         ExprKind::Block(Block { span: _, val: stmts })
-         | ExprKind::Loop(Block { span: _, val: stmts }) => walk_list!(visitor, visit_stmt, stmts),
+        | ExprKind::Loop(Block { span: _, val: stmts }) => walk_list!(visitor, visit_stmt, stmts),
         ExprKind::While(expr, Block { span: _, val: stmts }) => {
             visitor.visit_expr(expr);
             walk_list!(visitor, visit_stmt, stmts);
-        },
+        }
         ExprKind::If(expr, Block { span: _, val: stmts }, els) => {
             visitor.visit_expr(expr);
             walk_list!(visitor, visit_stmt, stmts);
             if let Some(expr) = els {
                 visitor.visit_expr(expr)
             }
-        },
-        ExprKind::Err => {},
+        }
+        ExprKind::Err => {}
     }
 }
 
@@ -210,13 +209,13 @@ pub fn walk_stmt<'ast, T: Visitor<'ast>>(visitor: &mut T, Stmt { span: _, val }:
                 visitor.visit_type(ty);
             }
             visitor.visit_expr(expr);
-        },
+        }
         StmtKind::Ret(expr) | StmtKind::Break(expr) => {
             if let Some(expr) = expr {
                 visitor.visit_expr(expr)
             }
-        },
-        StmtKind::Continue => {},
+        }
+        StmtKind::Continue => {}
         StmtKind::Err => {}
     }
 }

@@ -1,6 +1,6 @@
 extern crate static_assertions as sa;
 
-use string_interner::{StringInterner, Sym};
+use string_interner::StringInterner;
 
 mod parse;
 pub mod ast;

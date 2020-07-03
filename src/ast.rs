@@ -1,6 +1,8 @@
 use std::fmt::{Display, Formatter};
 use std::fmt;
-use string_interner::{Sym, Symbol};
+
+use string_interner::Sym;
+use lalrpop_util::state_machine::ParserAction;
 
 pub mod visit;
 
@@ -29,7 +31,19 @@ pub struct Spanned<T> {
 impl<T> Spanned<T> {
     #[inline(always)]
     pub fn new(l: usize, r: usize, val: T) -> Self {
-        Spanned{ span: Span{ l, r }, val }
+        Spanned { span: Span { l, r }, val }
+    }
+}
+
+impl<T: PartialEq> PartialEq for Spanned<T> {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        self.val == other.val
+    }
+
+    #[inline]
+    fn ne(&self, other: &Self) -> bool {
+        self.val != other.val
     }
 }
 
@@ -104,13 +118,13 @@ pub struct Branch {
 pub struct BranchVariant {
     pub span: Span,
     pub name: Identifier,
-    pub members: Vec<StructField>
+    pub members: Vec<StructField>,
 }
 
 #[derive(Debug)]
 pub enum ClassBounds {
     Default,
-    Ty(Type)
+    Ty(Type),
 }
 
 #[derive(Debug)]
@@ -130,7 +144,7 @@ pub struct FnSig {
 #[derive(Debug)]
 pub enum FnReturn {
     Default,
-    Ty(Type)
+    Ty(Type),
 }
 
 #[derive(Debug)]
@@ -178,12 +192,12 @@ pub enum ExprKind {
     While(Box<Expr>, Block),
     If(Box<Expr>, Block, Option<Box<Expr>>),
 
-    Err
+    Err,
 }
 
 pub type IsOp = Spanned<IsOpKind>;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum IsOpKind {
     Is,
     NotIs,
@@ -205,13 +219,13 @@ pub enum StmtKind {
     Err,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Lit {
     Int(i32),
     Bool(bool),
     String(String),
 
-    Err
+    Err,
 }
 
 impl Display for Lit {
@@ -227,7 +241,7 @@ impl Display for Lit {
 
 pub type BinOp = Spanned<BinOpKind>;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum BinOpKind {
     /// The `+` operator (addition)
     Add,
@@ -279,7 +293,7 @@ impl Display for BinOpKind {
 
 pub type UnOp = Spanned<UnOpKind>;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum UnOpKind {
     Neg,
     Not,
