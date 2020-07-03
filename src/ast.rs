@@ -25,7 +25,7 @@ pub struct Spanned<T> {
 }
 
 impl<T> Spanned<T> {
-    #[inline]
+    #[inline(always)]
     pub fn new(l: usize, r: usize, val: T) -> Self {
         Spanned{ span: Span{ l, r }, val }
     }
@@ -39,103 +39,135 @@ impl<T: Display> Display for Spanned<T> {
 
 pub type Identifier = Spanned<Sym>;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Path {
     pub items: Vec<Identifier>,
 }
 
+#[derive(Debug, Copy, Clone)]
+pub enum Visibility {
+    Pub(Span),
+    Private,
+}
+
 #[derive(Debug)]
-pub enum ProgramPart {
-    Module(Identifier, Vec<ProgramPart>),
-    StructDefinition(StructDefinition),
+pub struct Item {
+    pub name: Identifier,
+    pub vis: Visibility,
+    pub kind: ItemKind,
+    pub span: Span,
+}
+
+#[derive(Debug)]
+pub enum ItemKind {
+    Mod {
+        items: Vec<Item>,
+        inline: bool,
+    },
+    Struct {
+        members: Vec<StructField>
+    },
+    Class {
+        builtin: Option<Span>,
+        bounds: ClassBounds,
+        members: Vec<StructField>,
+    },
+    Branch {
+        bounds: ClassBounds,
+        variants: Vec<BranchItem>,
+    },
+    Fn(FnSig, Option<Block>),
 
     Err,
 }
 
 #[derive(Debug)]
-pub struct StructDefinition {
+pub struct BranchItem {
+    pub span: Span,
     pub name: Identifier,
-    pub builtin: bool,
-    pub bounds: Option<Type>,
-    pub members: Vec<MemberVariable>,
+    pub members: Vec<StructField>
+}
+
+#[derive(Debug, Clone)]
+pub enum ClassBounds {
+    Default,
+    Ty(Type)
 }
 
 #[derive(Debug)]
-pub struct MemberVariable {
+pub struct StructField {
     pub name: Identifier,
-    pub ty: Type
+    pub ty: Type,
+    pub vis: Visibility,
+    pub default: Option<Box<Expr>>,
+}
+
+#[derive(Debug)]
+pub struct FnSig {
+    pub params: Vec<FnParam>,
+    pub ret: FnReturn,
+}
+
+#[derive(Debug, Clone)]
+pub enum FnReturn {
+    Default,
+    Ty(Type)
+}
+
+#[derive(Debug, Clone)]
+pub struct FnParam {
+    pub name: Identifier,
+    pub ty: Type,
 }
 
 pub type Type = Spanned<TypeKind>;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum TypeKind {
     Int,
     String,
     Bool,
     Unit,
-    Complex(ComplexType)
-}
+    Tuple(Vec<Type>),
+    And(Vec<Path>),
+    Named(Path),
 
-pub type ComplexType = Spanned<ComplexTypeKind>;
-
-#[derive(Debug)]
-pub enum ComplexTypeKind {
-    Base(Path, ComplexReferent),
-    Compound(Vec<ComplexType>),
-    Not(Box<ComplexType>),
-    Above(Box<ComplexType>),
-}
-
-#[derive(Debug, Clone)]
-pub enum ComplexReferent {
     Infer,
-    Entity,
-    Struct,
-    Trait
+
+    Err,
 }
+
+pub type Block = Spanned<Vec<Stmt>>;
 
 pub type Expr = Spanned<ExprKind>;
 
 #[derive(Debug, Clone)]
 pub enum ExprKind {
-    Lit(LitKind),
+    Lit(Lit),
     Variable(Identifier),
     BinOp(BinOp, Box<Expr>, Box<Expr>),
     UnOp(UnOp, Box<Expr>),
     Assign(Span, Box<Expr>, Box<Expr>),
     AssignOp(BinOp, Box<Expr>, Box<Expr>),
-    Call(),
+    Is(IsOp, Box<Expr>, Box<Type>),
+    Call(Path, Vec<Expr>),
     MethodCall(),
+    FieldAccess(Box<Expr>, Option<Path>, Identifier),
     Tuple(Vec<Expr>),
-    Loop(),
-    If(),
+    Block(Block),
+    Loop(Block),
+    While(Box<Expr>, Block),
+    If(Box<Expr>, Block, Option<Box<Expr>>),
 
     Err
 }
 
-impl Display for ExprKind {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        match self {
-            ExprKind::Lit(l) => write!(f, "{}", l),
-            ExprKind::Variable(var) => write!(f, "ID[{}]", var.val.to_usize()),
-            ExprKind::BinOp(op, lhs, rhs) => write!(f, "({} {} {})", lhs, op, rhs),
-            ExprKind::UnOp(op, arg) => write!(f, "({}{})", op, arg),
-            ExprKind::Assign(_, lhs, rhs) => write!(f, "({} = {})", lhs, rhs),
-            ExprKind::AssignOp(op, lhs, rhs) => write!(f, "({} {}= {})", lhs, op, rhs),
-            ExprKind::Tuple(v) => {
-                f.write_str("(")?;
-                let mut iter = v.iter();
-                write!(f, "{}", iter.next().unwrap())?;
-                for x in iter {
-                    write!(f, ", {}", x)?;
-                }
-                f.write_str(")")
-            },
-            ExprKind::Err => f.write_str("ERR"),
-            _ => f.write_str("uhhh"),
-        }
-    }
+pub type IsOp = Spanned<IsOpKind>;
+
+#[derive(Debug, Copy, Clone)]
+pub enum IsOpKind {
+    Is,
+    NotIs,
 }
 
 pub type Stmt = Spanned<StmtKind>;
@@ -143,17 +175,18 @@ pub type Stmt = Spanned<StmtKind>;
 #[derive(Debug, Clone)]
 pub enum StmtKind {
     Expr(Box<Expr>),
-    Semi(Box<Expr>, Span)
+    Semi(Box<Expr>),
+    Let(Identifier, Option<Box<Type>>, Box<Expr>),
+
+    Ret(Option<Box<Expr>>),
+    Break(Option<Box<Expr>>),
+    Continue,
+
+    Err,
 }
 
 #[derive(Debug, Clone)]
-pub struct Block {
-    span: Span,
-    stmts: Vec<Stmt>,
-}
-
-#[derive(Debug, Clone)]
-pub enum LitKind {
+pub enum Lit {
     Int(i32),
     Bool(bool),
     String(String),
@@ -161,13 +194,13 @@ pub enum LitKind {
     Err
 }
 
-impl Display for LitKind {
+impl Display for Lit {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            LitKind::Int(i) => write!(f, "{}", i),
-            LitKind::Bool(b) => write!(f, "{}", b),
-            LitKind::String(s) => write!(f, "\"{}\"", s),
-            LitKind::Err => write!(f, "`err`"),
+            Lit::Int(i) => write!(f, "{}", i),
+            Lit::Bool(b) => write!(f, "{}", b),
+            Lit::String(s) => write!(f, "\"{}\"", s),
+            Lit::Err => write!(f, "`err`"),
         }
     }
 }

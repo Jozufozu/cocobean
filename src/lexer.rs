@@ -19,23 +19,33 @@ pub enum Token<'input> {
 
     Do,
     While,
+    Loop,
 
     If,
     Else,
+
+    Is,
 
     String,
     Bool,
     Int,
 
+    Pub,
     Fn,
     Let,
     Return,
+    Break,
+    Continue,
 
     Mod,
     Trait,
     Struct,
+    Class,
+    Branch,
     Enum,
     Builtin,
+    Player,
+    Entity,
 
     Colon,
     PathSeg,
@@ -55,6 +65,7 @@ pub enum Token<'input> {
     CloseParen,
 
     Hash,
+    At,
 
     Plus,
     Minus,
@@ -92,20 +103,29 @@ static KEYWORDS: phf::Map<&'static str, Token> = phf_map! {
     "true" => Token::True,
     "false" => Token::False,
     "const" => Token::Const,
+    "pub" => Token::Pub,
+    "fn" => Token::Fn,
     "do" => Token::Do,
     "while" => Token::While,
+    "loop" => Token::Loop,
     "if" => Token::If,
     "else" => Token::Else,
+    "is" => Token::Is,
     "string" => Token::String,
     "bool" => Token::Bool,
     "int" => Token::Int,
-    "fn" => Token::Fn,
     "let" => Token::Let,
     "return" => Token::Return,
+    "break" => Token::Break,
+    "continue" => Token::Continue,
     "trait" => Token::Trait,
     "struct" => Token::Struct,
+    "class" => Token::Class,
+    "branch" => Token::Branch,
     "enum" => Token::Enum,
     "builtin" => Token::Builtin,
+    // "player" => Token::Player,
+    // "entity" => Token::Entity,
     "mod" => Token::Mod,
 };
 
@@ -269,6 +289,20 @@ impl<'input> Lexer<'input> {
                     },
                     _ => Some(Ok((i, Token::Assign, i + 1)))
                 },
+                Some((i, '>')) => return match self.chars.peek() {
+                    Some((_, '=')) => {
+                        self.chars.next();
+                        Some(Ok((i, Token::Ge, i + 2)))
+                    },
+                    _ => Some(Ok((i, Token::Gt, i + 1)))
+                },
+                Some((i, '<')) => return match self.chars.peek() {
+                    Some((_, '=')) => {
+                        self.chars.next();
+                        Some(Ok((i, Token::Le, i + 2)))
+                    },
+                    _ => Some(Ok((i, Token::Lt, i + 1)))
+                },
                 Some((i, ':')) => return match self.chars.peek() {
                     Some((_, ':')) => {
                         self.chars.next();
@@ -287,6 +321,7 @@ impl<'input> Lexer<'input> {
                 Some((i, '[')) => return Some(Ok((i, Token::OpenBracket, i + 1))),
                 Some((i, ']')) => return Some(Ok((i, Token::CloseBracket, i + 1))),
                 Some((i, '#')) => return Some(Ok((i, Token::Hash, i + 1))),
+                Some((i, '@')) => return Some(Ok((i, Token::At, i + 1))),
                 Some((_, ch)) if ch.is_whitespace() => (),
                 Some((start, _)) => {
                     let mut end;

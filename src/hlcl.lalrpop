@@ -1,27 +1,18 @@
 use std::str::FromStr;
-use string_interner::{Sym, StringInterner};
+use string_interner::{DefaultStringInterner};
 use lalrpop_util::{ParseError, ErrorRecovery};
 use crate::lexer::{Token, ParserError};
 use crate::ast::{*, BinOpKind as BinOp};
 
-grammar<'input, 'err>(input: &'input str, intr: &mut StringInterner<Sym>, errs: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>);
+grammar<'input, 'err>(input: &'input str, intr: &mut DefaultStringInterner, errs: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>);
 
-pub Program: Vec<ProgramPart> = {
-    ProgramPart+ => <>
-};
+pub Program: Vec<Item> = ProgramPart*;
 
-ProgramPart: ProgramPart = {
-    "mod" <name:Identifier> "{" <p:Program> "}" => ProgramPart::Module(name, p),
-    StructDefinition => ProgramPart::StructDefinition(<>),
-    <l:@L> <err:!> <r:@R> => { errs.push(err); ProgramPart::Err },
-};
-
-StructDefinition: StructDefinition= {
-    <b:"builtin"?> "struct" <name:Identifier> <bounds:(":" <Type>)?> "{" <members:Comma<MemberVariable>> "}" => StructDefinition{name, builtin: b.is_some(), bounds, members}, 
-};
-
-MemberVariable: MemberVariable = {
-    <name:Identifier> ":" <ty:Type> => MemberVariable{name, ty},
+Vis: Visibility = {
+    <pb:(<@L> "pub" <@R>)?> => match pb {
+        Some((l, r)) => Visibility::Pub(Span{l,r}),
+        None => Visibility::Private,
+    },
 };
 
 Identifier: Identifier = {
@@ -39,21 +30,184 @@ Path: Path = {
     }
 };
 
-Stmt: Stmt = {
-    <l:@L> <e:Expr> <semi:(<@L>";"<@R>)?> <r:@R> => {
-        let val = if let Some((l, r)) = semi {
-            StmtKind::Semi(Box::new(e), Span{l,r})
+ProgramPart: Item = {
+    ModDefinition,
+    StructDefinition,
+    ClassDefinition,
+    BranchDefinition,
+    FunctionDefinition,
+};
+
+ModDefinition: Item = {
+    <l:@L> <vis:Vis> "mod" <name:Identifier> "{" <items:Program> "}" <r:@R> => {
+        Item {
+            name,
+            vis,
+            kind: ItemKind::Mod {
+                items,
+                inline: true,
+            },
+            span: Span{l,r},
+        }
+    },
+    <l:@L> <vis:Vis> "mod" <name:Identifier> ";" <r:@R> => {
+        Item {
+            name,
+            vis,
+            kind: ItemKind::Mod {
+                items: Vec::with_capacity(0),
+                inline: true,
+            },
+            span: Span{l,r},
+        }
+    },
+};
+
+StructDefinition: Item = {
+    <l:@L> <vis:Vis> "struct" <name:Identifier> "{" <members:Comma<StructField>> "}" <r:@R> => {
+        Item {
+            name,
+            vis,
+            kind: ItemKind::Struct {
+                members
+            },
+            span: Span{l,r},
+        }
+    }, 
+};
+
+ClassDefinition: Item = {
+    <l:@L> <vis:Vis> <b:(<@L> "builtin" <@R>)?> "class" <name:Identifier> <bounds:(":" <Type>)?> "{" <members:Comma<StructField>> "}" <r:@R> => {
+        let bounds = if let Some(ty) = bounds {
+            ClassBounds::Ty(ty)
         } else {
-            StmtKind::Expr(Box::new(e))
+            ClassBounds::Default
+        };
+        
+        Item {
+            name,
+            vis,
+            kind: ItemKind::Class {
+                builtin: b.map(|(l, r)| Span{l,r}), 
+                bounds, 
+                members
+            },
+            span: Span{l,r},
+        }
+    }, 
+};
+
+BranchDefinition: Item = {
+    <l:@L> <vis:Vis> "branch" <name:Identifier> <bounds:(":" <Type>)?> "{" <variants:Comma<BranchItem>> "}" <r:@R> => {
+        let bounds = if let Some(ty) = bounds {
+            ClassBounds::Ty(ty)
+        } else {
+            ClassBounds::Default
+        };
+        
+        Item {
+            name,
+            vis,
+            kind: ItemKind::Branch {
+                bounds, 
+                variants
+            },
+            span: Span{l,r},
+        }
+    },
+};
+
+BranchItem: BranchItem = {
+    <l:@L> <name:Identifier> "{" <members:Comma<StructField>> "}" <r:@R> => {
+        BranchItem {
+            span: Span{l,r},
+            name,
+            members,
+        }
+    },
+};
+
+StructField: StructField = {
+    <vis:Vis> <name:Identifier> ":" <ty:Type> => StructField{name, ty, vis, default: None},
+    <vis:Vis> <name:Identifier> <l:@L> <ty:(":" <Type>)?> <r:@R> "=" <default:Expr> => {
+        let ty = if let Some(ty) = ty {
+            ty
+        } else {
+            Type::new(l, r, TypeKind::Infer)
+        };
+        StructField{name, ty, vis, default: Some(bx(default))}
+    },
+};
+
+FunctionDefinition: Item = {
+    <l:@L> <vis:Vis>  "fn" <name:Identifier> "(" <params:Comma<FnParam>> ")" <retty:(":" <Type>)?> <block:BlockOrSemi> <r:@R> => {
+        let ret = if let Some(ty) = retty {
+            FnReturn::Ty(ty)
+        } else {
+            FnReturn::Default
         };
 
-        Stmt::new(l, r, val)
-    }
+        let sig = FnSig {
+            params,
+            ret
+        };
+
+        Item {
+            name,
+            vis,
+            kind: ItemKind::Fn(sig, block),
+            span: Span{l,r},
+        }
+    },
+};
+
+FnParam: FnParam = {
+    <name:Identifier> ":" <ty:Type> => FnParam{name, ty},
+};
+
+Block: Block = {
+    <l:@L> "{" <s:Stmt*> <e:(<@L> <ExprWithoutBlock> <@R>)?> "}" <r:@R> => {
+        let mut s = s;
+        if let Some((l, e, r)) = e {
+            s.push(Stmt::new(l, r, StmtKind::Expr(bx(e))));
+        }
+        Block::new(l, r, s)
+    },
+};
+
+BlockOrSemi: Option<Block> = {
+    Block => Some(<>),
+    ";" => None,
+};
+
+MaybeExprSemi: Option<Expr> = {
+    <Expr> ";" => Some(<>),
+    ";"? => None
+}
+
+
+Stmt: Stmt = {
+    <l:@L> "let" <id:Identifier> <ty:(":" <Type>)?> "=" <e:Expr> ";" <r:@R> => Stmt::new(l, r, StmtKind::Let(id, box_opt(ty), bx(e))),
+    <l:@L> "return" <e:Expr?> ";" <r:@R> => Stmt::new(l, r, StmtKind::Ret(box_opt(e))),
+    <l:@L> "break" <e:Expr?> ";" <r:@R> => Stmt::new(l, r, StmtKind::Break(box_opt(e))),
+    <l:@L> "continue" ";"? <r:@R> => Stmt::new(l, r, StmtKind::Continue),
+    <l:@L> <e:ExprWithoutBlock> ";" <r:@R> => {
+        Stmt::new(l, r, StmtKind::Semi(bx(e)))
+    },
+    <l:@L> <e:ExprWithBlock> <semi:";"?> <r:@R> => match semi {
+        Some(_) => Stmt::new(l, r, StmtKind::Semi(bx(e))),
+        None => Stmt::new(l, r, StmtKind::Expr(bx(e))),
+    },
 };
 
 Spanned<T>: Spanned<T> = {
     <l:@L> <val:T> <r:@R> => Spanned::new(l, r, val),
 }
+
+Either<T, U>: T = {
+    T,
+    U,
+};
 
 BinOpExpr<Op, Next>: Expr = {
     <l:@L> <lhs:BinOpExpr<Op, Next>> <op:Spanned<Op>> <rhs:Next> <r:@R> => Expr::new(l, r, ExprKind::BinOp(op, bx(lhs), bx(rhs))),
@@ -65,8 +219,37 @@ UnOpExpr<Op, Next>: Expr = {
     Next,
 };
 
-pub Expr: Expr = {
-    Expr10
+Expr: Expr = {
+    ExprWithoutBlock,
+    ExprWithBlock,
+};
+
+ExprWithBlock: Expr = {
+    IfExpr,
+    BlockExpr,
+    LoopExpr,
+};
+
+BlockExpr: Expr = {
+    <l:@L> <e:Block> <r:@R> => Expr::new(l, r, ExprKind::Block(e))
+};
+
+IfExpr: Expr = {
+    <l:@L> "if" <cond:Expr> <iftrue:Block> <r:@R> => {
+        Expr::new(l, r, ExprKind::If(bx(cond), iftrue, None))
+    },
+    <l:@L> "if" <cond:Expr> <iftrue:Block> "else" <iffalse:Either<IfExpr, BlockExpr>> <r:@R> => {
+        Expr::new(l, r, ExprKind::If(bx(cond), iftrue, Some(bx(iffalse))))
+    },
+};
+
+LoopExpr: Expr = {
+    <l:@L> "loop" <block:Block> <r:@R> => Expr::new(l, r, ExprKind::Loop(block)),
+    <l:@L> "while" <cond:Expr> <block:Block> <r:@R> => Expr::new(l, r, ExprKind::While(bx(cond), block)),
+};
+
+ExprWithoutBlock: Expr = {
+    Expr10,
 };
 
 Expr10: Expr = {
@@ -108,29 +291,46 @@ Op6: BinOp = {
     ">=" => BinOp::Ge,
 };
 
-Expr5 = BinOpExpr<Op5, Expr4>;
-Op5: BinOp = {
-    "+" => BinOp::Add,
-    "-" => BinOp::Sub,
+Expr5: Expr = {
+    <l:@L> <e:Expr5> <op:Spanned<IsOp>> <ty:Type> <r:@R> => Expr::new(l, r, ExprKind::Is(op, bx(e), bx(ty))),
+    Expr4,
+};
+IsOp: IsOpKind = {
+    "!" "is" => IsOpKind::NotIs,
+    "is" => IsOpKind::Is,
 };
 
 Expr4 = BinOpExpr<Op4, Expr3>;
 Op4: BinOp = {
+    "+" => BinOp::Add,
+    "-" => BinOp::Sub,
+};
+
+Expr3 = BinOpExpr<Op3, Expr2>;
+Op3: BinOp = {
     "*" => BinOp::Mul,
     "/" => BinOp::Div,
     "%" => BinOp::Rem,
 };
 
-Expr3 = UnOpExpr<Op3, Expr0>;
-Op3: UnOpKind = {
+Expr2 = UnOpExpr<Op2, Expr0>;
+Op2: UnOpKind = {
     "-" => UnOpKind::Neg,
     "!" => UnOpKind::Not,
 };
 
+Call: Expr = {
+    <l:@L> <name:Path> "(" <exprs:Comma<Expr>> ")" <r:@R> => {
+        Expr::new(l, r, ExprKind::Call(name, exprs))
+    },
+};
 
 Expr0: Expr = {
     <l:@L> <lit:Lit> <r:@R> => Expr::new(l, r, ExprKind::Lit(lit)),
     <l:@L> <ident:Identifier> <r:@R> => Expr::new(l, r, ExprKind::Variable(ident)),
+    <l:@L> <e:Expr0> <discriminator:("@" <Path>)?> "." <field:Identifier> <r:@R> => Expr::new(l, r, ExprKind::FieldAccess(bx(e), discriminator, field)),
+    Call,
+
     <l:@L> "(" <exprs:Many1<",", Expr>> ")" <r:@R> => {
         if exprs.len() == 1 {
             let mut exprs = exprs;
@@ -139,17 +339,18 @@ Expr0: Expr = {
             Expr::new(l, r, ExprKind::Tuple(exprs))
         }
     },
+
     <l:@L> <err:!> <r:@R> => { errs.push(err); Expr::new(l, r, ExprKind::Err) }
 };
 
-Lit: LitKind = {
-    "true" => LitKind::Bool(true),
-    "false" => LitKind::Bool(false),
-    <s:TokenString> => LitKind::String(s.to_string()),
+Lit: Lit = {
+    "true" => Lit::Bool(true),
+    "false" => Lit::Bool(false),
+    <s:TokenString> => Lit::String(s.to_string()),
     <l:@L> <tok:TokenInt> <r:@R> => {
         let s: String = tok.chars().filter(|v| *v != '_').collect();
         match i32::from_str(&s) {
-            Ok(i) => LitKind::Int(i),
+            Ok(i) => Lit::Int(i),
             Err(_) => {
                 errs.push(ErrorRecovery {
                     error: ParseError::User{ 
@@ -158,7 +359,7 @@ Lit: LitKind = {
                     dropped_tokens: vec![(l, Token::IntLiteral(tok.clone()), r)]
                 });
 
-                LitKind::Err
+                Lit::Err
             }
         }
     }
@@ -168,34 +369,29 @@ Type: Type = {
     <l:@L> "bool" <r:@R> => Type::new(l, r, TypeKind::Bool),
     <l:@L> "string" <r:@R> => Type::new(l, r, TypeKind::String),
     <l:@L> "int" <r:@R> => Type::new(l, r, TypeKind::Int),
-    <l:@L> "(" ")" <r:@R> => Type::new(l, r, TypeKind::Unit),
-    <l:@L> <ty:ComplexType> <r:@R> => Type::new(l, r, TypeKind::Complex(ty)),
-};
-
-ComplexType: ComplexType = {
-    <l:@L> <ty:Many1<"+", ComplexType1>> <r:@R> => {
+    <l:@L> "(" <tys:Many0<",", Type>> ")" <r:@R> => {
+        if tys.is_empty() {
+            Type::new(l, r, TypeKind::Unit)
+        } else {
+            Type::new(l, r, TypeKind::Tuple(tys))
+        }
+    },
+    <l:@L> <ty:Many1<"+", Path>> <r:@R> => {
         if ty.len() == 1 {
             let mut ty = ty;
-            ty.remove(0)
+            Type::new(l, r, TypeKind::Named(ty.remove(0)))
         } else {
-            ComplexType::new(l, r, ComplexTypeKind::Compound(ty))
+            Type::new(l, r, TypeKind::And(ty))
         }
-    }
+    },
+
+    <l:@L> <err:!> <r:@R> => { errs.push(err); Type::new(l, r, TypeKind::Err) }
 };
 
-ComplexType1: ComplexType = {
-    <l:@L> "^" <ty:ComplexType0> <r:@R> => ComplexType::new(l, r, ComplexTypeKind::Above(Box::new(ty))),
-    <l:@L> "!" <ty:ComplexType0> <r:@R> => ComplexType::new(l, r, ComplexTypeKind::Not(Box::new(ty))),
-    ComplexType0 => <>
-};
+Comma<T> = Many0<",", T>;
 
-ComplexType0: ComplexType = {
-    <l:@L> <name:Path> <r:@R> => ComplexType::new(l, r, ComplexTypeKind::Base(name, ComplexReferent::Infer)),
-    <l:@L> "(" <ty:ComplexType> ")" <r:@R> => ty,
-};
-
-Comma<T>: Vec<T> = {
-    <v:(<T> ",")*> <e:T?> => match e {
+Many0<SEP, T>: Vec<T> = {
+    <v:(<T> SEP)*> <e:T?> => match e {
         None => v,
         Some(e) => {
             let mut v = v;
@@ -232,21 +428,31 @@ extern {
         "true" => Token::True,
         "false" => Token::False,
         "const" => Token::Const,
+        "pub" => Token::Pub,
         "do" => Token::Do,
         "while" => Token::While,
+        "loop" => Token::Loop,
         "if" => Token::If,
         "else" => Token::Else,
+        "is" => Token::Is,
         "string" => Token::String,
         "bool" => Token::Bool,
         "int" => Token::Int,
         "fn" => Token::Fn,
         "let" => Token::Let,
         "return" => Token::Return,
+        "break" => Token::Break,
+        "continue" => Token::Continue,
         "mod" => Token::Mod,
         "struct" => Token::Struct,
+        "branch" => Token::Branch,
+        "class" => Token::Class,
+        // "entity" => Token::Entity,
+        // "player" => Token::Player,
         "trait" => Token::Trait,
         "enum" => Token::Enum,
         "builtin" => Token::Builtin,
+        "fn" => Token::Fn,
         "," => Token::Comma,
         ";" => Token::Semicolon,
         "." => Token::Dot,
@@ -262,6 +468,7 @@ extern {
         "[" => Token::OpenBracket,
         "]" => Token::CloseBracket,
         "#" => Token::Hash,
+        "@" => Token::At,
         "&" => Token::And,
         "|" => Token::Or,
         "+" => Token::Plus,
