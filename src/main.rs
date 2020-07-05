@@ -1,11 +1,11 @@
-use crate::session::Session;
+use crate::parse::ParsingSession;
 
-pub mod session;
-pub mod parse;
 pub mod ast;
+pub mod parse;
+pub mod span;
 
 fn main() {
-    let mut session = Session::new();
+    let session = ParsingSession::new("./test_prog/main.hlcl");
 
-    session.parse("./test_prog/main.hlcl");
+    let project = session.parse_project();
 }

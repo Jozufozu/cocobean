@@ -2,7 +2,10 @@ use std::iter::Peekable;
 use std::str::CharIndices;
 
 use phf::phf_map;
+
 use crate::ast::BinOpKind;
+use crate::parse::err::ParserError;
+use crate::span::Span;
 
 pub type Spanned<Token, Loc, Error> = Result<(Loc, Token, Loc), Error>;
 
@@ -102,13 +105,6 @@ pub struct Lexer<'input> {
     chars: Peekable<CharIndices<'input>>,
 }
 
-#[derive(Debug)]
-pub enum ParserError {
-    EofInString(usize, usize),
-    UnrecognisedToken(usize, usize, String),
-    IntTooBig(usize, usize),
-}
-
 impl<'input> Lexer<'input> {
     pub fn new(input: &'input str) -> Self {
         Lexer {
@@ -166,14 +162,18 @@ impl<'input> Iterator for Lexer<'input> {
                                 last_was_escape = false;
                             }
                         } else {
-                            return Some(Err(ParserError::EofInString(
-                                start,
-                                self.input.len(),
-                            )));
+                            return Some(Err(ParserError::EofInString(Span {
+                                l: start,
+                                r: self.input.len(),
+                            })));
                         }
                     }
 
-                    return Some(Ok((start, Token::StringLiteral(&self.input[start + 1..end]), end)));
+                    return Some(Ok((
+                        start,
+                        Token::StringLiteral(&self.input[start + 1..end]),
+                        end,
+                    )));
                 }
                 Some((start, ch)) if ch.is_ascii_digit() => {
                     let mut end = start;
@@ -187,100 +187,128 @@ impl<'input> Iterator for Lexer<'input> {
                         }
                     }
 
-                    return Some(Ok((start, Token::IntLiteral(&self.input[start..=end]), end + 1)));
+                    return Some(Ok((
+                        start,
+                        Token::IntLiteral(&self.input[start..=end]),
+                        end + 1,
+                    )));
                 }
-                Some((i, '+')) => return match self.chars.peek() {
-                    Some((_, '=')) => {
-                        self.chars.next();
-                        Some(Ok((i, Token::AssignOp(BinOpKind::Add), i + 2)))
+                Some((i, '+')) => {
+                    return match self.chars.peek() {
+                        Some((_, '=')) => {
+                            self.chars.next();
+                            Some(Ok((i, Token::AssignOp(BinOpKind::Add), i + 2)))
+                        }
+                        Some((_, '+')) => {
+                            self.chars.next();
+                            Some(Ok((i, Token::PlusPlus, i + 2)))
+                        }
+                        _ => Some(Ok((i, Token::BinOp(BinOpKind::Add), i + 1))),
                     }
-                    Some((_, '+')) => {
-                        self.chars.next();
-                        Some(Ok((i, Token::PlusPlus, i + 2)))
+                }
+                Some((i, '-')) => {
+                    return match self.chars.peek() {
+                        Some((_, '=')) => {
+                            self.chars.next();
+                            Some(Ok((i, Token::AssignOp(BinOpKind::Sub), i + 2)))
+                        }
+                        Some((_, '-')) => {
+                            self.chars.next();
+                            Some(Ok((i, Token::MinusMinus, i + 2)))
+                        }
+                        _ => Some(Ok((i, Token::BinOp(BinOpKind::Sub), i + 1))),
                     }
-                    _ => Some(Ok((i, Token::BinOp(BinOpKind::Add), i + 1)))
-                },
-                Some((i, '-')) => return match self.chars.peek() {
-                    Some((_, '=')) => {
-                        self.chars.next();
-                        Some(Ok((i, Token::AssignOp(BinOpKind::Sub), i + 2)))
+                }
+                Some((i, '*')) => {
+                    return match self.chars.peek() {
+                        Some((_, '=')) => {
+                            self.chars.next();
+                            Some(Ok((i, Token::AssignOp(BinOpKind::Mul), i + 2)))
+                        }
+                        _ => Some(Ok((i, Token::BinOp(BinOpKind::Mul), i + 1))),
                     }
-                    Some((_, '-')) => {
-                        self.chars.next();
-                        Some(Ok((i, Token::MinusMinus, i + 2)))
+                }
+                Some((i, '/')) => {
+                    return match self.chars.peek() {
+                        Some((_, '=')) => {
+                            self.chars.next();
+                            Some(Ok((i, Token::AssignOp(BinOpKind::Div), i + 2)))
+                        }
+                        _ => Some(Ok((i, Token::BinOp(BinOpKind::Div), i + 1))),
                     }
-                    _ => Some(Ok((i, Token::BinOp(BinOpKind::Sub), i + 1)))
-                },
-                Some((i, '*')) => return match self.chars.peek() {
-                    Some((_, '=')) => {
-                        self.chars.next();
-                        Some(Ok((i, Token::AssignOp(BinOpKind::Mul), i + 2)))
+                }
+                Some((i, '%')) => {
+                    return match self.chars.peek() {
+                        Some((_, '=')) => {
+                            self.chars.next();
+                            Some(Ok((i, Token::AssignOp(BinOpKind::Rem), i + 2)))
+                        }
+                        _ => Some(Ok((i, Token::BinOp(BinOpKind::Rem), i + 1))),
                     }
-                    _ => Some(Ok((i, Token::BinOp(BinOpKind::Mul), i + 1)))
-                },
-                Some((i, '/')) => return match self.chars.peek() {
-                    Some((_, '=')) => {
-                        self.chars.next();
-                        Some(Ok((i, Token::AssignOp(BinOpKind::Div), i + 2)))
+                }
+                Some((i, '!')) => {
+                    return match self.chars.peek() {
+                        Some((_, '=')) => {
+                            self.chars.next();
+                            Some(Ok((i, Token::BinOp(BinOpKind::Ne), i + 2)))
+                        }
+                        _ => Some(Ok((i, Token::Exclamation, i + 1))),
                     }
-                    _ => Some(Ok((i, Token::BinOp(BinOpKind::Div), i + 1)))
-                },
-                Some((i, '%')) => return match self.chars.peek() {
-                    Some((_, '=')) => {
-                        self.chars.next();
-                        Some(Ok((i, Token::AssignOp(BinOpKind::Rem), i + 2)))
+                }
+                Some((i, '&')) => {
+                    return match self.chars.peek() {
+                        Some((_, '=')) => {
+                            self.chars.next();
+                            Some(Ok((i, Token::AssignOp(BinOpKind::And), i + 2)))
+                        }
+                        _ => Some(Ok((i, Token::BinOp(BinOpKind::And), i + 1))),
                     }
-                    _ => Some(Ok((i, Token::BinOp(BinOpKind::Rem), i + 1)))
-                },
-                Some((i, '!')) => return match self.chars.peek() {
-                    Some((_, '=')) => {
-                        self.chars.next();
-                        Some(Ok((i, Token::BinOp(BinOpKind::Ne), i + 2)))
+                }
+                Some((i, '|')) => {
+                    return match self.chars.peek() {
+                        Some((_, '=')) => {
+                            self.chars.next();
+                            Some(Ok((i, Token::AssignOp(BinOpKind::Or), i + 2)))
+                        }
+                        _ => Some(Ok((i, Token::BinOp(BinOpKind::Or), i + 1))),
                     }
-                    _ => Some(Ok((i, Token::Exclamation, i + 1)))
-                },
-                Some((i, '&')) => return match self.chars.peek() {
-                    Some((_, '=')) => {
-                        self.chars.next();
-                        Some(Ok((i, Token::AssignOp(BinOpKind::And), i + 2)))
+                }
+                Some((i, '=')) => {
+                    return match self.chars.peek() {
+                        Some((_, '=')) => {
+                            self.chars.next();
+                            Some(Ok((i, Token::BinOp(BinOpKind::Eq), i + 2)))
+                        }
+                        _ => Some(Ok((i, Token::Assign, i + 1))),
                     }
-                    _ => Some(Ok((i, Token::BinOp(BinOpKind::And), i + 1)))
-                },
-                Some((i, '|')) => return match self.chars.peek() {
-                    Some((_, '=')) => {
-                        self.chars.next();
-                        Some(Ok((i, Token::AssignOp(BinOpKind::Or), i + 2)))
+                }
+                Some((i, '>')) => {
+                    return match self.chars.peek() {
+                        Some((_, '=')) => {
+                            self.chars.next();
+                            Some(Ok((i, Token::BinOp(BinOpKind::Ge), i + 2)))
+                        }
+                        _ => Some(Ok((i, Token::BinOp(BinOpKind::Gt), i + 1))),
                     }
-                    _ => Some(Ok((i, Token::BinOp(BinOpKind::Or), i + 1)))
-                },
-                Some((i, '=')) => return match self.chars.peek() {
-                    Some((_, '=')) => {
-                        self.chars.next();
-                        Some(Ok((i, Token::BinOp(BinOpKind::Eq), i + 2)))
+                }
+                Some((i, '<')) => {
+                    return match self.chars.peek() {
+                        Some((_, '=')) => {
+                            self.chars.next();
+                            Some(Ok((i, Token::BinOp(BinOpKind::Le), i + 2)))
+                        }
+                        _ => Some(Ok((i, Token::BinOp(BinOpKind::Lt), i + 1))),
                     }
-                    _ => Some(Ok((i, Token::Assign, i + 1)))
-                },
-                Some((i, '>')) => return match self.chars.peek() {
-                    Some((_, '=')) => {
-                        self.chars.next();
-                        Some(Ok((i, Token::BinOp(BinOpKind::Ge), i + 2)))
+                }
+                Some((i, ':')) => {
+                    return match self.chars.peek() {
+                        Some((_, ':')) => {
+                            self.chars.next();
+                            Some(Ok((i, Token::PathSeg, i + 2)))
+                        }
+                        _ => Some(Ok((i, Token::Colon, i + 1))),
                     }
-                    _ => Some(Ok((i, Token::BinOp(BinOpKind::Gt), i + 1)))
-                },
-                Some((i, '<')) => return match self.chars.peek() {
-                    Some((_, '=')) => {
-                        self.chars.next();
-                        Some(Ok((i, Token::BinOp(BinOpKind::Le), i + 2)))
-                    }
-                    _ => Some(Ok((i, Token::BinOp(BinOpKind::Lt), i + 1)))
-                },
-                Some((i, ':')) => return match self.chars.peek() {
-                    Some((_, ':')) => {
-                        self.chars.next();
-                        Some(Ok((i, Token::PathSeg, i + 2)))
-                    }
-                    _ => Some(Ok((i, Token::Colon, i + 1)))
-                },
+                }
                 Some((i, '.')) => return Some(Ok((i, Token::Dot, i + 1))),
                 Some((i, '^')) => return Some(Ok((i, Token::Caret, i + 1))),
                 Some((i, ';')) => return Some(Ok((i, Token::Semicolon, i + 1))),
@@ -311,8 +339,7 @@ impl<'input> Iterator for Lexer<'input> {
                     }
 
                     return Some(Err(ParserError::UnrecognisedToken(
-                        start,
-                        end,
+                        Span { l: start, r: end },
                         self.input[start..end].to_owned(),
                     )));
                 }

@@ -78,7 +78,15 @@ pub fn walk_program<'ast, T: Visitor<'ast>>(visitor: &mut T, Program { items }: 
     walk_list!(visitor, visit_item, items)
 }
 
-pub fn walk_item<'ast, T: Visitor<'ast>>(visitor: &mut T, Item { name, vis: _, kind, span: _ }: &'ast Item) {
+pub fn walk_item<'ast, T: Visitor<'ast>>(
+    visitor: &mut T,
+    Item {
+        name,
+        vis: _,
+        kind,
+        span: _,
+    }: &'ast Item,
+) {
     visitor.visit_ident(name);
 
     match kind {
@@ -93,7 +101,11 @@ pub fn walk_item<'ast, T: Visitor<'ast>>(visitor: &mut T, Item { name, vis: _, k
                 visitor.visit_type(ty);
             }
 
-            if let Some(Block { span: _, val: stmts }) = block {
+            if let Some(Block {
+                span: _,
+                val: stmts,
+            }) = block
+            {
                 walk_list!(visitor, visit_stmt, stmts);
             }
         }
@@ -109,7 +121,15 @@ pub fn walk_struct<'ast, T: Visitor<'ast>>(visitor: &mut T, Struct { members }: 
     walk_list!(visitor, visit_struct_field, members)
 }
 
-pub fn walk_struct_field<'ast, T: Visitor<'ast>>(visitor: &mut T, StructField { name, ty, vis: _, default }: &'ast StructField) {
+pub fn walk_struct_field<'ast, T: Visitor<'ast>>(
+    visitor: &mut T,
+    StructField {
+        name,
+        ty,
+        vis: _,
+        default,
+    }: &'ast StructField,
+) {
     visitor.visit_ident(name);
     visitor.visit_type(ty);
 
@@ -118,7 +138,14 @@ pub fn walk_struct_field<'ast, T: Visitor<'ast>>(visitor: &mut T, StructField { 
     }
 }
 
-pub fn walk_class<'ast, T: Visitor<'ast>>(visitor: &mut T, Class { builtin: _, bounds, members }: &'ast Class) {
+pub fn walk_class<'ast, T: Visitor<'ast>>(
+    visitor: &mut T,
+    Class {
+        builtin: _,
+        bounds,
+        members,
+    }: &'ast Class,
+) {
     if let ClassBounds::Ty(ty) = bounds {
         visitor.visit_type(ty);
     }
@@ -126,7 +153,10 @@ pub fn walk_class<'ast, T: Visitor<'ast>>(visitor: &mut T, Class { builtin: _, b
     walk_list!(visitor, visit_struct_field, members)
 }
 
-pub fn walk_branch<'ast, T: Visitor<'ast>>(visitor: &mut T, Branch { bounds, variants }: &'ast Branch) {
+pub fn walk_branch<'ast, T: Visitor<'ast>>(
+    visitor: &mut T,
+    Branch { bounds, variants }: &'ast Branch,
+) {
     if let ClassBounds::Ty(ty) = bounds {
         visitor.visit_type(ty);
     }
@@ -134,7 +164,14 @@ pub fn walk_branch<'ast, T: Visitor<'ast>>(visitor: &mut T, Branch { bounds, var
     walk_list!(visitor, visit_branch_variant, variants)
 }
 
-pub fn walk_branch_variant<'ast, T: Visitor<'ast>>(visitor: &mut T, BranchVariant { span: _, name, members }: &'ast BranchVariant) {
+pub fn walk_branch_variant<'ast, T: Visitor<'ast>>(
+    visitor: &mut T,
+    BranchVariant {
+        span: _,
+        name,
+        members,
+    }: &'ast BranchVariant,
+) {
     visitor.visit_ident(name);
     walk_list!(visitor, visit_struct_field, members)
 }
@@ -182,13 +219,32 @@ pub fn walk_expr<'ast, T: Visitor<'ast>>(visitor: &mut T, Expr { span: _, val }:
             visitor.visit_ident(ident);
         }
         ExprKind::Tuple(items) => walk_list!(visitor, visit_expr, items),
-        ExprKind::Block(Block { span: _, val: stmts })
-        | ExprKind::Loop(Block { span: _, val: stmts }) => walk_list!(visitor, visit_stmt, stmts),
-        ExprKind::While(expr, Block { span: _, val: stmts }) => {
+        ExprKind::Block(Block {
+            span: _,
+            val: stmts,
+        })
+        | ExprKind::Loop(Block {
+            span: _,
+            val: stmts,
+        }) => walk_list!(visitor, visit_stmt, stmts),
+        ExprKind::While(
+            expr,
+            Block {
+                span: _,
+                val: stmts,
+            },
+        ) => {
             visitor.visit_expr(expr);
             walk_list!(visitor, visit_stmt, stmts);
         }
-        ExprKind::If(expr, Block { span: _, val: stmts }, els) => {
+        ExprKind::If(
+            expr,
+            Block {
+                span: _,
+                val: stmts,
+            },
+            els,
+        ) => {
             visitor.visit_expr(expr);
             walk_list!(visitor, visit_stmt, stmts);
             if let Some(expr) = els {

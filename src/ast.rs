@@ -1,7 +1,9 @@
-use std::fmt::{Display, Formatter};
 use std::fmt;
+use std::fmt::{Display, Formatter};
 
 use lasso::Spur;
+
+use crate::span::*;
 
 pub mod visit;
 
@@ -13,43 +15,6 @@ pub(crate) fn bx<T>(val: T) -> Box<T> {
 #[inline]
 pub(crate) fn box_opt<T>(val: Option<T>) -> Option<Box<T>> {
     val.map(|v| Box::new(v))
-}
-
-#[derive(Debug, Copy, Clone)]
-pub struct Span {
-    pub l: usize,
-    pub r: usize,
-}
-
-#[derive(Debug, Clone)]
-pub struct Spanned<T> {
-    pub span: Span,
-    pub val: T,
-}
-
-impl<T> Spanned<T> {
-    #[inline(always)]
-    pub fn new(l: usize, r: usize, val: T) -> Self {
-        Spanned { span: Span { l, r }, val }
-    }
-}
-
-impl<T: PartialEq> PartialEq for Spanned<T> {
-    #[inline]
-    fn eq(&self, other: &Self) -> bool {
-        self.val == other.val
-    }
-
-    #[inline]
-    fn ne(&self, other: &Self) -> bool {
-        self.val != other.val
-    }
-}
-
-impl<T: Display> Display for Spanned<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        self.val.fmt(f)
-    }
 }
 
 pub type Identifier = Spanned<Spur>;
@@ -97,7 +62,7 @@ pub struct Mod {
 
 #[derive(Debug)]
 pub struct Struct {
-    pub members: Vec<StructField>
+    pub members: Vec<StructField>,
 }
 
 #[derive(Debug)]
