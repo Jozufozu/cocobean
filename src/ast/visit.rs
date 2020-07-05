@@ -195,6 +195,7 @@ pub fn walk_expr<'ast, T: Visitor<'ast>>(visitor: &mut T, Expr { span: _, val }:
                 visitor.visit_expr(expr)
             }
         }
+        ExprKind::Paren(expr) => visitor.visit_expr(expr),
         ExprKind::Err => {}
     }
 }

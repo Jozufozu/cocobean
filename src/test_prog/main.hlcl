@@ -1,0 +1,48 @@
+pub mod test_mod;
+
+pub builtin class entity {
+
+}
+
+pub builtin class player: entity {
+
+}
+
+pub branch GameMode: player {
+    InGame {
+        pub kills: int,
+        pub cooldown: int,
+        thing = true,
+        pub health: int,
+    },
+    Spectator {
+
+    },
+}
+
+pub branch Class: GameMode::InGame {
+    Scout {
+
+    },
+    Heavy {
+
+    }
+}
+
+fn test(thing: int, other: player) {
+
+    if other is GameMode::Spectator { return; }
+
+    let other = GameMode::InGame(other);
+
+    while { thing += 2; thing != 0 } {
+        loop {
+            if other@player.health >= 0 {
+                other@InGame.health = 2;
+            } else if other.cooldown == 2 {
+                other@InGame.health = thing;
+            } else if true {
+            }
+        }
+    }
+}

@@ -1,8 +1,7 @@
 use std::fmt::{Display, Formatter};
 use std::fmt;
 
-use string_interner::Sym;
-use lalrpop_util::state_machine::ParserAction;
+use lasso::Spur;
 
 pub mod visit;
 
@@ -53,7 +52,7 @@ impl<T: Display> Display for Spanned<T> {
     }
 }
 
-pub type Identifier = Spanned<Sym>;
+pub type Identifier = Spanned<Spur>;
 
 #[derive(Debug, Clone)]
 pub struct Path {
@@ -191,6 +190,7 @@ pub enum ExprKind {
     Loop(Block),
     While(Box<Expr>, Block),
     If(Box<Expr>, Block, Option<Box<Expr>>),
+    Paren(Box<Expr>),
 
     Err,
 }

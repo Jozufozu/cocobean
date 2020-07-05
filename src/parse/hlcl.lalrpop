@@ -1,10 +1,10 @@
 use std::str::FromStr;
-use string_interner::{DefaultStringInterner};
 use lalrpop_util::{ParseError, ErrorRecovery};
 use super::lexer::{Token, ParserError};
 use crate::ast::{*, BinOpKind as BinOp};
+use crate::session::Interner;
 
-grammar<'input, 'err>(input: &'input str, intr: &mut DefaultStringInterner, errs: &'err mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>);
+grammar<'input>(input: &'input str, intr: &mut Interner, mods: &mut Vec<Identifier>, errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>);
 
 pub Program: Program = <items:Item*> => Program { items };
 
@@ -51,12 +51,13 @@ ModDefinition: Item = {
         }
     },
     <l:@L> <vis:Vis> "mod" <name:Identifier> ";" <r:@R> => {
+        mods.push(name.clone());
         Item {
             name,
             vis,
             kind: ItemKind::Mod(Mod {
                 items: Vec::with_capacity(0),
-                inline: true,
+                inline: false,
             }),
             span: Span{l,r},
         }
@@ -333,12 +334,12 @@ Expr0: Expr = {
     Call,
 
     <l:@L> "(" <exprs:Many1<",", Expr>> ")" <r:@R> => {
-        if exprs.len() == 1 {
+        Expr::new(l, r, if exprs.len() == 1 {
             let mut exprs = exprs;
-            exprs.remove(0)
+            ExprKind::Paren(bx(exprs.remove(0)))
         } else {
-            Expr::new(l, r, ExprKind::Tuple(exprs))
-        }
+            ExprKind::Tuple(exprs)
+        })
     },
 
     <l:@L> <err:!> <r:@R> => { errs.push(err); Expr::new(l, r, ExprKind::Err) }
@@ -367,9 +368,10 @@ Lit: Lit = {
 };
 
 Type: Type = {
-    <l:@L> "bool" <r:@R> => Type::new(l, r, TypeKind::Bool),
-    <l:@L> "string" <r:@R> => Type::new(l, r, TypeKind::String),
-    <l:@L> "int" <r:@R> => Type::new(l, r, TypeKind::Int),
+    // <l:@L> "pos" <r:@R> => Type::new(l, r, TypeKind::Pos),
+    // <l:@L> "bool" <r:@R> => Type::new(l, r, TypeKind::Bool),
+    // <l:@L> "string" <r:@R> => Type::new(l, r, TypeKind::String),
+    // <l:@L> "int" <r:@R> => Type::new(l, r, TypeKind::Int),
     <l:@L> "(" <tys:Many0<",", Type>> ")" <r:@R> => {
         if tys.is_empty() {
             Type::new(l, r, TypeKind::Unit)
@@ -436,9 +438,6 @@ extern {
         "if" => Token::If,
         "else" => Token::Else,
         "is" => Token::Is,
-        "string" => Token::String,
-        "bool" => Token::Bool,
-        "int" => Token::Int,
         "fn" => Token::Fn,
         "let" => Token::Let,
         "return" => Token::Return,

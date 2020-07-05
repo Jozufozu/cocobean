@@ -27,10 +27,6 @@ pub enum Token<'input> {
 
     Is,
 
-    String,
-    Bool,
-    Int,
-
     Pub,
     Fn,
     Let,
@@ -88,9 +84,6 @@ static KEYWORDS: phf::Map<&'static str, Token> = phf_map! {
     "if" => Token::If,
     "else" => Token::Else,
     "is" => Token::Is,
-    "string" => Token::String,
-    "bool" => Token::Bool,
-    "int" => Token::Int,
     "let" => Token::Let,
     "return" => Token::Return,
     "break" => Token::Break,
