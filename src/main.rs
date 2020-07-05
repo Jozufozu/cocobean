@@ -7,5 +7,5 @@ pub mod ast;
 fn main() {
     let mut session = Session::new();
 
-    session.parse("./src/test_prog/main.hlcl");
+    session.parse("./test_prog/main.hlcl");
 }
