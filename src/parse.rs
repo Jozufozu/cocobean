@@ -7,7 +7,7 @@ use fxhash::FxBuildHasher;
 use lalrpop_util::ErrorRecovery;
 use lalrpop_util::ParseError;
 use lasso::{Spur, ThreadedRodeo};
-use walkdir::{WalkDir, DirEntry};
+use walkdir::{DirEntry, WalkDir};
 
 pub use hlcl::ProgramParser;
 pub use lexer::Lexer;
@@ -33,14 +33,22 @@ type ParserResult<'input> = (
     Result<Program, ParseError<usize, Token<'input>, ParserError>>,
 );
 
-pub struct ParsedProject {
-    main_module: Program,
-    loaded_files: Vec<(ASTPath, Program)>,
+#[derive(Debug)]
+pub struct Project {
+    interner: Interner,
+    main_module: SourceFile,
+    loaded_files: Vec<(ASTPath, SourceFile)>,
     stored_errs: Vec<(ASTPath, ())>,
 }
 
+#[derive(Debug)]
+pub struct SourceFile {
+    program: Program,
+    source: String,
+    file_name: String,
+}
 
-
+#[derive(Debug)]
 pub struct ParsingSession {
     interner: Interner,
     project_path: PathBuf,
@@ -62,7 +70,7 @@ impl ParsingSession {
         }
     }
 
-    pub fn parse_project(self) -> Result<ParsedProject, ()> {
+    pub fn parse_project(self) -> Result<Project, ()> {
         let ParsingSession {
             interner,
             project_path,
@@ -90,30 +98,36 @@ impl ParsingSession {
                 found += 1;
                 let sender = psend.clone();
                 let interner = &interner;
-                workers
-                    .install(|| {
-                        let ast_path = ParsingSession::dir_to_module_path(&path, interner);
-                        let result = File::open(path.into_path())
-                            .map_err(|_| ())
-                            .and_then(|mut file| {
-                                let mut source = String::with_capacity(1024);
 
-                                file.read_to_string(&mut source)
-                                    .map(|_| source)
-                                    .map_err(|_| ())
-                            })
-                            .and_then(|source| {
-                                let (soft_errs, result) = parse_string(interner, &source);
+                workers.install(|| {
+                    let ast_path = Self::dir_to_module_path(&path, interner);
+                    let result = File::open(path.path())
+                        .map_err(|_| ())
+                        .and_then(|mut file| {
+                            let mut source = String::with_capacity(1024);
 
-                                for _err in soft_errs.into_iter() {
-                                    // TODO: Process and store errors to be displayed later. Send them to the main thread separately?
-                                }
+                            file.read_to_string(&mut source)
+                                .map(|_| source)
+                                .map_err(|_| ())
+                        })
+                        .and_then(|source| {
+                            let (soft_errs, result) = Self::parse_string(interner, &source);
 
-                                result.map_err(|_| ()) // TODO: Process this error too
-                            });
+                            for _err in soft_errs.into_iter() {
+                                // TODO: Process and store errors to be displayed later. Send them to the main thread separately?
+                            }
 
-                        sender.send((ast_path, result)).unwrap();
-                    })
+                            result
+                                .map_err(|_| ()) // TODO: Process this error too
+                                .map(|program| SourceFile {
+                                    program,
+                                    source,
+                                    file_name: name.to_string(),
+                                })
+                        });
+
+                    sender.send((ast_path, result)).unwrap();
+                })
             }
         }
 
@@ -122,8 +136,6 @@ impl ParsingSession {
         let mut stored_errs = Vec::new();
 
         for (module_path, result) in prc.iter() {
-            println!("{:?}", module_path);
-
             if main_module.is_none()
                 && module_path.items.len() == 1
                 && "main" == interner.resolve(&module_path.items[0].val)
@@ -131,7 +143,7 @@ impl ParsingSession {
                 main_module = Some(result?);
             } else {
                 match result {
-                    Ok(prog) => modules.push((module_path, prog)),
+                    Ok(file) => modules.push((module_path, file)),
                     Err(err) => stored_errs.push((module_path, err)),
                 }
             }
@@ -143,7 +155,8 @@ impl ParsingSession {
         }
 
         if let Some(main_module) = main_module {
-            Ok(ParsedProject {
+            Ok(Project {
+                interner,
                 main_module,
                 loaded_files: modules,
                 stored_errs,
@@ -155,7 +168,8 @@ impl ParsingSession {
 
     fn dir_to_module_path(path: &DirEntry, interner: &Interner) -> ASTPath {
         ASTPath {
-            items: path.path()
+            items: path
+                .path()
                 .ancestors()
                 .into_iter()
                 .take(path.depth())
@@ -170,12 +184,13 @@ impl ParsingSession {
                 .collect(),
         }
     }
-}
 
-fn parse_string<'input>(interner: &Interner, source: &'input String) -> ParserResult<'input> {
-    let mut errs = Vec::new();
+    fn parse_string<'input>(interner: &Interner, source: &'input String) -> ParserResult<'input> {
+        let mut errs = Vec::new();
 
-    let program = ProgramParser::new().parse(&source, &interner, &mut errs, Lexer::new(&source));
+        let program =
+            ProgramParser::new().parse(&source, &interner, &mut errs, Lexer::new(&source));
 
-    (errs, program)
+        (errs, program)
+    }
 }
