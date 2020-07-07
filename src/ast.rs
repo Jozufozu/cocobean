@@ -1,11 +1,33 @@
 use std::fmt;
 use std::fmt::{Display, Formatter};
 
-use lasso::Spur;
+use itertools::*;
+use lasso::{Spur, RodeoResolver};
 
+use crate::ast::id::Id;
 use crate::span::*;
+use std::iter::FromIterator;
+use std::borrow::Cow;
+use crate::project::InternResolver;
 
+pub mod id;
+pub mod numbering;
 pub mod visit;
+
+macro_rules! new_spanned_id {
+    ($struc:ident, $field:ident, $kind:path) => {
+        impl $struc {
+            #[inline]
+            pub fn new(l: usize, r: usize, $field: $kind) -> Self {
+                Self {
+                    span: Span { l, r },
+                    $field,
+                    id: Id::DUMMY,
+                }
+            }
+        }
+    };
+}
 
 #[inline]
 pub(crate) fn bx<T>(val: T) -> Box<T> {
@@ -19,9 +41,29 @@ pub(crate) fn box_opt<T>(val: Option<T>) -> Option<Box<T>> {
 
 pub type Identifier = Spanned<Spur>;
 
+impl Identifier {
+    pub fn to_string<'r, R: InternResolver<Spur>>(&self, names: &'r R) -> &'r str {
+        names.resolve(&self.val)
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Path {
     pub items: Vec<Identifier>,
+}
+
+impl Path {
+    pub fn to_string<R: InternResolver<Spur>>(&self, names: &R) -> String {
+        self.items.iter()
+            .map(|ident| ident.to_string(names))
+            .join("::")
+    }
+}
+
+impl FromIterator<Identifier> for Path {
+    fn from_iter<T: IntoIterator<Item=Identifier>>(iter: T) -> Self {
+        Path { items: iter.into_iter().collect() }
+    }
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -41,6 +83,7 @@ pub struct Item {
     pub vis: Visibility,
     pub kind: ItemKind,
     pub span: Span,
+    pub id: Id,
 }
 
 #[derive(Debug)]
@@ -117,7 +160,14 @@ pub struct FnParam {
     pub ty: Type,
 }
 
-pub type Type = Spanned<TypeKind>;
+#[derive(Debug)]
+pub struct Type {
+    pub span: Span,
+    pub kind: TypeKind,
+    pub id: Id,
+}
+
+new_spanned_id!(Type, kind, TypeKind);
 
 #[derive(Debug)]
 pub enum TypeKind {
@@ -134,9 +184,23 @@ pub enum TypeKind {
     Err,
 }
 
-pub type Block = Spanned<Vec<Stmt>>;
+#[derive(Debug)]
+pub struct Block {
+    pub span: Span,
+    pub stmts: Vec<Stmt>,
+    pub id: Id,
+}
 
-pub type Expr = Spanned<ExprKind>;
+new_spanned_id!(Block, stmts, Vec<Stmt>);
+
+#[derive(Debug)]
+pub struct Expr {
+    pub span: Span,
+    pub kind: ExprKind,
+    pub id: Id,
+}
+
+new_spanned_id!(Expr, kind, ExprKind);
 
 #[derive(Debug)]
 pub enum ExprKind {
@@ -149,7 +213,7 @@ pub enum ExprKind {
     Is(IsOp, Box<Expr>, Box<Type>),
     Call(Path, Vec<Expr>),
     MethodCall(),
-    FieldAccess(Box<Expr>, Option<Path>, Identifier),
+    FieldAccess(Box<Expr>, Option<(Path, Id)>, Identifier),
     Tuple(Vec<Expr>),
     Block(Block),
     Loop(Block),
@@ -168,7 +232,14 @@ pub enum IsOpKind {
     NotIs,
 }
 
-pub type Stmt = Spanned<StmtKind>;
+#[derive(Debug)]
+pub struct Stmt {
+    pub span: Span,
+    pub kind: StmtKind,
+    pub id: Id,
+}
+
+new_spanned_id!(Stmt, kind, StmtKind);
 
 #[derive(Debug)]
 pub enum StmtKind {

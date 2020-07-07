@@ -6,7 +6,8 @@ use crossbeam::crossbeam_channel;
 use fxhash::FxBuildHasher;
 use lalrpop_util::ErrorRecovery;
 use lalrpop_util::ParseError;
-use lasso::{Spur, ThreadedRodeo};
+use lasso::{RodeoResolver, Spur, ThreadedRodeo};
+use rayon::{ThreadPool, ThreadPoolBuilder};
 use walkdir::{DirEntry, WalkDir};
 
 pub use hlcl::ProgramParser;
@@ -15,6 +16,7 @@ pub use lexer::Lexer;
 use crate::ast::{Identifier, Path as ASTPath, Program};
 use crate::parse::err::ParserError;
 use crate::parse::lexer::Token;
+use crate::project::{Project, SourceFile};
 use crate::span::Span;
 
 #[allow(clippy::all)]
@@ -23,8 +25,9 @@ pub mod hlcl;
 pub mod err;
 pub mod lexer;
 
-pub const ROOT_FILE: &'static str = "main.hlcl";
-pub const EXTENSION: &'static str = ".hlcl";
+pub const PRIMITIVES: &[&str] = &["int", "bool", "string", "pos"];
+pub const ROOT_FILE: &str = "main.hlcl";
+pub const EXTENSION: &str = ".hlcl";
 
 pub type Interner = ThreadedRodeo<Spur, FxBuildHasher>;
 
@@ -34,28 +37,24 @@ type ParserResult<'input> = (
 );
 
 #[derive(Debug)]
-pub struct Project {
-    interner: Interner,
-    main_module: SourceFile,
-    loaded_files: Vec<(ASTPath, SourceFile)>,
-    stored_errs: Vec<(ASTPath, ())>,
-}
-
-#[derive(Debug)]
-pub struct SourceFile {
-    program: Program,
-    source: String,
-    file_name: String,
-}
-
-#[derive(Debug)]
 pub struct ParsingSession {
     interner: Interner,
+    project_name: String,
     project_path: PathBuf,
+    workers: ThreadPool,
+}
+
+#[derive(Debug)]
+pub enum NameErr {
+    NameTooShort,
+    NameInvalidCharacter,
+    NameMustStartWithAlphabetic
 }
 
 impl ParsingSession {
-    pub fn new<P: AsRef<Path>>(project_path: P) -> Self {
+    pub fn new<P: AsRef<Path>>(project_path: P, project_name: String) -> Result<Self, NameErr> {
+        Self::validate_name(&project_name)?;
+
         let mut project_path = project_path.as_ref().to_path_buf();
 
         if project_path.is_file() {
@@ -64,25 +63,49 @@ impl ParsingSession {
             }
         }
 
-        ParsingSession {
-            interner: Interner::with_hasher(FxBuildHasher::default()),
+        let interner = Interner::with_hasher(FxBuildHasher::default());
+
+        for str in PRIMITIVES {
+            interner.get_or_intern(str);
+        }
+
+        Ok(ParsingSession {
+            interner,
+            project_name,
             project_path,
+            workers: ThreadPoolBuilder::new().build().unwrap(),
+        })
+    }
+
+    fn validate_name(name: &String) -> Result<(), NameErr> {
+        let mut chars = name.chars();
+        if let Some(first) = &chars.next() {
+            if !first.is_ascii_alphabetic() {
+                return Err(NameErr::NameMustStartWithAlphabetic)
+            }
+        }
+
+        if !chars.all(|ch| ch.is_ascii_alphanumeric() || ch == '_') {
+            Err(NameErr::NameInvalidCharacter)
+        } else {
+            Ok(())
         }
     }
 
     pub fn parse_project(self) -> Result<Project, ()> {
         let ParsingSession {
             interner,
+            project_name,
             project_path,
+            workers,
         } = self;
 
+        let project_name = interner.get_or_intern(project_name);
         let main_file = project_path.join(ROOT_FILE);
 
         if !main_file.is_file() {
             return Err(());
         }
-
-        let workers = rayon::ThreadPoolBuilder::new().build().unwrap();
 
         let mut found = 0;
         let (psend, prc) = crossbeam_channel::unbounded();
@@ -119,11 +142,7 @@ impl ParsingSession {
 
                             result
                                 .map_err(|_| ()) // TODO: Process this error too
-                                .map(|program| SourceFile {
-                                    program,
-                                    source,
-                                    file_name: name.to_string(),
-                                })
+                                .map(|program| SourceFile::new(program, source, name.to_string()))
                         });
 
                     sender.send((ast_path, result)).unwrap();
@@ -135,13 +154,16 @@ impl ParsingSession {
         let mut modules = Vec::new();
         let mut stored_errs = Vec::new();
 
-        for (module_path, result) in prc.iter() {
+        for (mut module_path, result) in prc.iter() {
             if main_module.is_none()
                 && module_path.items.len() == 1
-                && "main" == interner.resolve(&module_path.items[0].val)
+                && "main" == module_path.to_string(&interner)
             {
-                main_module = Some(result?);
+                module_path.items[0].val = project_name;
+                main_module = Some((module_path, result?));
             } else {
+                module_path.items.insert(0, Identifier::dummy(project_name));
+
                 match result {
                     Ok(file) => modules.push((module_path, file)),
                     Err(err) => stored_errs.push((module_path, err)),
@@ -154,35 +176,32 @@ impl ParsingSession {
             }
         }
 
-        if let Some(main_module) = main_module {
-            Ok(Project {
-                interner,
-                main_module,
-                loaded_files: modules,
-                stored_errs,
+        main_module
+            .map(|main_module| {
+                Project::new(
+                    interner.into_resolver(),
+                    main_module,
+                    modules,
+                    stored_errs,
+                )
             })
-        } else {
-            Err(())
-        }
+            .ok_or(())
     }
 
     fn dir_to_module_path(path: &DirEntry, interner: &Interner) -> ASTPath {
-        ASTPath {
-            items: path
-                .path()
-                .ancestors()
-                .into_iter()
-                .take(path.depth())
-                .map(|part| interner.get_or_intern(part.to_string_lossy()))
-                .map(|val| Identifier {
-                    span: Span::DUMMY,
-                    val,
-                })
-                .collect::<Vec<_>>()
-                .into_iter()
-                .rev()
-                .collect(),
-        }
+        path.path()
+            .ancestors()
+            .into_iter()
+            .take(path.depth())
+            .map(|part| interner.get_or_intern(part.file_stem().unwrap().to_string_lossy()))
+            .map(|val| Identifier {
+                span: Span::DUMMY,
+                val,
+            })
+            .collect::<Vec<_>>()
+            .into_iter()
+            .rev()
+            .collect()
     }
 
     fn parse_string<'input>(interner: &Interner, source: &'input String) -> ParserResult<'input> {

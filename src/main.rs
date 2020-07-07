@@ -2,6 +2,8 @@ use crate::parse::ParsingSession;
 
 pub mod ast;
 pub mod parse;
+pub mod project;
+pub mod resolve;
 pub mod span;
 
 /// TODO: Collect names and item signatures
@@ -19,7 +21,7 @@ pub mod span;
 /// TODO: DOCUMENTATION (both language support and documenting the compiler)
 ///
 fn main() {
-    let session = ParsingSession::new("./test_prog/main.hlcl");
+    let session = ParsingSession::new("./test_prog/main.hlcl", "test_prog".into()).unwrap();
 
-    let project = session.parse_project();
+    let project = session.parse_project().unwrap();
 }

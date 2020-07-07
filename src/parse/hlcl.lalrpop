@@ -1,6 +1,6 @@
 use std::str::FromStr;
 use lalrpop_util::{ParseError, ErrorRecovery};
-use crate::ast::{*, BinOpKind as BinOp};
+use crate::ast::{*, id::Id, BinOpKind as BinOp};
 use crate::span::*;
 use super::{lexer::Token, err::ParserError, Interner};
 
@@ -55,6 +55,7 @@ ModDefinition: Item = {
                 inline,
             }),
             span: Span{l,r},
+            id: Id::DUMMY,
         }
     }
 };
@@ -68,6 +69,7 @@ StructDefinition: Item = {
                 members
             }),
             span: Span{l,r},
+            id: Id::DUMMY,
         }
     }, 
 };
@@ -89,6 +91,7 @@ ClassDefinition: Item = {
                 members
             }),
             span: Span{l,r},
+            id: Id::DUMMY,
         }
     }, 
 };
@@ -109,6 +112,7 @@ BranchDefinition: Item = {
                 variants
             }),
             span: Span{l,r},
+            id: Id::DUMMY,
         }
     },
 };
@@ -153,6 +157,7 @@ FunctionDefinition: Item = {
             vis,
             kind: ItemKind::Fn(sig, block),
             span: Span{l,r},
+            id: Id::DUMMY,
         }
     },
 };
@@ -325,7 +330,7 @@ Call: Expr = {
 Expr0: Expr = {
     <l:@L> <lit:Lit> <r:@R> => Expr::new(l, r, ExprKind::Lit(lit)),
     <l:@L> <ident:Identifier> <r:@R> => Expr::new(l, r, ExprKind::Variable(ident)),
-    <l:@L> <e:Expr0> <discriminator:("@" <Path>)?> "." <field:Identifier> <r:@R> => Expr::new(l, r, ExprKind::FieldAccess(bx(e), discriminator, field)),
+    <l:@L> <e:Expr0> <discriminator:("@" <Path>)?> "." <field:Identifier> <r:@R> => Expr::new(l, r, ExprKind::FieldAccess(bx(e), discriminator.map(|d| (d, Id::DUMMY)), field)),
     Call,
 
     <l:@L> "(" <exprs:Many1<",", Expr>> ")" <r:@R> => {

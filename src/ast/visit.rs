@@ -17,8 +17,8 @@ macro_rules! walk_list {
 pub trait Visitor<'ast>: Sized {
     fn visit_ident(&mut self, _ident: &'ast Identifier) {}
 
-    fn visit_path(&mut self, path: &'ast Path) {
-        walk_path(self, path)
+    fn visit_path(&mut self, path: &'ast Path, id: Id) {
+        walk_path(self, path, id)
     }
 
     fn visit_program(&mut self, program: &'ast Program) {
@@ -57,6 +57,10 @@ pub trait Visitor<'ast>: Sized {
         walk_type(self, ty)
     }
 
+    fn visit_block(&mut self, block: &'ast Block) {
+        walk_block(self, block)
+    }
+
     fn visit_expr(&mut self, expr: &'ast Expr) {
         walk_expr(self, expr)
     }
@@ -70,7 +74,7 @@ pub trait Visitor<'ast>: Sized {
     }
 }
 
-pub fn walk_path<'ast, T: Visitor<'ast>>(visitor: &mut T, Path { items }: &'ast Path) {
+pub fn walk_path<'ast, T: Visitor<'ast>>(visitor: &mut T, Path { items }: &'ast Path, _id: Id) {
     walk_list!(visitor, visit_ident, items)
 }
 
@@ -85,6 +89,7 @@ pub fn walk_item<'ast, T: Visitor<'ast>>(
         vis: _,
         kind,
         span: _,
+        id: _,
     }: &'ast Item,
 ) {
     visitor.visit_ident(name);
@@ -101,12 +106,8 @@ pub fn walk_item<'ast, T: Visitor<'ast>>(
                 visitor.visit_type(ty);
             }
 
-            if let Some(Block {
-                span: _,
-                val: stmts,
-            }) = block
-            {
-                walk_list!(visitor, visit_stmt, stmts);
+            if let Some(block) = block {
+                visitor.visit_block(block);
             }
         }
         ItemKind::Err => {}
@@ -176,11 +177,11 @@ pub fn walk_branch_variant<'ast, T: Visitor<'ast>>(
     walk_list!(visitor, visit_struct_field, members)
 }
 
-pub fn walk_type<'ast, T: Visitor<'ast>>(visitor: &mut T, Type { span: _, val }: &'ast Type) {
-    match &val {
+pub fn walk_type<'ast, T: Visitor<'ast>>(visitor: &mut T, Type { span: _, kind, id }: &'ast Type) {
+    match &kind {
         TypeKind::Tuple(items) => walk_list!(visitor, visit_type, items),
-        TypeKind::And(items) => walk_list!(visitor, visit_path, items),
-        TypeKind::Named(name) => visitor.visit_path(name),
+        TypeKind::And(items) => walk_list!(visitor, visit_path, items, *id),
+        TypeKind::Named(name) => visitor.visit_path(name, *id),
 
         TypeKind::Int => {}
         TypeKind::String => {}
@@ -191,8 +192,19 @@ pub fn walk_type<'ast, T: Visitor<'ast>>(visitor: &mut T, Type { span: _, val }:
     }
 }
 
-pub fn walk_expr<'ast, T: Visitor<'ast>>(visitor: &mut T, Expr { span: _, val }: &'ast Expr) {
-    match &val {
+pub fn walk_block<'ast, T: Visitor<'ast>>(
+    visitor: &mut T,
+    Block {
+        span: _,
+        stmts,
+        id: _,
+    }: &'ast Block,
+) {
+    walk_list!(visitor, visit_stmt, stmts);
+}
+
+pub fn walk_expr<'ast, T: Visitor<'ast>>(visitor: &mut T, Expr { span: _, kind, id }: &'ast Expr) {
+    match &kind {
         ExprKind::Lit(_) => {}
         ExprKind::Variable(name) => visitor.visit_ident(name),
         ExprKind::UnOp(_, expr) => visitor.visit_expr(expr),
@@ -207,46 +219,26 @@ pub fn walk_expr<'ast, T: Visitor<'ast>>(visitor: &mut T, Expr { span: _, val }:
             visitor.visit_type(ty);
         }
         ExprKind::Call(path, args) => {
-            visitor.visit_path(path);
+            visitor.visit_path(path, *id);
             walk_list!(visitor, visit_expr, args)
         }
         ExprKind::MethodCall() => {}
-        ExprKind::FieldAccess(expr, path, ident) => {
+        ExprKind::FieldAccess(expr, qualifier, field) => {
             visitor.visit_expr(expr);
-            if let Some(path) = path {
-                visitor.visit_path(path)
+            if let Some((path, id)) = qualifier {
+                visitor.visit_path(path, *id)
             }
-            visitor.visit_ident(ident);
+            visitor.visit_ident(field);
         }
         ExprKind::Tuple(items) => walk_list!(visitor, visit_expr, items),
-        ExprKind::Block(Block {
-            span: _,
-            val: stmts,
-        })
-        | ExprKind::Loop(Block {
-            span: _,
-            val: stmts,
-        }) => walk_list!(visitor, visit_stmt, stmts),
-        ExprKind::While(
-            expr,
-            Block {
-                span: _,
-                val: stmts,
-            },
-        ) => {
+        ExprKind::Block(block) | ExprKind::Loop(block) => visitor.visit_block(block),
+        ExprKind::While(expr, block) => {
             visitor.visit_expr(expr);
-            walk_list!(visitor, visit_stmt, stmts);
+            visitor.visit_block(block);
         }
-        ExprKind::If(
-            expr,
-            Block {
-                span: _,
-                val: stmts,
-            },
-            els,
-        ) => {
+        ExprKind::If(expr, block, els) => {
             visitor.visit_expr(expr);
-            walk_list!(visitor, visit_stmt, stmts);
+            visitor.visit_block(block);
             if let Some(expr) = els {
                 visitor.visit_expr(expr)
             }
@@ -256,8 +248,15 @@ pub fn walk_expr<'ast, T: Visitor<'ast>>(visitor: &mut T, Expr { span: _, val }:
     }
 }
 
-pub fn walk_stmt<'ast, T: Visitor<'ast>>(visitor: &mut T, Stmt { span: _, val }: &'ast Stmt) {
-    match &val {
+pub fn walk_stmt<'ast, T: Visitor<'ast>>(
+    visitor: &mut T,
+    Stmt {
+        span: _,
+        kind,
+        id: _,
+    }: &'ast Stmt,
+) {
+    match &kind {
         StmtKind::Item(item) => visitor.visit_item(item),
         StmtKind::Expr(expr) | StmtKind::Semi(expr) => visitor.visit_expr(expr),
         StmtKind::Let(ident, ty, expr) => {

@@ -1,8 +1,8 @@
 // auto-generated: "lalrpop 0.19.0"
-// sha256: 937c54bba38c479f52a6b92e71137985829be765f536291b2971a7a81ec6580
+// sha256: 9269e872bd77879372358de45e4a4a32480d98b3b5dd16c914aa3297cf925a3
 use std::str::FromStr;
 use lalrpop_util::{ParseError, ErrorRecovery};
-use crate::ast::{*, BinOpKind as BinOp};
+use crate::ast::{*, id::Id, BinOpKind as BinOp};
 use crate::span::*;
 use super::{lexer::Token, err::ParserError, Interner};
 #[allow(unused_extern_crates)]
@@ -16,7 +16,7 @@ mod __parse__Program {
 
     use std::str::FromStr;
     use lalrpop_util::{ParseError, ErrorRecovery};
-    use crate::ast::{*, BinOpKind as BinOp};
+    use crate::ast::{*, id::Id, BinOpKind as BinOp};
     use crate::span::*;
     use super::super::{lexer::Token, err::ParserError, Interner};
     #[allow(unused_extern_crates)]
@@ -10313,6 +10313,7 @@ fn __action12<
                 inline,
             }),
             span: Span{l,r},
+            id: Id::DUMMY,
         }
     }
 }
@@ -10342,6 +10343,7 @@ fn __action13<
                 members
             }),
             span: Span{l,r},
+            id: Id::DUMMY,
         }
     }
 }
@@ -10381,6 +10383,7 @@ fn __action14<
                 members
             }),
             span: Span{l,r},
+            id: Id::DUMMY,
         }
     }
 }
@@ -10418,6 +10421,7 @@ fn __action15<
                 variants
             }),
             span: Span{l,r},
+            id: Id::DUMMY,
         }
     }
 }
@@ -10524,6 +10528,7 @@ fn __action19<
             vis,
             kind: ItemKind::Fn(sig, block),
             span: Span{l,r},
+            id: Id::DUMMY,
         }
     }
 }
@@ -11456,7 +11461,7 @@ fn __action83<
     (_, r, _): (usize, usize, usize),
 ) -> Expr
 {
-    Expr::new(l, r, ExprKind::FieldAccess(bx(e), discriminator, field))
+    Expr::new(l, r, ExprKind::FieldAccess(bx(e), discriminator.map(|d| (d, Id::DUMMY)), field))
 }
 
 #[allow(unused_variables)]

@@ -30,6 +30,13 @@ impl<T> Spanned<T> {
             val,
         }
     }
+
+    pub fn dummy(val: T) -> Self {
+        Spanned {
+            span: Span::DUMMY,
+            val,
+        }
+    }
 }
 
 impl<T: PartialEq> PartialEq for Spanned<T> {
