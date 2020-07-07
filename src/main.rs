@@ -21,7 +21,7 @@ pub mod span;
 /// TODO: DOCUMENTATION (both language support and documenting the compiler)
 ///
 fn main() {
-    let session = ParsingSession::new("./test_prog/main.hlcl", "test_prog".into()).unwrap();
+    let session = ParsingSession::new("./test_prog", "test_prog".into()).unwrap();
 
     let project = session.parse_project().unwrap();
 }

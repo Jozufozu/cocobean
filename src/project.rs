@@ -1,5 +1,5 @@
 use crate::ast::{Path, Program};
-use lasso::{RodeoResolver, Spur, ThreadedRodeo, Key};
+use lasso::{RodeoResolver, Spur, ThreadedRodeo, Key, Rodeo};
 use std::hash::{Hash, BuildHasher};
 
 pub trait InternResolver<K: Key = Spur> {
@@ -14,6 +14,17 @@ impl<K: Key> InternResolver<K> for RodeoResolver<K> {
 }
 
 impl<K, S> InternResolver<K> for ThreadedRodeo<K, S>
+    where
+        K: Key + Hash,
+        S: BuildHasher + Clone
+{
+    #[inline]
+    fn resolve(&self, key: &K) -> &str {
+        self.resolve(key)
+    }
+}
+
+impl<K, S> InternResolver<K> for Rodeo<K, S>
     where
         K: Key + Hash,
         S: BuildHasher + Clone

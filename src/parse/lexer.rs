@@ -15,6 +15,7 @@ pub enum Token<'input> {
     StringLiteral(&'input str),
     IntLiteral(&'input str),
     DocComment(&'input str),
+    WhiteSpace,
 
     True,
     False,
@@ -229,12 +230,19 @@ impl<'input> Iterator for Lexer<'input> {
                     }
                 }
                 Some((i, '/')) => {
-                    return match self.chars.peek() {
+                    match self.chars.peek() {
+                        Some((_, '/')) => {
+                            loop {
+                                if let Some((_, '\n')) = self.chars.next() {
+                                    break
+                                }
+                            }
+                        }
                         Some((_, '=')) => {
                             self.chars.next();
-                            Some(Ok((i, Token::AssignOp(BinOpKind::Div), i + 2)))
+                            return Some(Ok((i, Token::AssignOp(BinOpKind::Div), i + 2)))
                         }
-                        _ => Some(Ok((i, Token::BinOp(BinOpKind::Div), i + 1))),
+                        _ => return Some(Ok((i, Token::BinOp(BinOpKind::Div), i + 1))),
                     }
                 }
                 Some((i, '%')) => {
@@ -322,6 +330,21 @@ impl<'input> Iterator for Lexer<'input> {
                 Some((i, '#')) => return Some(Ok((i, Token::Hash, i + 1))),
                 Some((i, '@')) => return Some(Ok((i, Token::At, i + 1))),
                 Some((_, ch)) if ch.is_whitespace() => (),
+                // Some((i, ch)) if ch.is_whitespace() => {
+                //     loop {
+                //         match self.chars.peek() {
+                //             Some((_, ch)) if ch.is_whitespace() => {
+                //                 self.chars.next();
+                //             }
+                //             Some((end, _)) => {
+                //                 return Some(Ok((i, Token::WhiteSpace, *end)))
+                //             }
+                //             None => {
+                //                 return Some(Ok((i, Token::WhiteSpace, self.input.len())))
+                //             }
+                //         }
+                //     }
+                // }
                 Some((start, _)) => {
                     let mut end;
 

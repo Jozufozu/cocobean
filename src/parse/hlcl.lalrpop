@@ -1,6 +1,8 @@
 use std::str::FromStr;
+
 use lalrpop_util::{ParseError, ErrorRecovery};
-use crate::ast::{*, id::Id, BinOpKind as BinOp};
+
+use crate::ast::{*, id::AstId, BinOpKind as BinOp};
 use crate::span::*;
 use super::{lexer::Token, err::ParserError, Interner};
 
@@ -8,10 +10,9 @@ grammar<'input>(input: &'input str, intr: &Interner, errs: &mut Vec<ErrorRecover
 
 pub Program: Program = <items:Item*> => Program { items };
 
-#[inline]
 Vis: Visibility = {
     <pb:(<@L> "pub" <@R>)?> => match pb {
-        Some((l, r)) => Visibility::Pub(Span{l,r}),
+        Some((l, r)) => Visibility::Pub(Span::new(l, r)),
         None => Visibility::Private,
     },
 };
@@ -54,8 +55,8 @@ ModDefinition: Item = {
                 items,
                 inline,
             }),
-            span: Span{l,r},
-            id: Id::DUMMY,
+            span: Span::new(l, r),
+            id: AstId::DUMMY,
         }
     }
 };
@@ -68,8 +69,8 @@ StructDefinition: Item = {
             kind: ItemKind::Struct(Struct {
                 members
             }),
-            span: Span{l,r},
-            id: Id::DUMMY,
+            span: Span::new(l, r),
+            id: AstId::DUMMY,
         }
     }, 
 };
@@ -86,12 +87,12 @@ ClassDefinition: Item = {
             name,
             vis,
             kind: ItemKind::Class(Class {
-                builtin: b.map(|(l, r)| Span{l,r}), 
+                builtin: b.map(|(l, r)| Span::new(l, r)), 
                 bounds, 
                 members
             }),
-            span: Span{l,r},
-            id: Id::DUMMY,
+            span: Span::new(l, r),
+            id: AstId::DUMMY,
         }
     }, 
 };
@@ -111,8 +112,8 @@ BranchDefinition: Item = {
                 bounds, 
                 variants
             }),
-            span: Span{l,r},
-            id: Id::DUMMY,
+            span: Span::new(l, r),
+            id: AstId::DUMMY,
         }
     },
 };
@@ -120,9 +121,10 @@ BranchDefinition: Item = {
 BranchVariant: BranchVariant = {
     <l:@L> <name:Identifier> "{" <members:Comma<StructField>> "}" <r:@R> => {
         BranchVariant {
-            span: Span{l,r},
+            span: Span::new(l, r),
             name,
             members,
+            id: AstId::DUMMY,
         }
     },
 };
@@ -156,8 +158,8 @@ FunctionDefinition: Item = {
             name,
             vis,
             kind: ItemKind::Fn(sig, block),
-            span: Span{l,r},
-            id: Id::DUMMY,
+            span: Span::new(l, r),
+            id: AstId::DUMMY,
         }
     },
 };
@@ -255,7 +257,7 @@ ExprWithoutBlock: Expr = {
 };
 
 Expr10: Expr = {
-    <lo:@L> <lhs:Expr9> <l:@L> "=" <r:@R> <rhs:Expr10> <ro:@R> => Expr::new(lo, ro, ExprKind::Assign(Span{l,r}, bx(lhs), bx(rhs))),
+    <lo:@L> <lhs:Expr9> <l:@L> "=" <r:@R> <rhs:Expr10> <ro:@R> => Expr::new(lo, ro, ExprKind::Assign(Span::new(l, r), bx(lhs), bx(rhs))),
     <l:@L> <lhs:Expr9> <op:Spanned<OpAssign>> <rhs:Expr10> <r:@R> => Expr::new(l, r, ExprKind::AssignOp(op, bx(lhs), bx(rhs))),
     Expr9,
 };
@@ -327,10 +329,14 @@ Call: Expr = {
     },
 };
 
+Disambiguator: Disambiguator = {
+    <l:@L> "@" <name:Path> <r:@R> => Disambiguator::new(l, r, name)
+};
+
 Expr0: Expr = {
     <l:@L> <lit:Lit> <r:@R> => Expr::new(l, r, ExprKind::Lit(lit)),
     <l:@L> <ident:Identifier> <r:@R> => Expr::new(l, r, ExprKind::Variable(ident)),
-    <l:@L> <e:Expr0> <discriminator:("@" <Path>)?> "." <field:Identifier> <r:@R> => Expr::new(l, r, ExprKind::FieldAccess(bx(e), discriminator.map(|d| (d, Id::DUMMY)), field)),
+    <l:@L> <e:Expr0> <disambiguator:Disambiguator?> "." <field:Identifier> <r:@R> => Expr::new(l, r, ExprKind::FieldAccess(bx(e), disambiguator.map(|d| bx(d)), field)),
     Call,
 
     <l:@L> "(" <exprs:Many1<",", Expr>> ")" <r:@R> => {
@@ -356,7 +362,7 @@ Lit: Lit = {
             Err(_) => {
                 errs.push(ErrorRecovery {
                     error: ParseError::User{ 
-                        error: ParserError::IntTooBig(Span{l,r})
+                        error: ParserError::IntTooBig(Span::new(l, r))
                     },
                     dropped_tokens: vec![(l, Token::IntLiteral(tok.clone()), r)]
                 });
@@ -368,10 +374,7 @@ Lit: Lit = {
 };
 
 Type: Type = {
-    // <l:@L> "pos" <r:@R> => Type::new(l, r, TypeKind::Pos),
-    // <l:@L> "bool" <r:@R> => Type::new(l, r, TypeKind::Bool),
-    // <l:@L> "string" <r:@R> => Type::new(l, r, TypeKind::String),
-    // <l:@L> "int" <r:@R> => Type::new(l, r, TypeKind::Int),
+    <l:@L> "!" <r:@R> => Type::new(l, r, TypeKind::Never),
     <l:@L> "(" <tys:Many0<",", Type>> ")" <r:@R> => {
         if tys.is_empty() {
             Type::new(l, r, TypeKind::Unit)
@@ -384,7 +387,7 @@ Type: Type = {
             let mut ty = ty;
             Type::new(l, r, TypeKind::Named(ty.remove(0)))
         } else {
-            Type::new(l, r, TypeKind::And(ty))
+            Type::new(l, r, TypeKind::And(ty.into_iter().map(|name| TypeRef {name, id: AstId::DUMMY}).collect()))
         }
     },
 

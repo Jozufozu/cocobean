@@ -1,91 +1,84 @@
 use super::*;
 
-macro_rules! walk_list {
-    ($visitor: expr, $method: ident, $list: expr) => {
-        for elem in $list {
-            $visitor.$method(elem)
-        }
-    };
-    ($visitor: expr, $method: ident, $list: expr, $($extra_args: expr),*) => {
-        for elem in $list {
-            $visitor.$method(elem, $($extra_args,)*)
-        }
-    }
-}
+pub trait MutVisitor<'ast>: Sized {
+    fn visit_ident(&mut self, _ident: &'ast mut Identifier) {}
 
-pub trait Visitor<'ast>: Sized {
-    fn visit_ident(&mut self, _ident: &'ast Identifier) {}
-
-    fn visit_path(&mut self, path: &'ast Path, id: AstId) {
+    fn visit_path(&mut self, path: &'ast mut Path, id: AstId) {
         walk_path(self, path, id)
     }
 
-    fn visit_program(&mut self, program: &'ast Program) {
+    fn visit_program(&mut self, program: &'ast mut Program) {
         walk_program(self, program)
     }
 
-    fn visit_item(&mut self, item: &'ast Item) {
+    fn visit_item(&mut self, item: &'ast mut Item) {
         walk_item(self, item)
     }
 
-    fn visit_mod(&mut self, module: &'ast Mod) {
+    fn visit_mod(&mut self, module: &'ast mut Mod) {
         walk_mod(self, module)
     }
 
-    fn visit_struct(&mut self, struc: &'ast Struct) {
+    fn visit_struct(&mut self, struc: &'ast mut Struct) {
         walk_struct(self, struc)
     }
 
-    fn visit_struct_field(&mut self, field: &'ast StructField) {
+    fn visit_struct_field(&mut self, field: &'ast mut StructField) {
         walk_struct_field(self, field)
     }
 
-    fn visit_class(&mut self, class: &'ast Class) {
+    fn visit_class(&mut self, class: &'ast mut Class) {
         walk_class(self, class)
     }
 
-    fn visit_branch(&mut self, branch: &'ast Branch) {
+    fn visit_branch(&mut self, branch: &'ast mut Branch) {
         walk_branch(self, branch)
     }
 
-    fn visit_branch_variant(&mut self, variant: &'ast BranchVariant) {
+    fn visit_branch_variant(&mut self, variant: &'ast mut BranchVariant) {
         walk_branch_variant(self, variant)
     }
 
-    fn visit_type(&mut self, ty: &'ast Type) {
+    fn visit_type(&mut self, ty: &'ast mut Type) {
         walk_type(self, ty)
     }
 
-    fn visit_type_ref(&mut self, ty: &'ast TypeRef) {
-        walk_type_ref(self, ty)
-    }
-
-    fn visit_block(&mut self, block: &'ast Block) {
+    fn visit_block(&mut self, block: &'ast mut Block) {
         walk_block(self, block)
     }
 
-    fn visit_expr(&mut self, expr: &'ast Expr) {
+    fn visit_expr(&mut self, expr: &'ast mut Expr) {
         walk_expr(self, expr)
     }
 
-    fn visit_stmt(&mut self, stmt: &'ast Stmt) {
+    fn visit_stmt(&mut self, stmt: &'ast mut Stmt) {
         walk_stmt(self, stmt)
     }
 
-    fn visit_fn_param(&mut self, param: &'ast FnParam) {
+    fn visit_fn_param(&mut self, param: &'ast mut FnParam) {
         walk_fn_param(self, param)
     }
 }
 
-pub fn walk_path<'ast, T: Visitor<'ast>>(visitor: &mut T, Path { items }: &'ast Path, _id: AstId) {
-    walk_list!(visitor, visit_ident, items)
+#[inline]
+pub fn visit_vec<'ast, T, F>(elems: &'ast mut Vec<T>, mut visit_elem: F)
+    where
+        F: FnMut(&'ast mut T),
+{
+    for elem in elems {
+        visit_elem(elem);
+    }
 }
 
-pub fn walk_program<'ast, T: Visitor<'ast>>(visitor: &mut T, Program { items }: &'ast Program) {
-    walk_list!(visitor, visit_item, items)
+pub fn walk_path<'ast, T: MutVisitor<'ast>>(visitor: &mut T, Path { items }: &'ast mut Path, _id: AstId) {
+    visit_vec(items, |elem| visitor.visit_ident(elem))
 }
 
-pub fn walk_item<'ast, T: Visitor<'ast>>(
+pub fn walk_program<'ast, T: MutVisitor<'ast>>(visitor: &mut T, Program { items }: &'ast mut Program) {
+    visit_vec(items, |elem| visitor.visit_item(elem))
+}
+
+pub fn walk_item<'ast, T: MutVisitor<'ast>>(
     visitor: &mut T,
     Item {
         name,
@@ -93,17 +86,17 @@ pub fn walk_item<'ast, T: Visitor<'ast>>(
         kind,
         span: _,
         id: _,
-    }: &'ast Item,
+    }: &'ast mut Item,
 ) {
     visitor.visit_ident(name);
 
     match kind {
-        ItemKind::Mod(ref item) => visitor.visit_mod(item),
-        ItemKind::Struct(ref item) => visitor.visit_struct(item),
-        ItemKind::Class(ref item) => visitor.visit_class(item),
-        ItemKind::Branch(ref item) => visitor.visit_branch(item),
+        ItemKind::Mod(item) => visitor.visit_mod(item),
+        ItemKind::Struct(item) => visitor.visit_struct(item),
+        ItemKind::Class(item) => visitor.visit_class(item),
+        ItemKind::Branch(item) => visitor.visit_branch(item),
         ItemKind::Fn(FnSig { params, ret }, block) => {
-            walk_list!(visitor, visit_fn_param, params);
+            visit_vec(params, |elem| visitor.visit_fn_param(elem));
 
             if let FnReturn::Ty(ty) = ret {
                 visitor.visit_type(ty);
@@ -117,22 +110,22 @@ pub fn walk_item<'ast, T: Visitor<'ast>>(
     }
 }
 
-pub fn walk_mod<'ast, T: Visitor<'ast>>(visitor: &mut T, Mod { items, inline: _ }: &'ast Mod) {
-    walk_list!(visitor, visit_item, items)
+pub fn walk_mod<'ast, T: MutVisitor<'ast>>(visitor: &mut T, Mod { items, inline: _ }: &'ast mut Mod) {
+    visit_vec(items, |elem| visitor.visit_item(elem))
 }
 
-pub fn walk_struct<'ast, T: Visitor<'ast>>(visitor: &mut T, Struct { members }: &'ast Struct) {
-    walk_list!(visitor, visit_struct_field, members)
+pub fn walk_struct<'ast, T: MutVisitor<'ast>>(visitor: &mut T, Struct { members }: &'ast mut Struct) {
+    visit_vec(members, |elem| visitor.visit_struct_field(elem))
 }
 
-pub fn walk_struct_field<'ast, T: Visitor<'ast>>(
+pub fn walk_struct_field<'ast, T: MutVisitor<'ast>>(
     visitor: &mut T,
     StructField {
         name,
         ty,
         vis: _,
         default,
-    }: &'ast StructField,
+    }: &'ast mut StructField,
 ) {
     visitor.visit_ident(name);
     visitor.visit_type(ty);
@@ -142,49 +135,49 @@ pub fn walk_struct_field<'ast, T: Visitor<'ast>>(
     }
 }
 
-pub fn walk_class<'ast, T: Visitor<'ast>>(
+pub fn walk_class<'ast, T: MutVisitor<'ast>>(
     visitor: &mut T,
     Class {
         builtin: _,
         bounds,
         members,
-    }: &'ast Class,
+    }: &'ast mut Class,
 ) {
     if let ClassBounds::Ty(ty) = bounds {
         visitor.visit_type(ty);
     }
 
-    walk_list!(visitor, visit_struct_field, members)
+    visit_vec(members, |elem| visitor.visit_struct_field(elem))
 }
 
-pub fn walk_branch<'ast, T: Visitor<'ast>>(
+pub fn walk_branch<'ast, T: MutVisitor<'ast>>(
     visitor: &mut T,
-    Branch { bounds, variants }: &'ast Branch,
+    Branch { bounds, variants }: &'ast mut Branch,
 ) {
     if let ClassBounds::Ty(ty) = bounds {
         visitor.visit_type(ty);
     }
 
-    walk_list!(visitor, visit_branch_variant, variants)
+    visit_vec(variants, |elem| visitor.visit_branch_variant(elem))
 }
 
-pub fn walk_branch_variant<'ast, T: Visitor<'ast>>(
+pub fn walk_branch_variant<'ast, T: MutVisitor<'ast>>(
     visitor: &mut T,
     BranchVariant {
         span: _,
         name,
         members,
         id: _
-    }: &'ast BranchVariant,
+    }: &'ast mut BranchVariant,
 ) {
     visitor.visit_ident(name);
-    walk_list!(visitor, visit_struct_field, members)
+    visit_vec(members, |elem| visitor.visit_struct_field(elem))
 }
 
-pub fn walk_type<'ast, T: Visitor<'ast>>(visitor: &mut T, Type { span: _, kind, id }: &'ast Type) {
-    match &kind {
-        TypeKind::Tuple(items) => walk_list!(visitor, visit_type, items),
-        TypeKind::And(items) => walk_list!(visitor, visit_type_ref, items),
+pub fn walk_type<'ast, T: MutVisitor<'ast>>(visitor: &mut T, Type { span: _, kind, id }: &'ast mut Type) {
+    match kind {
+        TypeKind::Tuple(items) => visit_vec(items, |elem| visitor.visit_type(elem)),
+        TypeKind::And(items) => visit_vec(items, |TypeRef { name, id}| visitor.visit_path(name, *id)),
         TypeKind::Named(name) => visitor.visit_path(name, *id),
 
         TypeKind::Never => {}
@@ -194,23 +187,19 @@ pub fn walk_type<'ast, T: Visitor<'ast>>(visitor: &mut T, Type { span: _, kind, 
     }
 }
 
-pub fn walk_type_ref<'ast, T: Visitor<'ast>>(visitor: &mut T, TypeRef { name, id }: &'ast TypeRef) {
-    visitor.visit_path(name, *id);
-}
-
-pub fn walk_block<'ast, T: Visitor<'ast>>(
+pub fn walk_block<'ast, T: MutVisitor<'ast>>(
     visitor: &mut T,
     Block {
         span: _,
         stmts,
         id: _,
-    }: &'ast Block,
+    }: &'ast mut Block,
 ) {
-    walk_list!(visitor, visit_stmt, stmts);
+    visit_vec(stmts, |elem| visitor.visit_stmt(elem));
 }
 
-pub fn walk_expr<'ast, T: Visitor<'ast>>(visitor: &mut T, Expr { span: _, kind, id }: &'ast Expr) {
-    match &kind {
+pub fn walk_expr<'ast, T: MutVisitor<'ast>>(visitor: &mut T, Expr { span: _, kind, id }: &'ast mut Expr) {
+    match kind {
         ExprKind::Lit(_) => {}
         ExprKind::Variable(name) => visitor.visit_ident(name),
         ExprKind::UnOp(_, expr) => visitor.visit_expr(expr),
@@ -226,17 +215,18 @@ pub fn walk_expr<'ast, T: Visitor<'ast>>(visitor: &mut T, Expr { span: _, kind, 
         }
         ExprKind::Call(path, args) => {
             visitor.visit_path(path, *id);
-            walk_list!(visitor, visit_expr, args)
+            visit_vec(args, |elem| visitor.visit_expr(elem))
         }
         ExprKind::MethodCall() => {}
         ExprKind::FieldAccess(expr, qualifier, field) => {
             visitor.visit_expr(expr);
-            if let Some(Disambiguator { span: _, name, id }) = qualifier.as_ref().map(|b| b.as_ref()) {
+            if let Some(b) = qualifier {
+                let Disambiguator { span: _, name, id } = b.as_mut();
                 visitor.visit_path(name, *id);
             }
             visitor.visit_ident(field);
         }
-        ExprKind::Tuple(items) => walk_list!(visitor, visit_expr, items),
+        ExprKind::Tuple(items) => visit_vec(items, |elem| visitor.visit_expr(elem)),
         ExprKind::Block(block) | ExprKind::Loop(block) => visitor.visit_block(block),
         ExprKind::While(expr, block) => {
             visitor.visit_expr(expr);
@@ -254,15 +244,15 @@ pub fn walk_expr<'ast, T: Visitor<'ast>>(visitor: &mut T, Expr { span: _, kind, 
     }
 }
 
-pub fn walk_stmt<'ast, T: Visitor<'ast>>(
+pub fn walk_stmt<'ast, T: MutVisitor<'ast>>(
     visitor: &mut T,
     Stmt {
         span: _,
         kind,
         id: _,
-    }: &'ast Stmt,
+    }: &'ast mut Stmt,
 ) {
-    match &kind {
+    match kind {
         StmtKind::Item(item) => visitor.visit_item(item),
         StmtKind::Expr(expr) | StmtKind::Semi(expr) => visitor.visit_expr(expr),
         StmtKind::Let(ident, ty, expr) => {
@@ -282,7 +272,7 @@ pub fn walk_stmt<'ast, T: Visitor<'ast>>(
     }
 }
 
-pub fn walk_fn_param<'ast, T: Visitor<'ast>>(visitor: &mut T, FnParam { name, ty }: &'ast FnParam) {
+pub fn walk_fn_param<'ast, T: MutVisitor<'ast>>(visitor: &mut T, FnParam { name, ty }: &'ast mut FnParam) {
     visitor.visit_ident(name);
     visitor.visit_type(ty);
 }

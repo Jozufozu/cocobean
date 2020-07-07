@@ -6,7 +6,7 @@ use crossbeam::crossbeam_channel;
 use fxhash::FxBuildHasher;
 use lalrpop_util::ErrorRecovery;
 use lalrpop_util::ParseError;
-use lasso::{RodeoResolver, Spur, ThreadedRodeo};
+use lasso::{Spur, ThreadedRodeo};
 use rayon::{ThreadPool, ThreadPoolBuilder};
 use walkdir::{DirEntry, WalkDir};
 
@@ -26,6 +26,7 @@ pub mod err;
 pub mod lexer;
 
 pub const PRIMITIVES: &[&str] = &["int", "bool", "string", "pos"];
+pub const MAIN: &str = "main";
 pub const ROOT_FILE: &str = "main.hlcl";
 pub const EXTENSION: &str = ".hlcl";
 
@@ -45,25 +46,41 @@ pub struct ParsingSession {
 }
 
 #[derive(Debug)]
+pub enum ProjectStructureErr {
+    NameErr(NameErr),
+    MissingMain,
+    MustBeDir,
+}
+
+impl From<NameErr> for ProjectStructureErr {
+    #[inline(always)]
+    fn from(err: NameErr) -> Self {
+        ProjectStructureErr::NameErr(err)
+    }
+}
+
+#[derive(Debug)]
 pub enum NameErr {
-    NameTooShort,
-    NameInvalidCharacter,
-    NameMustStartWithAlphabetic
+    TooShort,
+    InvalidCharacter,
+    MustStartWithAlphabetic
 }
 
 impl ParsingSession {
-    pub fn new<P: AsRef<Path>>(project_path: P, project_name: String) -> Result<Self, NameErr> {
+    pub fn new<P: AsRef<Path>>(project_path: P, project_name: String) -> Result<Self, ProjectStructureErr> {
         Self::validate_name(&project_name)?;
 
-        let mut project_path = project_path.as_ref().to_path_buf();
+        let project_path = project_path.as_ref().to_path_buf();
 
         if project_path.is_file() {
-            if let Some(parent) = project_path.parent() {
-                project_path = parent.to_path_buf();
-            }
+            return Err(ProjectStructureErr::MustBeDir)
         }
 
-        let interner = Interner::with_hasher(FxBuildHasher::default());
+        if !project_path.join(ROOT_FILE).is_file() {
+            return Err(ProjectStructureErr::MissingMain);
+        }
+
+        let interner = ThreadedRodeo::with_hasher(FxBuildHasher::default());
 
         for str in PRIMITIVES {
             interner.get_or_intern(str);
@@ -77,21 +94,6 @@ impl ParsingSession {
         })
     }
 
-    fn validate_name(name: &String) -> Result<(), NameErr> {
-        let mut chars = name.chars();
-        if let Some(first) = &chars.next() {
-            if !first.is_ascii_alphabetic() {
-                return Err(NameErr::NameMustStartWithAlphabetic)
-            }
-        }
-
-        if !chars.all(|ch| ch.is_ascii_alphanumeric() || ch == '_') {
-            Err(NameErr::NameInvalidCharacter)
-        } else {
-            Ok(())
-        }
-    }
-
     pub fn parse_project(self) -> Result<Project, ()> {
         let ParsingSession {
             interner,
@@ -101,11 +103,7 @@ impl ParsingSession {
         } = self;
 
         let project_name = interner.get_or_intern(project_name);
-        let main_file = project_path.join(ROOT_FILE);
-
-        if !main_file.is_file() {
-            return Err(());
-        }
+        let main = interner.get_or_intern(MAIN);
 
         let mut found = 0;
         let (psend, prc) = crossbeam_channel::unbounded();
@@ -124,26 +122,7 @@ impl ParsingSession {
 
                 workers.install(|| {
                     let ast_path = Self::dir_to_module_path(&path, interner);
-                    let result = File::open(path.path())
-                        .map_err(|_| ())
-                        .and_then(|mut file| {
-                            let mut source = String::with_capacity(1024);
-
-                            file.read_to_string(&mut source)
-                                .map(|_| source)
-                                .map_err(|_| ())
-                        })
-                        .and_then(|source| {
-                            let (soft_errs, result) = Self::parse_string(interner, &source);
-
-                            for _err in soft_errs.into_iter() {
-                                // TODO: Process and store errors to be displayed later. Send them to the main thread separately?
-                            }
-
-                            result
-                                .map_err(|_| ()) // TODO: Process this error too
-                                .map(|program| SourceFile::new(program, source, name.to_string()))
-                        });
+                    let result = ParsingSession::process_file(path.path(), name, interner);
 
                     sender.send((ast_path, result)).unwrap();
                 })
@@ -157,7 +136,7 @@ impl ParsingSession {
         for (mut module_path, result) in prc.iter() {
             if main_module.is_none()
                 && module_path.items.len() == 1
-                && "main" == module_path.to_string(&interner)
+                && main == module_path.items[0].val
             {
                 module_path.items[0].val = project_name;
                 main_module = Some((module_path, result?));
@@ -186,6 +165,44 @@ impl ParsingSession {
                 )
             })
             .ok_or(())
+    }
+
+    fn process_file<S: AsRef<str>, P: AsRef<Path>>(path: P, name: S, interner: &Interner) -> Result<SourceFile, ()> {
+        File::open(path.as_ref())
+            .map_err(|_| ())
+            .and_then(|mut file| {
+                let mut source = String::with_capacity(1024);
+
+                file.read_to_string(&mut source)
+                    .map(|_| source)
+                    .map_err(|_| ())
+            })
+            .and_then(|source| {
+                let (soft_errs, result) = Self::parse_string(interner, &source);
+
+                for _err in soft_errs.into_iter() {
+                    // TODO: Process and store errors to be displayed later. Send them to the main thread separately?
+                }
+
+                result
+                    .map_err(|_| ()) // TODO: Process this error too
+                    .map(|program| SourceFile::new(program, source, name.as_ref().to_string()))
+            })
+    }
+
+    fn validate_name(name: &String) -> Result<(), NameErr> {
+        let mut chars = name.chars();
+        if let Some(first) = &chars.next() {
+            if !first.is_ascii_alphabetic() {
+                return Err(NameErr::MustStartWithAlphabetic)
+            }
+        }
+
+        if !chars.all(|ch| ch.is_ascii_alphanumeric() || ch == '_') {
+            Err(NameErr::InvalidCharacter)
+        } else {
+            Ok(())
+        }
     }
 
     fn dir_to_module_path(path: &DirEntry, interner: &Interner) -> ASTPath {

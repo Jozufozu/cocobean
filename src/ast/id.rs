@@ -1,7 +1,7 @@
 #[derive(Debug, Copy, Clone)]
-pub struct Id(u32);
+pub struct AstId(u32);
 
-impl Id {
-    pub const PROJECT: Id = Id(0);
-    pub const DUMMY: Id = Id(u32::MAX);
+impl AstId {
+    pub const PROJECT: AstId = AstId(0);
+    pub const DUMMY: AstId = AstId(u32::MAX);
 }

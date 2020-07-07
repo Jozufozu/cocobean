@@ -9,7 +9,7 @@ pub builtin class player: entity {
 }
 
 pub branch GameMode: player {
-    InGame {
+    InGame { // thing
         pub kills: int,
         pub cooldown: int,
         thing = true,

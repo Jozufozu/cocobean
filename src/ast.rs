@@ -2,17 +2,17 @@ use std::fmt;
 use std::fmt::{Display, Formatter};
 
 use itertools::*;
-use lasso::{Spur, RodeoResolver};
+use lasso::Spur;
 
-use crate::ast::id::Id;
+use crate::ast::id::AstId;
 use crate::span::*;
 use std::iter::FromIterator;
-use std::borrow::Cow;
 use crate::project::InternResolver;
 
 pub mod id;
 pub mod numbering;
 pub mod visit;
+pub mod mut_visit;
 
 macro_rules! new_spanned_id {
     ($struc:ident, $field:ident, $kind:path) => {
@@ -22,10 +22,16 @@ macro_rules! new_spanned_id {
                 Self {
                     span: Span { l, r },
                     $field,
-                    id: Id::DUMMY,
+                    id: AstId::DUMMY,
                 }
             }
         }
+    };
+}
+
+macro_rules! static_assert_size {
+    ($ty:ty, $size:expr) => {
+        const _: [(); $size] = [(); ::std::mem::size_of::<$ty>()];
     };
 }
 
@@ -83,7 +89,7 @@ pub struct Item {
     pub vis: Visibility,
     pub kind: ItemKind,
     pub span: Span,
-    pub id: Id,
+    pub id: AstId,
 }
 
 #[derive(Debug)]
@@ -126,6 +132,7 @@ pub struct BranchVariant {
     pub span: Span,
     pub name: Identifier,
     pub members: Vec<StructField>,
+    pub id: AstId,
 }
 
 #[derive(Debug)]
@@ -164,19 +171,23 @@ pub struct FnParam {
 pub struct Type {
     pub span: Span,
     pub kind: TypeKind,
-    pub id: Id,
+    pub id: AstId,
 }
 
 new_spanned_id!(Type, kind, TypeKind);
 
 #[derive(Debug)]
+pub struct TypeRef {
+    pub name: Path,
+    pub id: AstId,
+}
+
+#[derive(Debug)]
 pub enum TypeKind {
-    Int,
-    String,
-    Bool,
     Unit,
+    Never,
     Tuple(Vec<Type>),
-    And(Vec<Path>),
+    And(Vec<TypeRef>),
     Named(Path),
 
     Infer,
@@ -188,18 +199,28 @@ pub enum TypeKind {
 pub struct Block {
     pub span: Span,
     pub stmts: Vec<Stmt>,
-    pub id: Id,
+    pub id: AstId,
 }
 
 new_spanned_id!(Block, stmts, Vec<Stmt>);
 
 #[derive(Debug)]
+pub struct Disambiguator {
+    pub span: Span,
+    pub name: Path,
+    pub id: AstId,
+}
+
+new_spanned_id!(Disambiguator, name, Path);
+
+#[derive(Debug)]
 pub struct Expr {
     pub span: Span,
     pub kind: ExprKind,
-    pub id: Id,
+    pub id: AstId,
 }
 
+static_assert_size!(Expr, 96);
 new_spanned_id!(Expr, kind, ExprKind);
 
 #[derive(Debug)]
@@ -213,7 +234,7 @@ pub enum ExprKind {
     Is(IsOp, Box<Expr>, Box<Type>),
     Call(Path, Vec<Expr>),
     MethodCall(),
-    FieldAccess(Box<Expr>, Option<(Path, Id)>, Identifier),
+    FieldAccess(Box<Expr>, Option<Box<Disambiguator>>, Identifier),
     Tuple(Vec<Expr>),
     Block(Block),
     Loop(Block),
@@ -236,7 +257,7 @@ pub enum IsOpKind {
 pub struct Stmt {
     pub span: Span,
     pub kind: StmtKind,
-    pub id: Id,
+    pub id: AstId,
 }
 
 new_spanned_id!(Stmt, kind, StmtKind);
