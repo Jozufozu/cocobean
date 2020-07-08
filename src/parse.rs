@@ -67,8 +67,8 @@ pub enum NameErr {
 }
 
 impl ParsingSession {
-    pub fn new<P: AsRef<Path>>(project_path: P, project_name: String) -> Result<Self, ProjectStructureErr> {
-        Self::validate_name(&project_name)?;
+    pub fn new<P: AsRef<Path>, S: AsRef<String>>(project_path: P, project_name: S) -> Result<Self, ProjectStructureErr> {
+        Self::validate_name(project_name.as_ref())?;
 
         let project_path = project_path.as_ref().to_path_buf();
 
@@ -88,7 +88,7 @@ impl ParsingSession {
 
         Ok(ParsingSession {
             interner,
-            project_name,
+            project_name: project_name.as_ref().to_string(),
             project_path,
             workers: ThreadPoolBuilder::new().build().unwrap(),
         })

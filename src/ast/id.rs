@@ -1,4 +1,4 @@
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Add, From, Into)]
 pub struct AstId(u32);
 
 impl AstId {

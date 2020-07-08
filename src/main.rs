@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate derive_more;
+
 use crate::parse::ParsingSession;
 
 pub mod ast;
