@@ -1,0 +1,33 @@
+[package]
+name = "hlcl_parse"
+version = "0.1.0"
+authors = ["JozsefA <jozsefaug@gmail.com>"]
+edition = "2018"
+build = "build.rs"
+
+[profile.release]
+lto = true
+codegen-units = 1
+
+[lib]
+name = "hlcl_parse"
+path = "lib.rs"
+doctest = false
+
+[build-dependencies]
+lalrpop = { version = "0.19.0" }
+
+[dependencies]
+hlcl_span = { path = "../hlcl_span" }
+hlcl_helpers = { path = "../hlcl_helpers" }
+hlcl_project = { path = "../hlcl_project" }
+hlcl_ast = { path = "../hlcl_ast" }
+lalrpop-util = "0.19.0"
+phf = { version = "0.8.0", features = ["macros"] }
+lasso = { version = "0.2.2", features = ["multi-threaded"] }
+fxhash = "0.2.1"
+walkdir = "2.3.1"
+crossbeam = "0.7.3"
+rayon = "1.3.1"
+itertools = "0.9.0"
+smallvec = "1.4.1"

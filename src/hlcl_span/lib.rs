@@ -26,7 +26,7 @@ impl<T> Spanned<T> {
     #[inline(always)]
     pub fn new(l: usize, r: usize, val: T) -> Self {
         Spanned {
-            span: Span { l, r },
+            span: Span::new(l, r),
             val,
         }
     }
@@ -50,6 +50,8 @@ impl<T: PartialEq> PartialEq for Spanned<T> {
         self.val != other.val
     }
 }
+
+impl<T: Eq + PartialEq> Eq for Spanned<T> {}
 
 impl<T: Display> Display for Spanned<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {

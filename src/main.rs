@@ -1,13 +1,4 @@
-#[macro_use]
-extern crate derive_more;
-
-use crate::parse::ParsingSession;
-
-pub mod ast;
-pub mod parse;
-pub mod project;
-pub mod resolve;
-pub mod span;
+use hlcl_parse::ParsingSession;
 
 /// TODO: Collect names and item signatures
 /// TODO: Perform sanity check
@@ -24,7 +15,7 @@ pub mod span;
 /// TODO: DOCUMENTATION (both language support and documenting the compiler)
 ///
 fn main() {
-    let session = ParsingSession::new("./test_prog", "test_prog".into()).unwrap();
+    let session = ParsingSession::new("./test_prog", "test_prog").unwrap();
 
     let project = session.parse_project().unwrap();
 }

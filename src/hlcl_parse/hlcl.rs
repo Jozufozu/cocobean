@@ -1,32 +1,45 @@
-// auto-generated: "lalrpop 0.19.0"
-// sha256: 449146124a42c9f653587206275b6a7fbc942e6ab7b02e3080da7b814bbf5d
-use std::str::FromStr;
-use lalrpop_util::{ParseError, ErrorRecovery};
-use crate::ast::{*, id::AstId, BinOpKind as BinOp};
-use crate::span::*;
-use super::{lexer::Token, err::ParserError, Interner};
 #[allow(unused_extern_crates)]
 extern crate lalrpop_util as __lalrpop_util;
+
+// auto-generated: "lalrpop 0.19.0"
+// sha256: 8c3593f556dc95494bd1386c474a91eb294aa53bbd1a3c04ddadda857e95bf7
+use std::str::FromStr;
+
+use lalrpop_util::{ErrorRecovery, ParseError};
+
+use hlcl_ast::{*, BinOpKind as BinOp, id::AstId};
+use hlcl_span::*;
+
+use super::{err::ParserError, Interner, lexer::Token, util::*};
+
 #[allow(unused_imports)]
 use self::__lalrpop_util::state_machine as __state_machine;
+pub use self::__parse__Program::ProgramParser;
+
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
 mod __parse__Program {
     #![allow(non_snake_case, non_camel_case_types, unused_mut, unused_variables, unused_imports, unused_parens)]
 
     use std::str::FromStr;
-    use lalrpop_util::{ParseError, ErrorRecovery};
-    use crate::ast::{*, id::AstId, BinOpKind as BinOp};
-    use crate::span::*;
-    use super::super::{lexer::Token, err::ParserError, Interner};
-    #[allow(unused_extern_crates)]
-    extern crate lalrpop_util as __lalrpop_util;
+
+    use lalrpop_util::{ErrorRecovery, ParseError};
+
+    use hlcl_ast::{*, BinOpKind as BinOp, id::AstId};
+    use hlcl_span::*;
+
+    use super::__ToTriple;
+    use super::super::{err::ParserError, Interner, lexer::Token, util::*};
+
     #[allow(unused_imports)]
     use self::__lalrpop_util::state_machine as __state_machine;
-    use super::__ToTriple;
+
+    #[allow(unused_extern_crates)]
+    extern crate lalrpop_util as __lalrpop_util;
+
     #[allow(dead_code)]
     pub enum __Symbol<'input>
-     {
+    {
         Variant0(Token<'input>),
         Variant1(&'input str),
         Variant2(__lalrpop_util::ErrorRecovery<usize, Token<'input>, ParserError>),
@@ -81,6 +94,7 @@ mod __parse__Program {
         Variant51(::std::option::Option<StructField>),
         Variant52(Visibility),
     }
+
     const __ACTION: &[i16] = &[
         // State 0
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -244, 0, -244, -244, 0, 0, 0, 0, 0, 0, -244, -244, 0, 0, 0, 0, -244, 95, 0, -244, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -645,9 +659,11 @@ mod __parse__Program {
         // State 280
         -214, 0, 0, 0, 0, 0, 0, -214, 0, 0, 0, 0, 0, 0, -214, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -214, -214, -214, -214, 0, -214, 0, 0, 0, -214, -214, -214, -214, 0, -214, -214, -214, -214, -214, -214, 0, -214, -214, -214, 0, 0, -214, -214, -214, -214, -214,
     ];
+
     fn __action(state: i16, integer: usize) -> i16 {
         __ACTION[(state as usize) * 64 + integer]
     }
+
     const __EOF_ACTION: &[i16] = &[
         // State 0
         -202,
@@ -1212,6 +1228,7 @@ mod __parse__Program {
         // State 280
         0,
     ];
+
     fn __goto(state: i16, nt: usize) -> i16 {
         match nt {
             3 => 124,
@@ -1428,6 +1445,7 @@ mod __parse__Program {
             _ => 0,
         }
     }
+
     fn __expected_tokens(__state: i16) -> Vec<::std::string::String> {
         const __TERMINAL: &[&str] = &[
             r###""!""###,
@@ -1503,16 +1521,18 @@ mod __parse__Program {
             }
         }).collect()
     }
+
     pub struct __StateMachine<'input, '__1, '__2>
-    where 'input: '__2
+        where 'input: '__2
     {
         input: &'input str,
         intr: &'__1 Interner,
         errs: &'__2 mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __phantom: ::std::marker::PhantomData<(&'input ())>,
     }
+
     impl<'input, '__1, '__2> __state_machine::ParserDefinition for __StateMachine<'input, '__1, '__2>
-    where 'input: '__2
+        where 'input: '__2
     {
         type Location = usize;
         type Error = ParserError;
@@ -1527,12 +1547,12 @@ mod __parse__Program {
 
         #[inline]
         fn start_location(&self) -> Self::Location {
-              Default::default()
+            Default::default()
         }
 
         #[inline]
         fn start_state(&self) -> Self::StateIndex {
-              0
+            0
         }
 
         #[inline]
@@ -1604,6 +1624,7 @@ mod __parse__Program {
             __simulate_reduce(action, ::std::marker::PhantomData::<(&())>)
         }
     }
+
     fn __token_to_integer<
         'input,
     >(
@@ -1678,6 +1699,7 @@ mod __parse__Program {
             _ => None,
         }
     }
+
     fn __token_to_symbol<
         'input,
     >(
@@ -1695,6 +1717,7 @@ mod __parse__Program {
             _ => unreachable!(),
         }
     }
+
     fn __simulate_reduce<
         'input,
         '__1,
@@ -1703,8 +1726,8 @@ mod __parse__Program {
         __reduce_index: i16,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> __state_machine::SimulatedReduce<__StateMachine<'input, '__1, '__2>>
-    where
-        'input: '__2,
+        where
+            'input: '__2,
     {
         match __reduce_index {
             0 => {
@@ -3175,6 +3198,7 @@ mod __parse__Program {
             _ => panic!("invalid reduction index {}", __reduce_index)
         }
     }
+
     pub struct ProgramParser {
         _priv: (),
     }
@@ -3212,6 +3236,7 @@ mod __parse__Program {
             )
         }
     }
+
     fn __accepts<
         'input,
     >(
@@ -3219,7 +3244,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __error_state: i16,
-        __states: & [i16],
+        __states: &[i16],
         __opt_integer: Option<usize>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> bool
@@ -3248,6 +3273,7 @@ mod __parse__Program {
             __states.push(__next_state);
         }
     }
+
     pub(crate) fn __reduce<
         'input,
     >(
@@ -3257,9 +3283,9 @@ mod __parse__Program {
         __action: i16,
         __lookahead_start: Option<&usize>,
         __states: &mut ::std::vec::Vec<i16>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
-    ) -> Option<Result<Program,__lalrpop_util::ParseError<usize, Token<'input>, ParserError>>>
+    ) -> Option<Result<Program, __lalrpop_util::ParseError<usize, Token<'input>, ParserError>>>
     {
         let (__pop_states, __nonterminal) = match __action {
             0 => {
@@ -4011,593 +4037,648 @@ mod __parse__Program {
         __states.push(__next_state);
         None
     }
+
     #[inline(never)]
     fn __symbol_type_mismatch() -> ! {
         panic!("symbol type mismatch")
     }
+
     fn __pop_Variant14<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, (usize, Expr, usize), usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant14(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant12<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, (usize, usize), usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant12(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant44<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, BinOp, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant44(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant24<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, Block, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant24(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant16<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, BranchVariant, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant16(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant32<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, Disambiguator, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant32(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant6<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, Expr, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant6(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant18<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, FnParam, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant18(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant10<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, Identifier, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant10(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant36<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, IsOpKind, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant36(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant26<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, Item, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant26(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant38<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, Lit, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant38(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant25<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, Option<Block>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant25(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant41<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, Option<Expr>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant41(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant4<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, Path, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant4(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant45<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, Program, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant45(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant48<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, Spanned<BinOp>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant48(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant46<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, Spanned<IsOpKind>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant46(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant47<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, Spanned<UnOpKind>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant47(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant49<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, Stmt, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant49(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant20<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, StructField, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant20(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant0<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, Token<'input>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant0(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant8<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, Type, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant8(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant43<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, UnOpKind, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant43(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant28<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, Vec<BranchVariant>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant28(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant29<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, Vec<Expr>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant29(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant30<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, Vec<FnParam>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant30(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant42<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, Vec<Item>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant42(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant40<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, Vec<Path>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant40(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant31<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, Vec<StructField>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant31(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant39<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, Vec<Type>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant39(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant52<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, Visibility, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant52(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant2<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, __lalrpop_util::ErrorRecovery<usize, Token<'input>, ParserError>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant2(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant23<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, usize, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant23(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant15<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, ::std::option::Option<(usize, Expr, usize)>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant15(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant13<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, ::std::option::Option<(usize, usize)>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant13(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant27<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, ::std::option::Option<BranchVariant>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant27(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant33<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, ::std::option::Option<Disambiguator>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant33(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant34<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, ::std::option::Option<Expr>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant34(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant35<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, ::std::option::Option<FnParam>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant35(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant51<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, ::std::option::Option<StructField>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant51(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant3<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, ::std::option::Option<Token<'input>>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant3(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant9<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, ::std::option::Option<Type>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant9(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant17<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, ::std::vec::Vec<BranchVariant>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant17(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant7<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, ::std::vec::Vec<Expr>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant7(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant19<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, ::std::vec::Vec<FnParam>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant19(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant11<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, ::std::vec::Vec<Identifier>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant11(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant37<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, ::std::vec::Vec<Item>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant37(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant5<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, ::std::vec::Vec<Path>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant5(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant50<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, ::std::vec::Vec<Stmt>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant50(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant21<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, ::std::vec::Vec<StructField>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant21(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant22<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, ::std::vec::Vec<Type>, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant22(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     fn __pop_Variant1<
-      'input,
+        'input,
     >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>
     ) -> (usize, &'input str, usize)
-     {
+    {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Variant1(__v), __r) => (__l, __v, __r),
             _ => __symbol_type_mismatch()
         }
     }
+
     pub(crate) fn __reduce0<
         'input,
     >(
@@ -4605,7 +4686,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -4617,6 +4698,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant3(__nt), __end));
         (1, 0)
     }
+
     pub(crate) fn __reduce1<
         'input,
     >(
@@ -4624,7 +4706,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -4635,6 +4717,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant3(__nt), __end));
         (0, 0)
     }
+
     pub(crate) fn __reduce2<
         'input,
     >(
@@ -4642,7 +4725,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -4656,6 +4739,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant4(__nt), __end));
         (2, 1)
     }
+
     pub(crate) fn __reduce3<
         'input,
     >(
@@ -4663,7 +4747,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -4674,6 +4758,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant5(__nt), __end));
         (0, 2)
     }
+
     pub(crate) fn __reduce4<
         'input,
     >(
@@ -4681,7 +4766,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -4693,6 +4778,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant5(__nt), __end));
         (1, 2)
     }
+
     pub(crate) fn __reduce5<
         'input,
     >(
@@ -4700,7 +4786,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -4714,6 +4800,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant5(__nt), __end));
         (2, 3)
     }
+
     pub(crate) fn __reduce6<
         'input,
     >(
@@ -4721,7 +4808,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -4736,6 +4823,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant5(__nt), __end));
         (3, 3)
     }
+
     pub(crate) fn __reduce7<
         'input,
     >(
@@ -4743,7 +4831,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -4757,6 +4845,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (2, 4)
     }
+
     pub(crate) fn __reduce8<
         'input,
     >(
@@ -4764,7 +4853,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -4775,6 +4864,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
         (0, 5)
     }
+
     pub(crate) fn __reduce9<
         'input,
     >(
@@ -4782,7 +4872,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -4794,6 +4884,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
         (1, 5)
     }
+
     pub(crate) fn __reduce10<
         'input,
     >(
@@ -4801,7 +4892,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -4815,6 +4906,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
         (2, 6)
     }
+
     pub(crate) fn __reduce11<
         'input,
     >(
@@ -4822,7 +4914,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -4837,6 +4929,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
         (3, 6)
     }
+
     pub(crate) fn __reduce12<
         'input,
     >(
@@ -4844,7 +4937,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -4858,6 +4951,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant8(__nt), __end));
         (2, 7)
     }
+
     pub(crate) fn __reduce13<
         'input,
     >(
@@ -4865,7 +4959,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -4879,6 +4973,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (2, 8)
     }
+
     pub(crate) fn __reduce14<
         'input,
     >(
@@ -4886,7 +4981,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -4897,6 +4992,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (0, 8)
     }
+
     pub(crate) fn __reduce15<
         'input,
     >(
@@ -4904,7 +5000,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -4918,6 +5014,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
         (2, 9)
     }
+
     pub(crate) fn __reduce16<
         'input,
     >(
@@ -4925,7 +5022,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -4936,6 +5033,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant11(__nt), __end));
         (0, 10)
     }
+
     pub(crate) fn __reduce17<
         'input,
     >(
@@ -4943,7 +5041,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -4955,6 +5053,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant11(__nt), __end));
         (1, 10)
     }
+
     pub(crate) fn __reduce18<
         'input,
     >(
@@ -4962,7 +5061,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -4976,6 +5075,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant11(__nt), __end));
         (2, 11)
     }
+
     pub(crate) fn __reduce19<
         'input,
     >(
@@ -4983,7 +5083,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -4998,6 +5098,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant11(__nt), __end));
         (3, 11)
     }
+
     pub(crate) fn __reduce20<
         'input,
     >(
@@ -5005,7 +5106,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5017,6 +5118,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (1, 12)
     }
+
     pub(crate) fn __reduce21<
         'input,
     >(
@@ -5024,7 +5126,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5036,6 +5138,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 13)
     }
+
     pub(crate) fn __reduce22<
         'input,
     >(
@@ -5043,7 +5146,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5054,6 +5157,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (0, 13)
     }
+
     pub(crate) fn __reduce23<
         'input,
     >(
@@ -5061,7 +5165,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5073,6 +5177,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant12(__nt), __end));
         (1, 14)
     }
+
     pub(crate) fn __reduce24<
         'input,
     >(
@@ -5080,7 +5185,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5092,6 +5197,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (1, 15)
     }
+
     pub(crate) fn __reduce25<
         'input,
     >(
@@ -5099,7 +5205,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5110,6 +5216,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant13(__nt), __end));
         (0, 15)
     }
+
     pub(crate) fn __reduce26<
         'input,
     >(
@@ -5117,7 +5224,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5129,6 +5236,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant14(__nt), __end));
         (1, 16)
     }
+
     pub(crate) fn __reduce27<
         'input,
     >(
@@ -5136,7 +5244,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5148,6 +5256,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant15(__nt), __end));
         (1, 17)
     }
+
     pub(crate) fn __reduce28<
         'input,
     >(
@@ -5155,7 +5264,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5166,6 +5275,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant15(__nt), __end));
         (0, 17)
     }
+
     pub(crate) fn __reduce29<
         'input,
     >(
@@ -5173,7 +5283,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5187,6 +5297,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant16(__nt), __end));
         (2, 18)
     }
+
     pub(crate) fn __reduce30<
         'input,
     >(
@@ -5194,7 +5305,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5205,6 +5316,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant17(__nt), __end));
         (0, 19)
     }
+
     pub(crate) fn __reduce31<
         'input,
     >(
@@ -5212,7 +5324,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5224,6 +5336,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant17(__nt), __end));
         (1, 19)
     }
+
     pub(crate) fn __reduce32<
         'input,
     >(
@@ -5231,7 +5344,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5245,6 +5358,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant17(__nt), __end));
         (2, 20)
     }
+
     pub(crate) fn __reduce33<
         'input,
     >(
@@ -5252,7 +5366,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5267,6 +5381,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant17(__nt), __end));
         (3, 20)
     }
+
     pub(crate) fn __reduce34<
         'input,
     >(
@@ -5274,7 +5389,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5288,6 +5403,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (2, 21)
     }
+
     pub(crate) fn __reduce35<
         'input,
     >(
@@ -5295,7 +5411,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5306,6 +5422,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
         (0, 22)
     }
+
     pub(crate) fn __reduce36<
         'input,
     >(
@@ -5313,7 +5430,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5325,6 +5442,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
         (1, 22)
     }
+
     pub(crate) fn __reduce37<
         'input,
     >(
@@ -5332,7 +5450,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5346,6 +5464,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
         (2, 23)
     }
+
     pub(crate) fn __reduce38<
         'input,
     >(
@@ -5353,7 +5472,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5368,6 +5487,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant7(__nt), __end));
         (3, 23)
     }
+
     pub(crate) fn __reduce39<
         'input,
     >(
@@ -5375,7 +5495,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5389,6 +5509,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant18(__nt), __end));
         (2, 24)
     }
+
     pub(crate) fn __reduce40<
         'input,
     >(
@@ -5396,7 +5517,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5407,6 +5528,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant19(__nt), __end));
         (0, 25)
     }
+
     pub(crate) fn __reduce41<
         'input,
     >(
@@ -5414,7 +5536,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5426,6 +5548,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant19(__nt), __end));
         (1, 25)
     }
+
     pub(crate) fn __reduce42<
         'input,
     >(
@@ -5433,7 +5556,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5447,6 +5570,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant19(__nt), __end));
         (2, 26)
     }
+
     pub(crate) fn __reduce43<
         'input,
     >(
@@ -5454,7 +5578,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5469,6 +5593,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant19(__nt), __end));
         (3, 26)
     }
+
     pub(crate) fn __reduce44<
         'input,
     >(
@@ -5476,7 +5601,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5490,6 +5615,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant20(__nt), __end));
         (2, 27)
     }
+
     pub(crate) fn __reduce45<
         'input,
     >(
@@ -5497,7 +5623,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5508,6 +5634,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant21(__nt), __end));
         (0, 28)
     }
+
     pub(crate) fn __reduce46<
         'input,
     >(
@@ -5515,7 +5642,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5527,6 +5654,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant21(__nt), __end));
         (1, 28)
     }
+
     pub(crate) fn __reduce47<
         'input,
     >(
@@ -5534,7 +5662,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5548,6 +5676,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant21(__nt), __end));
         (2, 29)
     }
+
     pub(crate) fn __reduce48<
         'input,
     >(
@@ -5555,7 +5684,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5570,6 +5699,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant21(__nt), __end));
         (3, 29)
     }
+
     pub(crate) fn __reduce49<
         'input,
     >(
@@ -5577,7 +5707,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5591,6 +5721,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant8(__nt), __end));
         (2, 30)
     }
+
     pub(crate) fn __reduce50<
         'input,
     >(
@@ -5598,7 +5729,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5609,6 +5740,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant22(__nt), __end));
         (0, 31)
     }
+
     pub(crate) fn __reduce51<
         'input,
     >(
@@ -5616,7 +5748,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5628,6 +5760,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant22(__nt), __end));
         (1, 31)
     }
+
     pub(crate) fn __reduce52<
         'input,
     >(
@@ -5635,7 +5768,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5649,6 +5782,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant22(__nt), __end));
         (2, 32)
     }
+
     pub(crate) fn __reduce53<
         'input,
     >(
@@ -5656,7 +5790,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5671,6 +5805,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant22(__nt), __end));
         (3, 32)
     }
+
     pub(crate) fn __reduce54<
         'input,
     >(
@@ -5678,7 +5813,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5689,6 +5824,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant23(__nt), __end));
         (0, 33)
     }
+
     pub(crate) fn __reduce55<
         'input,
     >(
@@ -5696,7 +5832,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5707,6 +5843,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant23(__nt), __end));
         (0, 34)
     }
+
     pub(crate) fn __reduce56<
         'input,
     >(
@@ -5714,7 +5851,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5729,6 +5866,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (3, 35)
     }
+
     pub(crate) fn __reduce57<
         'input,
     >(
@@ -5736,7 +5874,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5748,6 +5886,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 35)
     }
+
     pub(crate) fn __reduce58<
         'input,
     >(
@@ -5755,7 +5894,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5770,6 +5909,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (3, 36)
     }
+
     pub(crate) fn __reduce59<
         'input,
     >(
@@ -5777,7 +5917,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5789,6 +5929,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 36)
     }
+
     pub(crate) fn __reduce60<
         'input,
     >(
@@ -5796,7 +5937,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5811,6 +5952,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (3, 37)
     }
+
     pub(crate) fn __reduce61<
         'input,
     >(
@@ -5818,7 +5960,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5830,6 +5972,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 37)
     }
+
     pub(crate) fn __reduce62<
         'input,
     >(
@@ -5837,7 +5980,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5852,6 +5995,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (3, 38)
     }
+
     pub(crate) fn __reduce63<
         'input,
     >(
@@ -5859,7 +6003,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5871,6 +6015,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 38)
     }
+
     pub(crate) fn __reduce64<
         'input,
     >(
@@ -5878,7 +6023,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5893,6 +6038,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (3, 39)
     }
+
     pub(crate) fn __reduce65<
         'input,
     >(
@@ -5900,7 +6046,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5912,6 +6058,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 39)
     }
+
     pub(crate) fn __reduce66<
         'input,
     >(
@@ -5919,7 +6066,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5934,6 +6081,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (3, 40)
     }
+
     pub(crate) fn __reduce67<
         'input,
     >(
@@ -5941,7 +6089,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5953,6 +6101,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 40)
     }
+
     pub(crate) fn __reduce68<
         'input,
     >(
@@ -5960,7 +6109,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5975,6 +6124,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant24(__nt), __end));
         (3, 41)
     }
+
     pub(crate) fn __reduce69<
         'input,
     >(
@@ -5982,7 +6132,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -5998,6 +6148,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant24(__nt), __end));
         (4, 41)
     }
+
     pub(crate) fn __reduce70<
         'input,
     >(
@@ -6005,7 +6156,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6019,6 +6170,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant24(__nt), __end));
         (2, 41)
     }
+
     pub(crate) fn __reduce71<
         'input,
     >(
@@ -6026,7 +6178,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6041,6 +6193,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant24(__nt), __end));
         (3, 41)
     }
+
     pub(crate) fn __reduce72<
         'input,
     >(
@@ -6048,7 +6201,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6060,6 +6213,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 42)
     }
+
     pub(crate) fn __reduce73<
         'input,
     >(
@@ -6067,7 +6221,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6079,6 +6233,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant25(__nt), __end));
         (1, 43)
     }
+
     pub(crate) fn __reduce74<
         'input,
     >(
@@ -6086,7 +6241,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6098,6 +6253,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant25(__nt), __end));
         (1, 43)
     }
+
     pub(crate) fn __reduce75<
         'input,
     >(
@@ -6105,7 +6261,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6125,6 +6281,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (8, 44)
     }
+
     pub(crate) fn __reduce76<
         'input,
     >(
@@ -6132,7 +6289,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6150,6 +6307,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (6, 44)
     }
+
     pub(crate) fn __reduce77<
         'input,
     >(
@@ -6157,7 +6315,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6173,6 +6331,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant16(__nt), __end));
         (4, 45)
     }
+
     pub(crate) fn __reduce78<
         'input,
     >(
@@ -6180,7 +6339,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6192,6 +6351,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant27(__nt), __end));
         (1, 46)
     }
+
     pub(crate) fn __reduce79<
         'input,
     >(
@@ -6199,7 +6359,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6210,6 +6370,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant27(__nt), __end));
         (0, 46)
     }
+
     pub(crate) fn __reduce80<
         'input,
     >(
@@ -6217,7 +6378,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6233,6 +6394,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (4, 47)
     }
+
     pub(crate) fn __reduce81<
         'input,
     >(
@@ -6240,7 +6402,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6261,6 +6423,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (9, 48)
     }
+
     pub(crate) fn __reduce82<
         'input,
     >(
@@ -6268,7 +6431,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6288,6 +6451,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (8, 48)
     }
+
     pub(crate) fn __reduce83<
         'input,
     >(
@@ -6295,7 +6459,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6314,6 +6478,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (7, 48)
     }
+
     pub(crate) fn __reduce84<
         'input,
     >(
@@ -6321,7 +6486,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6339,6 +6504,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (6, 48)
     }
+
     pub(crate) fn __reduce85<
         'input,
     >(
@@ -6346,7 +6512,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6358,6 +6524,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant28(__nt), __end));
         (1, 49)
     }
+
     pub(crate) fn __reduce86<
         'input,
     >(
@@ -6365,7 +6532,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6377,6 +6544,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant29(__nt), __end));
         (1, 50)
     }
+
     pub(crate) fn __reduce87<
         'input,
     >(
@@ -6384,7 +6552,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6396,6 +6564,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant30(__nt), __end));
         (1, 51)
     }
+
     pub(crate) fn __reduce88<
         'input,
     >(
@@ -6403,7 +6572,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6415,6 +6584,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant31(__nt), __end));
         (1, 52)
     }
+
     pub(crate) fn __reduce89<
         'input,
     >(
@@ -6422,7 +6592,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6436,6 +6606,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant32(__nt), __end));
         (2, 53)
     }
+
     pub(crate) fn __reduce90<
         'input,
     >(
@@ -6443,7 +6614,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6455,6 +6626,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant33(__nt), __end));
         (1, 54)
     }
+
     pub(crate) fn __reduce91<
         'input,
     >(
@@ -6462,7 +6634,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6473,6 +6645,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant33(__nt), __end));
         (0, 54)
     }
+
     pub(crate) fn __reduce92<
         'input,
     >(
@@ -6480,7 +6653,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6492,6 +6665,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 55)
     }
+
     pub(crate) fn __reduce93<
         'input,
     >(
@@ -6499,7 +6673,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6511,6 +6685,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 55)
     }
+
     pub(crate) fn __reduce94<
         'input,
     >(
@@ -6518,7 +6693,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6530,6 +6705,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 56)
     }
+
     pub(crate) fn __reduce95<
         'input,
     >(
@@ -6537,7 +6713,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6549,6 +6725,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 56)
     }
+
     pub(crate) fn __reduce96<
         'input,
     >(
@@ -6556,7 +6733,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6568,6 +6745,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 57)
     }
+
     pub(crate) fn __reduce97<
         'input,
     >(
@@ -6575,7 +6753,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6587,6 +6765,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 57)
     }
+
     pub(crate) fn __reduce98<
         'input,
     >(
@@ -6594,7 +6773,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6610,6 +6789,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (4, 57)
     }
+
     pub(crate) fn __reduce99<
         'input,
     >(
@@ -6617,7 +6797,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6632,6 +6812,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (3, 57)
     }
+
     pub(crate) fn __reduce100<
         'input,
     >(
@@ -6639,7 +6820,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6651,6 +6832,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 57)
     }
+
     pub(crate) fn __reduce101<
         'input,
     >(
@@ -6658,7 +6840,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6673,6 +6855,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (3, 57)
     }
+
     pub(crate) fn __reduce102<
         'input,
     >(
@@ -6680,7 +6863,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6692,6 +6875,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 57)
     }
+
     pub(crate) fn __reduce103<
         'input,
     >(
@@ -6699,7 +6883,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6714,6 +6898,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (3, 58)
     }
+
     pub(crate) fn __reduce104<
         'input,
     >(
@@ -6721,7 +6906,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6736,6 +6921,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (3, 58)
     }
+
     pub(crate) fn __reduce105<
         'input,
     >(
@@ -6743,7 +6929,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6755,6 +6941,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 58)
     }
+
     pub(crate) fn __reduce106<
         'input,
     >(
@@ -6762,7 +6949,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6774,6 +6961,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 59)
     }
+
     pub(crate) fn __reduce107<
         'input,
     >(
@@ -6781,7 +6969,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6793,6 +6981,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 60)
     }
+
     pub(crate) fn __reduce108<
         'input,
     >(
@@ -6800,7 +6989,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6812,6 +7001,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 61)
     }
+
     pub(crate) fn __reduce109<
         'input,
     >(
@@ -6819,7 +7009,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6834,6 +7024,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (3, 62)
     }
+
     pub(crate) fn __reduce110<
         'input,
     >(
@@ -6841,7 +7032,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6853,6 +7044,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 62)
     }
+
     pub(crate) fn __reduce111<
         'input,
     >(
@@ -6860,7 +7052,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6872,6 +7064,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 63)
     }
+
     pub(crate) fn __reduce112<
         'input,
     >(
@@ -6879,7 +7072,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6891,6 +7084,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 64)
     }
+
     pub(crate) fn __reduce113<
         'input,
     >(
@@ -6898,7 +7092,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6910,6 +7104,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 65)
     }
+
     pub(crate) fn __reduce114<
         'input,
     >(
@@ -6917,7 +7112,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6929,6 +7124,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 66)
     }
+
     pub(crate) fn __reduce115<
         'input,
     >(
@@ -6936,7 +7132,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6948,6 +7144,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant34(__nt), __end));
         (1, 67)
     }
+
     pub(crate) fn __reduce116<
         'input,
     >(
@@ -6955,7 +7152,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6966,6 +7163,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant34(__nt), __end));
         (0, 67)
     }
+
     pub(crate) fn __reduce117<
         'input,
     >(
@@ -6973,7 +7171,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -6985,6 +7183,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 68)
     }
+
     pub(crate) fn __reduce118<
         'input,
     >(
@@ -6992,7 +7191,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7004,6 +7203,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 68)
     }
+
     pub(crate) fn __reduce119<
         'input,
     >(
@@ -7011,7 +7211,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7023,6 +7223,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 68)
     }
+
     pub(crate) fn __reduce120<
         'input,
     >(
@@ -7030,7 +7231,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7042,6 +7243,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 69)
     }
+
     pub(crate) fn __reduce121<
         'input,
     >(
@@ -7049,7 +7251,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7064,6 +7266,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant18(__nt), __end));
         (3, 70)
     }
+
     pub(crate) fn __reduce122<
         'input,
     >(
@@ -7071,7 +7274,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7083,6 +7286,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant35(__nt), __end));
         (1, 71)
     }
+
     pub(crate) fn __reduce123<
         'input,
     >(
@@ -7090,7 +7294,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7101,6 +7305,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant35(__nt), __end));
         (0, 71)
     }
+
     pub(crate) fn __reduce124<
         'input,
     >(
@@ -7108,7 +7313,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7129,6 +7334,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (9, 72)
     }
+
     pub(crate) fn __reduce125<
         'input,
     >(
@@ -7136,7 +7342,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7155,6 +7361,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (7, 72)
     }
+
     pub(crate) fn __reduce126<
         'input,
     >(
@@ -7162,7 +7369,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7174,6 +7381,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant10(__nt), __end));
         (1, 73)
     }
+
     pub(crate) fn __reduce127<
         'input,
     >(
@@ -7181,7 +7389,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7196,6 +7404,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (3, 74)
     }
+
     pub(crate) fn __reduce128<
         'input,
     >(
@@ -7203,7 +7412,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7220,6 +7429,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (5, 74)
     }
+
     pub(crate) fn __reduce129<
         'input,
     >(
@@ -7227,7 +7437,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7241,6 +7451,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant36(__nt), __end));
         (2, 75)
     }
+
     pub(crate) fn __reduce130<
         'input,
     >(
@@ -7248,7 +7459,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7260,6 +7471,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant36(__nt), __end));
         (1, 75)
     }
+
     pub(crate) fn __reduce131<
         'input,
     >(
@@ -7267,7 +7479,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7279,6 +7491,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (1, 76)
     }
+
     pub(crate) fn __reduce132<
         'input,
     >(
@@ -7286,7 +7499,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7298,6 +7511,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (1, 76)
     }
+
     pub(crate) fn __reduce133<
         'input,
     >(
@@ -7305,7 +7519,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7317,6 +7531,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (1, 76)
     }
+
     pub(crate) fn __reduce134<
         'input,
     >(
@@ -7324,7 +7539,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7336,6 +7551,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (1, 76)
     }
+
     pub(crate) fn __reduce135<
         'input,
     >(
@@ -7343,7 +7559,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7355,6 +7571,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (1, 76)
     }
+
     pub(crate) fn __reduce136<
         'input,
     >(
@@ -7362,7 +7579,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7373,6 +7590,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant37(__nt), __end));
         (0, 77)
     }
+
     pub(crate) fn __reduce137<
         'input,
     >(
@@ -7380,7 +7598,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7392,6 +7610,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant37(__nt), __end));
         (1, 77)
     }
+
     pub(crate) fn __reduce138<
         'input,
     >(
@@ -7399,7 +7618,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7411,6 +7630,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant37(__nt), __end));
         (1, 78)
     }
+
     pub(crate) fn __reduce139<
         'input,
     >(
@@ -7418,7 +7638,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7432,6 +7652,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant37(__nt), __end));
         (2, 78)
     }
+
     pub(crate) fn __reduce140<
         'input,
     >(
@@ -7439,7 +7660,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7451,6 +7672,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant38(__nt), __end));
         (1, 79)
     }
+
     pub(crate) fn __reduce141<
         'input,
     >(
@@ -7458,7 +7680,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7470,6 +7692,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant38(__nt), __end));
         (1, 79)
     }
+
     pub(crate) fn __reduce142<
         'input,
     >(
@@ -7477,7 +7700,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7489,6 +7712,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant38(__nt), __end));
         (1, 79)
     }
+
     pub(crate) fn __reduce143<
         'input,
     >(
@@ -7496,7 +7720,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7508,6 +7732,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant38(__nt), __end));
         (1, 79)
     }
+
     pub(crate) fn __reduce144<
         'input,
     >(
@@ -7515,7 +7740,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7529,6 +7754,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (2, 80)
     }
+
     pub(crate) fn __reduce145<
         'input,
     >(
@@ -7536,7 +7762,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7551,6 +7777,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (3, 80)
     }
+
     pub(crate) fn __reduce146<
         'input,
     >(
@@ -7558,7 +7785,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7570,6 +7797,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant28(__nt), __end));
         (1, 81)
     }
+
     pub(crate) fn __reduce147<
         'input,
     >(
@@ -7577,7 +7805,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7588,6 +7816,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant28(__nt), __end));
         (0, 81)
     }
+
     pub(crate) fn __reduce148<
         'input,
     >(
@@ -7595,7 +7824,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7609,6 +7838,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant28(__nt), __end));
         (2, 81)
     }
+
     pub(crate) fn __reduce149<
         'input,
     >(
@@ -7616,7 +7846,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7628,6 +7858,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant28(__nt), __end));
         (1, 81)
     }
+
     pub(crate) fn __reduce150<
         'input,
     >(
@@ -7635,7 +7866,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7647,6 +7878,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant29(__nt), __end));
         (1, 82)
     }
+
     pub(crate) fn __reduce151<
         'input,
     >(
@@ -7654,7 +7886,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7665,6 +7897,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant29(__nt), __end));
         (0, 82)
     }
+
     pub(crate) fn __reduce152<
         'input,
     >(
@@ -7672,7 +7905,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7686,6 +7919,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant29(__nt), __end));
         (2, 82)
     }
+
     pub(crate) fn __reduce153<
         'input,
     >(
@@ -7693,7 +7927,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7705,6 +7939,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant29(__nt), __end));
         (1, 82)
     }
+
     pub(crate) fn __reduce154<
         'input,
     >(
@@ -7712,7 +7947,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7724,6 +7959,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant30(__nt), __end));
         (1, 83)
     }
+
     pub(crate) fn __reduce155<
         'input,
     >(
@@ -7731,7 +7967,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7742,6 +7978,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant30(__nt), __end));
         (0, 83)
     }
+
     pub(crate) fn __reduce156<
         'input,
     >(
@@ -7749,7 +7986,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7763,6 +8000,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant30(__nt), __end));
         (2, 83)
     }
+
     pub(crate) fn __reduce157<
         'input,
     >(
@@ -7770,7 +8008,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7782,6 +8020,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant30(__nt), __end));
         (1, 83)
     }
+
     pub(crate) fn __reduce158<
         'input,
     >(
@@ -7789,7 +8028,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7801,6 +8040,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant31(__nt), __end));
         (1, 84)
     }
+
     pub(crate) fn __reduce159<
         'input,
     >(
@@ -7808,7 +8048,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7819,6 +8059,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant31(__nt), __end));
         (0, 84)
     }
+
     pub(crate) fn __reduce160<
         'input,
     >(
@@ -7826,7 +8067,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7840,6 +8081,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant31(__nt), __end));
         (2, 84)
     }
+
     pub(crate) fn __reduce161<
         'input,
     >(
@@ -7847,7 +8089,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7859,6 +8101,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant31(__nt), __end));
         (1, 84)
     }
+
     pub(crate) fn __reduce162<
         'input,
     >(
@@ -7866,7 +8109,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7878,6 +8121,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant39(__nt), __end));
         (1, 85)
     }
+
     pub(crate) fn __reduce163<
         'input,
     >(
@@ -7885,7 +8129,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7896,6 +8140,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant39(__nt), __end));
         (0, 85)
     }
+
     pub(crate) fn __reduce164<
         'input,
     >(
@@ -7903,7 +8148,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7917,6 +8162,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant39(__nt), __end));
         (2, 85)
     }
+
     pub(crate) fn __reduce165<
         'input,
     >(
@@ -7924,7 +8170,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7936,6 +8182,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant39(__nt), __end));
         (1, 85)
     }
+
     pub(crate) fn __reduce166<
         'input,
     >(
@@ -7943,7 +8190,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7955,6 +8202,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant40(__nt), __end));
         (1, 86)
     }
+
     pub(crate) fn __reduce167<
         'input,
     >(
@@ -7962,7 +8210,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7976,6 +8224,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant40(__nt), __end));
         (2, 86)
     }
+
     pub(crate) fn __reduce168<
         'input,
     >(
@@ -7983,7 +8232,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -7995,6 +8244,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant29(__nt), __end));
         (1, 87)
     }
+
     pub(crate) fn __reduce169<
         'input,
     >(
@@ -8002,7 +8252,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8016,6 +8266,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant29(__nt), __end));
         (2, 87)
     }
+
     pub(crate) fn __reduce170<
         'input,
     >(
@@ -8023,7 +8274,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8037,6 +8288,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant41(__nt), __end));
         (2, 88)
     }
+
     pub(crate) fn __reduce171<
         'input,
     >(
@@ -8044,7 +8296,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8056,6 +8308,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant41(__nt), __end));
         (1, 88)
     }
+
     pub(crate) fn __reduce172<
         'input,
     >(
@@ -8063,7 +8316,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8074,6 +8327,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant41(__nt), __end));
         (0, 88)
     }
+
     pub(crate) fn __reduce173<
         'input,
     >(
@@ -8081,7 +8335,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8097,6 +8351,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (4, 89)
     }
+
     pub(crate) fn __reduce174<
         'input,
     >(
@@ -8104,7 +8359,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8118,6 +8373,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant42(__nt), __end));
         (2, 90)
     }
+
     pub(crate) fn __reduce175<
         'input,
     >(
@@ -8125,7 +8381,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8140,6 +8396,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant42(__nt), __end));
         (3, 90)
     }
+
     pub(crate) fn __reduce176<
         'input,
     >(
@@ -8147,7 +8404,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8159,6 +8416,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant42(__nt), __end));
         (1, 90)
     }
+
     pub(crate) fn __reduce177<
         'input,
     >(
@@ -8166,7 +8424,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8178,6 +8436,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant43(__nt), __end));
         (1, 91)
     }
+
     pub(crate) fn __reduce178<
         'input,
     >(
@@ -8185,7 +8444,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8197,6 +8456,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant43(__nt), __end));
         (1, 91)
     }
+
     pub(crate) fn __reduce179<
         'input,
     >(
@@ -8204,7 +8464,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8216,6 +8476,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant44(__nt), __end));
         (1, 92)
     }
+
     pub(crate) fn __reduce180<
         'input,
     >(
@@ -8223,7 +8484,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8235,6 +8496,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant44(__nt), __end));
         (1, 92)
     }
+
     pub(crate) fn __reduce181<
         'input,
     >(
@@ -8242,7 +8504,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8254,6 +8516,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant44(__nt), __end));
         (1, 92)
     }
+
     pub(crate) fn __reduce182<
         'input,
     >(
@@ -8261,7 +8524,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8273,6 +8536,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant44(__nt), __end));
         (1, 93)
     }
+
     pub(crate) fn __reduce183<
         'input,
     >(
@@ -8280,7 +8544,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8292,6 +8556,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant44(__nt), __end));
         (1, 93)
     }
+
     pub(crate) fn __reduce184<
         'input,
     >(
@@ -8299,7 +8564,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8311,6 +8576,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant44(__nt), __end));
         (1, 94)
     }
+
     pub(crate) fn __reduce185<
         'input,
     >(
@@ -8318,7 +8584,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8330,6 +8596,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant44(__nt), __end));
         (1, 94)
     }
+
     pub(crate) fn __reduce186<
         'input,
     >(
@@ -8337,7 +8604,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8349,6 +8616,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant44(__nt), __end));
         (1, 94)
     }
+
     pub(crate) fn __reduce187<
         'input,
     >(
@@ -8356,7 +8624,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8368,6 +8636,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant44(__nt), __end));
         (1, 94)
     }
+
     pub(crate) fn __reduce188<
         'input,
     >(
@@ -8375,7 +8644,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8387,6 +8656,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant44(__nt), __end));
         (1, 95)
     }
+
     pub(crate) fn __reduce189<
         'input,
     >(
@@ -8394,7 +8664,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8406,6 +8676,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant44(__nt), __end));
         (1, 95)
     }
+
     pub(crate) fn __reduce190<
         'input,
     >(
@@ -8413,7 +8684,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8425,6 +8696,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant44(__nt), __end));
         (1, 96)
     }
+
     pub(crate) fn __reduce191<
         'input,
     >(
@@ -8432,7 +8704,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8444,6 +8716,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant44(__nt), __end));
         (1, 97)
     }
+
     pub(crate) fn __reduce192<
         'input,
     >(
@@ -8451,7 +8724,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8463,6 +8736,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant44(__nt), __end));
         (1, 97)
     }
+
     pub(crate) fn __reduce193<
         'input,
     >(
@@ -8470,7 +8744,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8482,6 +8756,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant44(__nt), __end));
         (1, 97)
     }
+
     pub(crate) fn __reduce194<
         'input,
     >(
@@ -8489,7 +8764,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8501,6 +8776,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant44(__nt), __end));
         (1, 97)
     }
+
     pub(crate) fn __reduce195<
         'input,
     >(
@@ -8508,7 +8784,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8520,6 +8796,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant44(__nt), __end));
         (1, 97)
     }
+
     pub(crate) fn __reduce196<
         'input,
     >(
@@ -8527,7 +8804,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8539,6 +8816,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant44(__nt), __end));
         (1, 97)
     }
+
     pub(crate) fn __reduce197<
         'input,
     >(
@@ -8546,7 +8824,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8558,6 +8836,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant44(__nt), __end));
         (1, 97)
     }
+
     pub(crate) fn __reduce198<
         'input,
     >(
@@ -8565,7 +8844,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8577,6 +8856,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant44(__nt), __end));
         (1, 98)
     }
+
     pub(crate) fn __reduce199<
         'input,
     >(
@@ -8584,7 +8864,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8596,6 +8876,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant4(__nt), __end));
         (1, 99)
     }
+
     pub(crate) fn __reduce200<
         'input,
     >(
@@ -8603,7 +8884,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8617,6 +8898,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant4(__nt), __end));
         (2, 99)
     }
+
     pub(crate) fn __reduce201<
         'input,
     >(
@@ -8624,7 +8906,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8635,6 +8917,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant45(__nt), __end));
         (0, 100)
     }
+
     pub(crate) fn __reduce202<
         'input,
     >(
@@ -8642,7 +8925,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8654,6 +8937,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant45(__nt), __end));
         (1, 100)
     }
+
     pub(crate) fn __reduce203<
         'input,
     >(
@@ -8661,7 +8945,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8673,6 +8957,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant46(__nt), __end));
         (1, 101)
     }
+
     pub(crate) fn __reduce204<
         'input,
     >(
@@ -8680,7 +8965,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8692,6 +8977,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant47(__nt), __end));
         (1, 102)
     }
+
     pub(crate) fn __reduce205<
         'input,
     >(
@@ -8699,7 +8985,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8711,6 +8997,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant48(__nt), __end));
         (1, 103)
     }
+
     pub(crate) fn __reduce206<
         'input,
     >(
@@ -8718,7 +9005,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8730,6 +9017,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant48(__nt), __end));
         (1, 104)
     }
+
     pub(crate) fn __reduce207<
         'input,
     >(
@@ -8737,7 +9025,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8749,6 +9037,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant48(__nt), __end));
         (1, 105)
     }
+
     pub(crate) fn __reduce208<
         'input,
     >(
@@ -8756,7 +9045,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8768,6 +9057,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant48(__nt), __end));
         (1, 106)
     }
+
     pub(crate) fn __reduce209<
         'input,
     >(
@@ -8775,7 +9065,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8787,6 +9077,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant48(__nt), __end));
         (1, 107)
     }
+
     pub(crate) fn __reduce210<
         'input,
     >(
@@ -8794,7 +9085,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8806,6 +9097,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant48(__nt), __end));
         (1, 108)
     }
+
     pub(crate) fn __reduce211<
         'input,
     >(
@@ -8813,7 +9105,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8825,6 +9117,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant48(__nt), __end));
         (1, 109)
     }
+
     pub(crate) fn __reduce212<
         'input,
     >(
@@ -8832,7 +9125,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8844,6 +9137,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant49(__nt), __end));
         (1, 110)
     }
+
     pub(crate) fn __reduce213<
         'input,
     >(
@@ -8851,7 +9145,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8870,6 +9164,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant49(__nt), __end));
         (7, 110)
     }
+
     pub(crate) fn __reduce214<
         'input,
     >(
@@ -8877,7 +9172,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8894,6 +9189,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant49(__nt), __end));
         (5, 110)
     }
+
     pub(crate) fn __reduce215<
         'input,
     >(
@@ -8901,7 +9197,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8916,6 +9212,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant49(__nt), __end));
         (3, 110)
     }
+
     pub(crate) fn __reduce216<
         'input,
     >(
@@ -8923,7 +9220,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8937,6 +9234,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant49(__nt), __end));
         (2, 110)
     }
+
     pub(crate) fn __reduce217<
         'input,
     >(
@@ -8944,7 +9242,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8959,6 +9257,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant49(__nt), __end));
         (3, 110)
     }
+
     pub(crate) fn __reduce218<
         'input,
     >(
@@ -8966,7 +9265,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -8980,6 +9279,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant49(__nt), __end));
         (2, 110)
     }
+
     pub(crate) fn __reduce219<
         'input,
     >(
@@ -8987,7 +9287,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -9001,6 +9301,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant49(__nt), __end));
         (2, 110)
     }
+
     pub(crate) fn __reduce220<
         'input,
     >(
@@ -9008,7 +9309,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -9020,6 +9321,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant49(__nt), __end));
         (1, 110)
     }
+
     pub(crate) fn __reduce221<
         'input,
     >(
@@ -9027,7 +9329,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -9041,6 +9343,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant49(__nt), __end));
         (2, 110)
     }
+
     pub(crate) fn __reduce222<
         'input,
     >(
@@ -9048,7 +9351,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -9062,6 +9365,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant49(__nt), __end));
         (2, 110)
     }
+
     pub(crate) fn __reduce223<
         'input,
     >(
@@ -9069,7 +9373,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -9081,6 +9385,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant49(__nt), __end));
         (1, 110)
     }
+
     pub(crate) fn __reduce224<
         'input,
     >(
@@ -9088,7 +9393,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -9099,6 +9404,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant50(__nt), __end));
         (0, 111)
     }
+
     pub(crate) fn __reduce225<
         'input,
     >(
@@ -9106,7 +9412,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -9118,6 +9424,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant50(__nt), __end));
         (1, 111)
     }
+
     pub(crate) fn __reduce226<
         'input,
     >(
@@ -9125,7 +9432,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -9137,6 +9444,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant50(__nt), __end));
         (1, 112)
     }
+
     pub(crate) fn __reduce227<
         'input,
     >(
@@ -9144,7 +9452,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -9158,6 +9466,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant50(__nt), __end));
         (2, 112)
     }
+
     pub(crate) fn __reduce228<
         'input,
     >(
@@ -9165,7 +9474,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -9183,6 +9492,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant26(__nt), __end));
         (6, 113)
     }
+
     pub(crate) fn __reduce229<
         'input,
     >(
@@ -9190,7 +9500,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -9206,6 +9516,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant20(__nt), __end));
         (4, 114)
     }
+
     pub(crate) fn __reduce230<
         'input,
     >(
@@ -9213,7 +9524,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -9231,6 +9542,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant20(__nt), __end));
         (6, 114)
     }
+
     pub(crate) fn __reduce231<
         'input,
     >(
@@ -9238,7 +9550,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -9254,6 +9566,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant20(__nt), __end));
         (4, 114)
     }
+
     pub(crate) fn __reduce232<
         'input,
     >(
@@ -9261,7 +9574,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -9273,6 +9586,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant51(__nt), __end));
         (1, 115)
     }
+
     pub(crate) fn __reduce233<
         'input,
     >(
@@ -9280,7 +9594,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -9291,6 +9605,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant51(__nt), __end));
         (0, 115)
     }
+
     pub(crate) fn __reduce234<
         'input,
     >(
@@ -9298,7 +9613,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -9310,6 +9625,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant8(__nt), __end));
         (1, 116)
     }
+
     pub(crate) fn __reduce235<
         'input,
     >(
@@ -9317,7 +9633,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -9332,6 +9648,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant8(__nt), __end));
         (3, 116)
     }
+
     pub(crate) fn __reduce236<
         'input,
     >(
@@ -9339,7 +9656,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -9351,6 +9668,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant8(__nt), __end));
         (1, 116)
     }
+
     pub(crate) fn __reduce237<
         'input,
     >(
@@ -9358,7 +9676,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -9370,6 +9688,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant8(__nt), __end));
         (1, 116)
     }
+
     pub(crate) fn __reduce238<
         'input,
     >(
@@ -9377,7 +9696,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -9389,6 +9708,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (1, 117)
     }
+
     pub(crate) fn __reduce239<
         'input,
     >(
@@ -9396,7 +9716,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -9407,6 +9727,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant9(__nt), __end));
         (0, 117)
     }
+
     pub(crate) fn __reduce240<
         'input,
     >(
@@ -9414,7 +9735,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -9428,6 +9749,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (2, 118)
     }
+
     pub(crate) fn __reduce241<
         'input,
     >(
@@ -9435,7 +9757,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -9447,6 +9769,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant6(__nt), __end));
         (1, 118)
     }
+
     pub(crate) fn __reduce242<
         'input,
     >(
@@ -9454,7 +9777,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -9466,6 +9789,7 @@ mod __parse__Program {
         __symbols.push((__start, __Symbol::Variant52(__nt), __end));
         (1, 119)
     }
+
     pub(crate) fn __reduce243<
         'input,
     >(
@@ -9473,7 +9797,7 @@ mod __parse__Program {
         intr: &Interner,
         errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
         __lookahead_start: Option<&usize>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
+        __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
         _: ::std::marker::PhantomData<(&'input ())>,
     ) -> (usize, usize)
     {
@@ -9485,7 +9809,6 @@ mod __parse__Program {
         (0, 119)
     }
 }
-pub use self::__parse__Program::ProgramParser;
 
 #[allow(unused_variables)]
 fn __action0<
@@ -9510,7 +9833,7 @@ fn __action1<
     (_, items, _): (usize, ::std::vec::Vec<Item>, usize),
 ) -> Program
 {
-    Program { items }
+    Program { items, id: AstId::DUMMY }
 }
 
 #[allow(unused_variables)]
@@ -9743,14 +10066,14 @@ fn __action14<
         } else {
             ClassBounds::Default
         };
-        
+
         Item {
             name,
             vis,
             kind: ItemKind::Class(Class {
-                builtin: b.map(|(l, r)| Span::new(l, r)), 
-                bounds, 
-                members
+                builtin: b.map(|(l, r)| Span::new(l, r)),
+                bounds,
+                members,
             }),
             span: Span::new(l, r),
             id: AstId::DUMMY,
@@ -9782,13 +10105,13 @@ fn __action15<
         } else {
             ClassBounds::Default
         };
-        
+
         Item {
             name,
             vis,
             kind: ItemKind::Branch(Branch {
-                bounds, 
-                variants
+                bounds,
+                variants,
             }),
             span: Span::new(l, r),
             id: AstId::DUMMY,
@@ -9834,7 +10157,7 @@ fn __action17<
     (_, ty, _): (usize, Type, usize),
 ) -> StructField
 {
-    StructField{name, ty, vis, default: None}
+    StructField { name, ty, vis, default: None }
 }
 
 #[allow(unused_variables)]
@@ -9859,7 +10182,7 @@ fn __action18<
         } else {
             Type::new(l, r, TypeKind::Infer)
         };
-        StructField{name, ty, vis, default: Some(bx(default))}
+        StructField { name, ty, vis, default: Some(bx(default)) }
     }
 }
 
@@ -9891,7 +10214,7 @@ fn __action19<
 
         let sig = FnSig {
             params,
-            ret
+            ret,
         };
 
         Item {
@@ -9916,7 +10239,7 @@ fn __action20<
     (_, ty, _): (usize, Type, usize),
 ) -> FnParam
 {
-    FnParam{name, ty}
+    FnParam { name, ty }
 }
 
 #[allow(unused_variables)]
@@ -10900,7 +11223,10 @@ fn __action87<
     (_, r, _): (usize, usize, usize),
 ) -> Expr
 {
-    { errs.push(err); Expr::new(l, r, ExprKind::Err) }
+    {
+        errs.push(err);
+        Expr::new(l, r, ExprKind::Err)
+    }
 }
 
 #[allow(unused_variables)]
@@ -10960,10 +11286,10 @@ fn __action91<
             Ok(i) => Lit::Int(i),
             Err(_) => {
                 errs.push(ErrorRecovery {
-                    error: ParseError::User{ 
+                    error: ParseError::User {
                         error: ParserError::IntTooBig(Span::new(l, r))
                     },
-                    dropped_tokens: vec![(l, Token::IntLiteral(tok.clone()), r)]
+                    dropped_tokens: vec![(l, Token::IntLiteral(tok.clone()), r)],
                 });
 
                 Lit::Err
@@ -11027,7 +11353,7 @@ fn __action94<
             let mut ty = ty;
             Type::new(l, r, TypeKind::Named(ty.remove(0)))
         } else {
-            Type::new(l, r, TypeKind::And(ty.into_iter().map(|name| TypeRef {name, id: AstId::DUMMY}).collect()))
+            Type::new(l, r, TypeKind::And(ty.into_iter().map(|name| TypeRef { name, id: AstId::DUMMY }).collect()))
         }
     }
 }
@@ -11044,7 +11370,10 @@ fn __action95<
     (_, r, _): (usize, usize, usize),
 ) -> Type
 {
-    { errs.push(err); Type::new(l, r, TypeKind::Err) }
+    {
+        errs.push(err);
+        Type::new(l, r, TypeKind::Err)
+    }
 }
 
 #[allow(unused_variables)]
@@ -11816,7 +12145,11 @@ fn __action149<
     (_, e, _): (usize, Item, usize),
 ) -> ::std::vec::Vec<Item>
 {
-    { let mut v = v; v.push(e); v }
+    {
+        let mut v = v;
+        v.push(e);
+        v
+    }
 }
 
 #[allow(unused_variables)]
@@ -11843,7 +12176,11 @@ fn __action151<
     (_, e, _): (usize, Identifier, usize),
 ) -> ::std::vec::Vec<Identifier>
 {
-    { let mut v = v; v.push(e); v }
+    {
+        let mut v = v;
+        v.push(e);
+        v
+    }
 }
 
 #[allow(unused_variables)]
@@ -11933,7 +12270,11 @@ fn __action156<
     (_, e, _): (usize, Stmt, usize),
 ) -> ::std::vec::Vec<Stmt>
 {
-    { let mut v = v; v.push(e); v }
+    {
+        let mut v = v;
+        v.push(e);
+        v
+    }
 }
 
 #[allow(unused_variables)]
@@ -12236,7 +12577,11 @@ fn __action177<
     (_, e, _): (usize, Path, usize),
 ) -> ::std::vec::Vec<Path>
 {
-    { let mut v = v; v.push(e); v }
+    {
+        let mut v = v;
+        v.push(e);
+        v
+    }
 }
 
 #[allow(unused_variables)]
@@ -12263,7 +12608,11 @@ fn __action179<
     (_, e, _): (usize, Type, usize),
 ) -> ::std::vec::Vec<Type>
 {
-    { let mut v = v; v.push(e); v }
+    {
+        let mut v = v;
+        v.push(e);
+        v
+    }
 }
 
 #[allow(unused_variables)]
@@ -12290,7 +12639,11 @@ fn __action181<
     (_, e, _): (usize, Expr, usize),
 ) -> ::std::vec::Vec<Expr>
 {
-    { let mut v = v; v.push(e); v }
+    {
+        let mut v = v;
+        v.push(e);
+        v
+    }
 }
 
 #[allow(unused_variables)]
@@ -12562,7 +12915,11 @@ fn __action201<
     (_, e, _): (usize, StructField, usize),
 ) -> ::std::vec::Vec<StructField>
 {
-    { let mut v = v; v.push(e); v }
+    {
+        let mut v = v;
+        v.push(e);
+        v
+    }
 }
 
 #[allow(unused_variables)]
@@ -12589,7 +12946,11 @@ fn __action203<
     (_, e, _): (usize, BranchVariant, usize),
 ) -> ::std::vec::Vec<BranchVariant>
 {
-    { let mut v = v; v.push(e); v }
+    {
+        let mut v = v;
+        v.push(e);
+        v
+    }
 }
 
 #[allow(unused_variables)]
@@ -12616,7 +12977,11 @@ fn __action205<
     (_, e, _): (usize, FnParam, usize),
 ) -> ::std::vec::Vec<FnParam>
 {
-    { let mut v = v; v.push(e); v }
+    {
+        let mut v = v;
+        v.push(e);
+        v
+    }
 }
 
 #[allow(unused_variables)]
@@ -12643,7 +13008,11 @@ fn __action207<
     (_, e, _): (usize, Expr, usize),
 ) -> ::std::vec::Vec<Expr>
 {
-    { let mut v = v; v.push(e); v }
+    {
+        let mut v = v;
+        v.push(e);
+        v
+    }
 }
 
 #[allow(unused_variables)]
@@ -19833,16 +20202,17 @@ fn __action425<
 }
 
 pub trait __ToTriple<'input, > {
-    fn to_triple(value: Self) -> Result<(usize,Token<'input>,usize), __lalrpop_util::ParseError<usize, Token<'input>, ParserError>>;
+    fn to_triple(value: Self) -> Result<(usize, Token<'input>, usize), __lalrpop_util::ParseError<usize, Token<'input>, ParserError>>;
 }
 
 impl<'input, > __ToTriple<'input, > for (usize, Token<'input>, usize) {
-    fn to_triple(value: Self) -> Result<(usize,Token<'input>,usize), __lalrpop_util::ParseError<usize, Token<'input>, ParserError>> {
+    fn to_triple(value: Self) -> Result<(usize, Token<'input>, usize), __lalrpop_util::ParseError<usize, Token<'input>, ParserError>> {
         Ok(value)
     }
 }
+
 impl<'input, > __ToTriple<'input, > for Result<(usize, Token<'input>, usize), ParserError> {
-    fn to_triple(value: Self) -> Result<(usize,Token<'input>,usize), __lalrpop_util::ParseError<usize, Token<'input>, ParserError>> {
+    fn to_triple(value: Self) -> Result<(usize, Token<'input>, usize), __lalrpop_util::ParseError<usize, Token<'input>, ParserError>> {
         match value {
             Ok(v) => Ok(v),
             Err(error) => Err(__lalrpop_util::ParseError::User { error }),

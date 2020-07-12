@@ -2,13 +2,13 @@ use std::str::FromStr;
 
 use lalrpop_util::{ParseError, ErrorRecovery};
 
-use crate::ast::{*, id::AstId, BinOpKind as BinOp};
-use crate::span::*;
-use super::{lexer::Token, err::ParserError, Interner};
+use hlcl_ast::{*, id::AstId, BinOpKind as BinOp};
+use hlcl_span::*;
+use super::{util::*, lexer::Token, err::ParserError, Interner};
 
 grammar<'input>(input: &'input str, intr: &Interner, errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>);
 
-pub Program: Program = <items:Item*> => Program { items };
+pub Program: Program = <items:Item*> => Program { items, id: AstId::DUMMY };
 
 Vis: Visibility = {
     <pb:(<@L> "pub" <@R>)?> => match pb {

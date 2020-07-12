@@ -1,0 +1,18 @@
+[package]
+name = "hlcl_helpers"
+version = "0.1.0"
+authors = ["JozsefA <jozsefaug@gmail.com>"]
+edition = "2018"
+
+[profile.release]
+lto = true
+codegen-units = 1
+
+[lib]
+name = "hlcl_helpers"
+path = "lib.rs"
+doctest = false
+
+[dependencies]
+lasso = { version = "0.2.2", features = ["multi-threaded"] }
+smallvec = "1.4.1"

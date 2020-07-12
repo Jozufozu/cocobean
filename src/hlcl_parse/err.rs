@@ -1,4 +1,4 @@
-use crate::span::Span;
+use hlcl_span::Span;
 
 #[derive(Debug)]
 pub enum ParserError {

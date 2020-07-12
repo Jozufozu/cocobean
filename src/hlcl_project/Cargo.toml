@@ -1,0 +1,20 @@
+[package]
+name = "hlcl_project"
+version = "0.1.0"
+authors = ["JozsefA <jozsefaug@gmail.com>"]
+edition = "2018"
+
+[profile.release]
+lto = true
+codegen-units = 1
+
+[lib]
+name = "hlcl_project"
+path = "lib.rs"
+doctest = false
+
+[dependencies]
+hlcl_span = { path = "../hlcl_span" }
+hlcl_ast = { path = "../hlcl_ast" }
+lasso = "0.2.2"
+smallvec = "1.4.1"

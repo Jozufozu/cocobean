@@ -1,18 +1,21 @@
+#[macro_use]
+extern crate derive_more;
+
 use std::fmt;
 use std::fmt::{Display, Formatter};
+use std::iter::FromIterator;
 
 use itertools::*;
 use lasso::Spur;
 
-use crate::ast::id::AstId;
-use crate::span::*;
-use std::iter::FromIterator;
-use crate::project::InternResolver;
+use hlcl_helpers::InternResolver;
+use hlcl_span::*;
+
+use crate::id::AstId;
 
 pub mod id;
-pub mod numbering;
-pub mod visit;
 pub mod mut_visit;
+pub mod visit;
 
 macro_rules! new_spanned_id {
     ($struc:ident, $field:ident, $kind:path) => {
@@ -35,40 +38,58 @@ macro_rules! static_assert_size {
     };
 }
 
-#[inline]
-pub(crate) fn bx<T>(val: T) -> Box<T> {
-    Box::new(val)
+#[derive(Debug, Clone)]
+pub struct Identifier {
+    pub span: Span,
+    pub spur: Spur,
 }
-
-#[inline]
-pub(crate) fn box_opt<T>(val: Option<T>) -> Option<Box<T>> {
-    val.map(|v| Box::new(v))
-}
-
-pub type Identifier = Spanned<Spur>;
 
 impl Identifier {
+    pub fn new(l: usize, r: usize, spur: Spur) -> Self {
+        Identifier {
+            span: Span::new(l, r),
+            spur,
+        }
+    }
+
     pub fn to_string<'r, R: InternResolver<Spur>>(&self, names: &'r R) -> &'r str {
-        names.resolve(&self.val)
+        names.resolve(&self.spur)
     }
 }
 
-#[derive(Debug, Clone)]
+impl PartialEq for Identifier {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        self.spur == other.spur
+    }
+
+    #[inline]
+    fn ne(&self, other: &Self) -> bool {
+        self.spur != other.spur
+    }
+}
+
+impl Eq for Identifier {}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Path {
     pub items: Vec<Identifier>,
 }
 
 impl Path {
     pub fn to_string<R: InternResolver<Spur>>(&self, names: &R) -> String {
-        self.items.iter()
+        self.items
+            .iter()
             .map(|ident| ident.to_string(names))
             .join("::")
     }
 }
 
 impl FromIterator<Identifier> for Path {
-    fn from_iter<T: IntoIterator<Item=Identifier>>(iter: T) -> Self {
-        Path { items: iter.into_iter().collect() }
+    fn from_iter<T: IntoIterator<Item = Identifier>>(iter: T) -> Self {
+        Path {
+            items: iter.into_iter().collect(),
+        }
     }
 }
 
@@ -81,6 +102,7 @@ pub enum Visibility {
 #[derive(Debug)]
 pub struct Program {
     pub items: Vec<Item>,
+    pub id: AstId,
 }
 
 #[derive(Debug)]

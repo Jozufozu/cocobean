@@ -1,0 +1,16 @@
+[package]
+name = "hlcl_span"
+version = "0.1.0"
+authors = ["JozsefA <jozsefaug@gmail.com>"]
+edition = "2018"
+
+[profile.release]
+lto = true
+codegen-units = 1
+
+[lib]
+name = "hlcl_span"
+path = "lib.rs"
+doctest = false
+
+[dependencies]

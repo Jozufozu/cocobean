@@ -4,6 +4,7 @@ fn main() {
     lalrpop::Configuration::new()
         .generate_in_source_tree()
         .emit_rerun_directives(true)
-        .process_file("./src/parse/hlcl.lalrpop")
+        .emit_whitespace(false)
+        .process_file("hlcl.lalrpop")
         .unwrap();
 }

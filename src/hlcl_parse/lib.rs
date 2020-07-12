@@ -8,22 +8,23 @@ use lalrpop_util::ErrorRecovery;
 use lalrpop_util::ParseError;
 use lasso::{Spur, ThreadedRodeo};
 use rayon::{ThreadPool, ThreadPoolBuilder};
+use smallvec::smallvec;
 use walkdir::{DirEntry, WalkDir};
 
 pub use hlcl::ProgramParser;
+use hlcl_ast::Program;
+use hlcl_project::{Modules, Path as ASTPath, PathMap, Project, SourceFile};
 pub use lexer::Lexer;
 
-use crate::ast::{Identifier, Path as ASTPath, Program};
-use crate::parse::err::ParserError;
-use crate::parse::lexer::Token;
-use crate::project::{Project, SourceFile};
-use crate::span::Span;
+use crate::err::ParserError;
+use crate::lexer::Token;
 
 #[allow(clippy::all)]
 #[cfg_attr(rustfmt, rustfmt_skip)]
 pub mod hlcl;
 pub mod err;
 pub mod lexer;
+pub mod util;
 
 pub const PRIMITIVES: &[&str] = &["int", "bool", "string", "pos"];
 pub const MAIN: &str = "main";
@@ -63,17 +64,20 @@ impl From<NameErr> for ProjectStructureErr {
 pub enum NameErr {
     TooShort,
     InvalidCharacter,
-    MustStartWithAlphabetic
+    MustStartWithAlphabetic,
 }
 
 impl ParsingSession {
-    pub fn new<P: AsRef<Path>, S: AsRef<String>>(project_path: P, project_name: S) -> Result<Self, ProjectStructureErr> {
+    pub fn new<P: AsRef<Path>, S: AsRef<str>>(
+        project_path: P,
+        project_name: S,
+    ) -> Result<Self, ProjectStructureErr> {
         Self::validate_name(project_name.as_ref())?;
 
         let project_path = project_path.as_ref().to_path_buf();
 
         if project_path.is_file() {
-            return Err(ProjectStructureErr::MustBeDir)
+            return Err(ProjectStructureErr::MustBeDir);
         }
 
         if !project_path.join(ROOT_FILE).is_file() {
@@ -94,7 +98,7 @@ impl ParsingSession {
         })
     }
 
-    pub fn parse_project(self) -> Result<Project, ()> {
+    pub fn parse_project(self) -> Result<(Modules, Project), ()> {
         let ParsingSession {
             interner,
             project_name,
@@ -130,22 +134,24 @@ impl ParsingSession {
         }
 
         let mut main_module = None;
-        let mut modules = Vec::new();
-        let mut stored_errs = Vec::new();
+        let mut modules = PathMap::new();
+        let mut sources = PathMap::new();
 
         for (mut module_path, result) in prc.iter() {
-            if main_module.is_none()
-                && module_path.items.len() == 1
-                && main == module_path.items[0].val
-            {
-                module_path.items[0].val = project_name;
-                main_module = Some((module_path, result?));
-            } else {
-                module_path.items.insert(0, Identifier::dummy(project_name));
+            if main_module.is_none() && module_path.len() == 1 && main == module_path[0] {
+                let (source, program) = result?;
+                main_module = Some(program?);
 
+                sources.insert(smallvec![project_name], source);
+            } else {
                 match result {
-                    Ok(file) => modules.push((module_path, file)),
-                    Err(err) => stored_errs.push((module_path, err)),
+                    Ok((source, result)) => {
+                        module_path.insert(0, project_name);
+
+                        modules.insert(module_path.clone(), result);
+                        sources.insert(module_path, source);
+                    }
+                    Err(()) => {}
                 }
             }
 
@@ -157,17 +163,23 @@ impl ParsingSession {
 
         main_module
             .map(|main_module| {
-                Project::new(
-                    interner.into_resolver(),
-                    main_module,
-                    modules,
-                    stored_errs,
+                (
+                    Modules::new(main_module, modules),
+                    Project::new(interner.into_resolver(), project_name, sources),
                 )
             })
             .ok_or(())
     }
 
-    fn process_file<S: AsRef<str>, P: AsRef<Path>>(path: P, name: S, interner: &Interner) -> Result<SourceFile, ()> {
+    fn process_file<S, P>(
+        path: P,
+        name: S,
+        interner: &Interner,
+    ) -> Result<(SourceFile, Result<Program, ()>), ()>
+    where
+        S: AsRef<str>,
+        P: AsRef<Path>,
+    {
         File::open(path.as_ref())
             .map_err(|_| ())
             .and_then(|mut file| {
@@ -177,24 +189,23 @@ impl ParsingSession {
                     .map(|_| source)
                     .map_err(|_| ())
             })
-            .and_then(|source| {
+            .map(|source| {
                 let (soft_errs, result) = Self::parse_string(interner, &source);
 
                 for _err in soft_errs.into_iter() {
                     // TODO: Process and store errors to be displayed later. Send them to the main thread separately?
                 }
 
-                result
-                    .map_err(|_| ()) // TODO: Process this error too
-                    .map(|program| SourceFile::new(program, source, name.as_ref().to_string()))
+                let program = result.map_err(|_| ()); // TODO: Process this error too
+                (SourceFile::new(source, name.as_ref().to_string()), program)
             })
     }
 
-    fn validate_name(name: &String) -> Result<(), NameErr> {
+    fn validate_name(name: &str) -> Result<(), NameErr> {
         let mut chars = name.chars();
         if let Some(first) = &chars.next() {
             if !first.is_ascii_alphabetic() {
-                return Err(NameErr::MustStartWithAlphabetic)
+                return Err(NameErr::MustStartWithAlphabetic);
             }
         }
 
@@ -206,19 +217,15 @@ impl ParsingSession {
     }
 
     fn dir_to_module_path(path: &DirEntry, interner: &Interner) -> ASTPath {
-        path.path()
+        let mut rev: ASTPath = path
+            .path()
             .ancestors()
             .into_iter()
             .take(path.depth())
             .map(|part| interner.get_or_intern(part.file_stem().unwrap().to_string_lossy()))
-            .map(|val| Identifier {
-                span: Span::DUMMY,
-                val,
-            })
-            .collect::<Vec<_>>()
-            .into_iter()
-            .rev()
-            .collect()
+            .collect();
+        rev.reverse();
+        rev
     }
 
     fn parse_string<'input>(interner: &Interner, source: &'input String) -> ParserResult<'input> {

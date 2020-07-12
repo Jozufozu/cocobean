@@ -3,9 +3,10 @@ use std::str::CharIndices;
 
 use phf::phf_map;
 
-use crate::ast::BinOpKind;
-use crate::parse::err::ParserError;
-use crate::span::Span;
+use hlcl_ast::BinOpKind;
+use hlcl_span::Span;
+
+use crate::err::ParserError;
 
 pub type Spanned<Token, Loc, Error> = Result<(Loc, Token, Loc), Error>;
 
@@ -205,7 +206,7 @@ impl<'input> Iterator for Lexer<'input> {
                             Some(Ok((i, Token::PlusPlus, i + 2)))
                         }
                         _ => Some(Ok((i, Token::BinOp(BinOpKind::Add), i + 1))),
-                    }
+                    };
                 }
                 Some((i, '-')) => {
                     return match self.chars.peek() {
@@ -218,7 +219,7 @@ impl<'input> Iterator for Lexer<'input> {
                             Some(Ok((i, Token::MinusMinus, i + 2)))
                         }
                         _ => Some(Ok((i, Token::BinOp(BinOpKind::Sub), i + 1))),
-                    }
+                    };
                 }
                 Some((i, '*')) => {
                     return match self.chars.peek() {
@@ -227,24 +228,20 @@ impl<'input> Iterator for Lexer<'input> {
                             Some(Ok((i, Token::AssignOp(BinOpKind::Mul), i + 2)))
                         }
                         _ => Some(Ok((i, Token::BinOp(BinOpKind::Mul), i + 1))),
-                    }
+                    };
                 }
-                Some((i, '/')) => {
-                    match self.chars.peek() {
-                        Some((_, '/')) => {
-                            loop {
-                                if let Some((_, '\n')) = self.chars.next() {
-                                    break
-                                }
-                            }
+                Some((i, '/')) => match self.chars.peek() {
+                    Some((_, '/')) => loop {
+                        if let Some((_, '\n')) = self.chars.next() {
+                            break;
                         }
-                        Some((_, '=')) => {
-                            self.chars.next();
-                            return Some(Ok((i, Token::AssignOp(BinOpKind::Div), i + 2)))
-                        }
-                        _ => return Some(Ok((i, Token::BinOp(BinOpKind::Div), i + 1))),
+                    },
+                    Some((_, '=')) => {
+                        self.chars.next();
+                        return Some(Ok((i, Token::AssignOp(BinOpKind::Div), i + 2)));
                     }
-                }
+                    _ => return Some(Ok((i, Token::BinOp(BinOpKind::Div), i + 1))),
+                },
                 Some((i, '%')) => {
                     return match self.chars.peek() {
                         Some((_, '=')) => {
@@ -252,7 +249,7 @@ impl<'input> Iterator for Lexer<'input> {
                             Some(Ok((i, Token::AssignOp(BinOpKind::Rem), i + 2)))
                         }
                         _ => Some(Ok((i, Token::BinOp(BinOpKind::Rem), i + 1))),
-                    }
+                    };
                 }
                 Some((i, '!')) => {
                     return match self.chars.peek() {
@@ -261,7 +258,7 @@ impl<'input> Iterator for Lexer<'input> {
                             Some(Ok((i, Token::BinOp(BinOpKind::Ne), i + 2)))
                         }
                         _ => Some(Ok((i, Token::Exclamation, i + 1))),
-                    }
+                    };
                 }
                 Some((i, '&')) => {
                     return match self.chars.peek() {
@@ -270,7 +267,7 @@ impl<'input> Iterator for Lexer<'input> {
                             Some(Ok((i, Token::AssignOp(BinOpKind::And), i + 2)))
                         }
                         _ => Some(Ok((i, Token::BinOp(BinOpKind::And), i + 1))),
-                    }
+                    };
                 }
                 Some((i, '|')) => {
                     return match self.chars.peek() {
@@ -279,7 +276,7 @@ impl<'input> Iterator for Lexer<'input> {
                             Some(Ok((i, Token::AssignOp(BinOpKind::Or), i + 2)))
                         }
                         _ => Some(Ok((i, Token::BinOp(BinOpKind::Or), i + 1))),
-                    }
+                    };
                 }
                 Some((i, '=')) => {
                     return match self.chars.peek() {
@@ -288,7 +285,7 @@ impl<'input> Iterator for Lexer<'input> {
                             Some(Ok((i, Token::BinOp(BinOpKind::Eq), i + 2)))
                         }
                         _ => Some(Ok((i, Token::Assign, i + 1))),
-                    }
+                    };
                 }
                 Some((i, '>')) => {
                     return match self.chars.peek() {
@@ -297,7 +294,7 @@ impl<'input> Iterator for Lexer<'input> {
                             Some(Ok((i, Token::BinOp(BinOpKind::Ge), i + 2)))
                         }
                         _ => Some(Ok((i, Token::BinOp(BinOpKind::Gt), i + 1))),
-                    }
+                    };
                 }
                 Some((i, '<')) => {
                     return match self.chars.peek() {
@@ -306,7 +303,7 @@ impl<'input> Iterator for Lexer<'input> {
                             Some(Ok((i, Token::BinOp(BinOpKind::Le), i + 2)))
                         }
                         _ => Some(Ok((i, Token::BinOp(BinOpKind::Lt), i + 1))),
-                    }
+                    };
                 }
                 Some((i, ':')) => {
                     return match self.chars.peek() {
@@ -315,7 +312,7 @@ impl<'input> Iterator for Lexer<'input> {
                             Some(Ok((i, Token::PathSeg, i + 2)))
                         }
                         _ => Some(Ok((i, Token::Colon, i + 1))),
-                    }
+                    };
                 }
                 Some((i, '.')) => return Some(Ok((i, Token::Dot, i + 1))),
                 Some((i, '^')) => return Some(Ok((i, Token::Caret, i + 1))),
