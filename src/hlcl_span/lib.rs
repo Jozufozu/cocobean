@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate derive_more;
+
 use std::fmt;
 use std::fmt::{Display, Formatter};
 
@@ -5,6 +8,14 @@ use std::fmt::{Display, Formatter};
 pub struct Span {
     pub l: usize,
     pub r: usize,
+}
+
+#[derive(Debug, Copy, Clone, Add, Sub, Ord, PartialOrd, Eq, PartialEq, From)]
+pub struct BytePos(pub u32);
+
+pub struct SpanData {
+    pub l: BytePos,
+    pub r: BytePos,
 }
 
 impl Span {
@@ -56,5 +67,21 @@ impl<T: Eq + PartialEq> Eq for Spanned<T> {}
 impl<T: Display> Display for Spanned<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         self.val.fmt(f)
+    }
+}
+
+pub struct SourceMap {
+    data: String,
+}
+
+#[derive(Debug)]
+pub struct SourceFile {
+    pub source: String,
+    pub file_name: String,
+}
+
+impl SourceFile {
+    pub fn new(source: String, file_name: String) -> Self {
+        SourceFile { source, file_name }
     }
 }

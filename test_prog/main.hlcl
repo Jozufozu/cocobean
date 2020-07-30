@@ -4,6 +4,20 @@ pub builtin class entity {
 
 }
 
+pub builtin class item: entity {
+    pub item: Item
+}
+
+pub struct Item {
+    pub id: string,
+    pub count: int,
+    pub tag: nbt,
+}
+
+fn append(self) {
+    
+}
+
 pub builtin class player: entity {
 
 }

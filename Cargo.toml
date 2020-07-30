@@ -12,6 +12,9 @@ members = [
     "src/hlcl_helpers",
     "src/hlcl_finalize",
     "src/hlcl_project",
+    "src/hlcl_asm",
+    "src/hlcl_asm_lowering",
+    "src/hlcl_error",
 ]
 
 [profile.release]
@@ -21,3 +24,4 @@ codegen-units = 1
 [dependencies]
 hlcl_parse = { path = "src/hlcl_parse" }
 hlcl_finalize = { path = "src/hlcl_finalize" }
+hlcl_asm = { path = "src/hlcl_asm" }

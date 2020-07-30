@@ -1,3 +1,5 @@
+use hlcl_asm::selector::Selector;
+use hlcl_finalize::AstFinalizer;
 use hlcl_parse::ParsingSession;
 
 /// TODO: Collect names and item signatures
@@ -17,5 +19,9 @@ use hlcl_parse::ParsingSession;
 fn main() {
     let session = ParsingSession::new("./test_prog", "test_prog").unwrap();
 
-    let project = session.parse_project().unwrap();
+    let (mods, mut project) = session.parse_project().unwrap();
+
+    let program = AstFinalizer::unify(mods, &mut project);
+
+    println!("{:#?}", program);
 }

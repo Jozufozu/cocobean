@@ -130,19 +130,10 @@ pub fn walk_struct<'ast, T: Visitor<'ast>>(visitor: &mut T, Struct { members }: 
 
 pub fn walk_struct_field<'ast, T: Visitor<'ast>>(
     visitor: &mut T,
-    StructField {
-        name,
-        ty,
-        vis: _,
-        default,
-    }: &'ast StructField,
+    StructField { name, ty, vis: _ }: &'ast StructField,
 ) {
     visitor.visit_ident(name);
     visitor.visit_type(ty);
-
-    if let Some(expr) = default {
-        visitor.visit_expr(expr)
-    }
 }
 
 pub fn walk_class<'ast, T: Visitor<'ast>>(

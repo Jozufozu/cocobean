@@ -18,6 +18,7 @@ pub use lexer::Lexer;
 
 use crate::err::ParserError;
 use crate::lexer::Token;
+use hlcl_span::SourceFile;
 
 #[allow(clippy::all)]
 #[cfg_attr(rustfmt, rustfmt_skip)]
@@ -94,7 +95,7 @@ impl ParsingSession {
             interner,
             project_name: project_name.as_ref().to_string(),
             project_path,
-            workers: ThreadPoolBuilder::new().build().unwrap(),
+            workers: ThreadPoolBuilder::new().num_threads(8).build().unwrap(),
         })
     }
 
@@ -124,12 +125,15 @@ impl ParsingSession {
                 let sender = psend.clone();
                 let interner = &interner;
 
-                workers.install(|| {
-                    let ast_path = Self::dir_to_module_path(&path, interner);
-                    let result = ParsingSession::process_file(path.path(), name, interner);
+                path.metadata()
+                    .map(|met| met.len())
+                    .workers
+                    .install(move || {
+                        let ast_path = Self::dir_to_module_path(&path, interner);
+                        let result = ParsingSession::process_file(path.path(), name, interner);
 
-                    sender.send((ast_path, result)).unwrap();
-                })
+                        sender.send((found, ast_path, result)).unwrap();
+                    })
             }
         }
 
@@ -137,7 +141,7 @@ impl ParsingSession {
         let mut modules = PathMap::new();
         let mut sources = PathMap::new();
 
-        for (mut module_path, result) in prc.iter() {
+        for (idx, mut module_path, result) in prc.iter() {
             if main_module.is_none() && module_path.len() == 1 && main == module_path[0] {
                 let (source, program) = result?;
                 main_module = Some(program?);

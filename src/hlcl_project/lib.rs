@@ -4,6 +4,7 @@ use lasso::{RodeoResolver, Spur};
 use smallvec::SmallVec;
 
 use hlcl_ast::Program;
+use hlcl_span::SourceFile;
 
 pub type Path = SmallVec<[Spur; 2]>;
 
@@ -41,17 +42,5 @@ impl Project {
             project_name,
             sources,
         }
-    }
-}
-
-#[derive(Debug)]
-pub struct SourceFile {
-    pub source: String,
-    pub file_name: String,
-}
-
-impl SourceFile {
-    pub fn new(source: String, file_name: String) -> Self {
-        SourceFile { source, file_name }
     }
 }

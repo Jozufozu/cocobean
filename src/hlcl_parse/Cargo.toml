@@ -5,10 +5,6 @@ authors = ["JozsefA <jozsefaug@gmail.com>"]
 edition = "2018"
 build = "build.rs"
 
-[profile.release]
-lto = true
-codegen-units = 1
-
 [lib]
 name = "hlcl_parse"
 path = "lib.rs"

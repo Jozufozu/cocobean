@@ -1,16 +1,15 @@
 [package]
-name = "hlcl_project"
+name = "hlcl_asm"
 version = "0.1.0"
 authors = ["JozsefA <jozsefaug@gmail.com>"]
 edition = "2018"
 
 [lib]
-name = "hlcl_project"
+name = "hlcl_asm"
 path = "lib.rs"
 doctest = false
 
 [dependencies]
-hlcl_span = { path = "../hlcl_span" }
-hlcl_ast = { path = "../hlcl_ast" }
-lasso = "0.2.2"
+hlcl_helpers = { path = "../hlcl_helpers" }
+derive_more = "0.99.9"
 smallvec = "1.4.1"

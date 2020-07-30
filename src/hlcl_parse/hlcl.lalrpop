@@ -130,15 +130,7 @@ BranchVariant: BranchVariant = {
 };
 
 StructField: StructField = {
-    <vis:Vis> <name:Identifier> ":" <ty:Type> => StructField{name, ty, vis, default: None},
-    <vis:Vis> <name:Identifier> <l:@L> <ty:(":" <Type>)?> <r:@R> "=" <default:Expr> => {
-        let ty = if let Some(ty) = ty {
-            ty
-        } else {
-            Type::new(l, r, TypeKind::Infer)
-        };
-        StructField{name, ty, vis, default: Some(bx(default))}
-    },
+    <vis:Vis> <name:Identifier> ":" <ty:Type> => StructField{name, ty, vis},
 };
 
 FunctionDefinition: Item = {

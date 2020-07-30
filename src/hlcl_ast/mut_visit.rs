@@ -120,19 +120,10 @@ pub fn walk_struct<T: MutVisitor>(visitor: &mut T, Struct { members }: &mut Stru
 
 pub fn walk_struct_field<T: MutVisitor>(
     visitor: &mut T,
-    StructField {
-        name,
-        ty,
-        vis: _,
-        default,
-    }: &mut StructField,
+    StructField { name, ty, vis: _ }: &mut StructField,
 ) {
     visitor.visit_ident(name);
     visitor.visit_type(ty);
-
-    if let Some(expr) = default {
-        visitor.visit_expr(expr)
-    }
 }
 
 pub fn walk_class<T: MutVisitor>(

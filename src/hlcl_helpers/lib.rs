@@ -1,6 +1,17 @@
 use std::hash::{BuildHasher, Hash};
 
 use lasso::{Key, Rodeo, RodeoResolver, Spur, ThreadedRodeo};
+use std::num::NonZeroUsize;
+
+pub mod resource_name;
+pub mod id_map;
+
+#[macro_export]
+macro_rules! static_assert_size {
+    ($ty:ty, $size:expr) => {
+        const _: [(); $size] = [(); ::std::mem::size_of::<$ty>()];
+    };
+}
 
 pub trait InternResolver<K: Key = Spur> {
     fn resolve(&self, key: &K) -> &str;

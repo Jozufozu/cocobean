@@ -9,6 +9,7 @@ use itertools::*;
 use lasso::Spur;
 
 use hlcl_helpers::InternResolver;
+use hlcl_helpers::static_assert_size;
 use hlcl_span::*;
 
 use crate::id::AstId;
@@ -29,12 +30,6 @@ macro_rules! new_spanned_id {
                 }
             }
         }
-    };
-}
-
-macro_rules! static_assert_size {
-    ($ty:ty, $size:expr) => {
-        const _: [(); $size] = [(); ::std::mem::size_of::<$ty>()];
     };
 }
 
@@ -168,7 +163,6 @@ pub struct StructField {
     pub name: Identifier,
     pub ty: Type,
     pub vis: Visibility,
-    pub default: Option<Box<Expr>>,
 }
 
 #[derive(Debug)]
