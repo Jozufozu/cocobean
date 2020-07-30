@@ -8,8 +8,8 @@ use std::iter::FromIterator;
 use itertools::*;
 use lasso::Spur;
 
-use hlcl_helpers::InternResolver;
 use hlcl_helpers::static_assert_size;
+use hlcl_helpers::InternResolver;
 use hlcl_span::*;
 
 use crate::id::AstId;

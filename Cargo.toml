@@ -13,7 +13,7 @@ members = [
     "src/hlcl_finalize",
     "src/hlcl_project",
     "src/hlcl_asm",
-    "src/hlcl_asm_lowering",
+    "src/hlcl_assembler",
     "src/hlcl_error",
 ]
 
@@ -25,3 +25,4 @@ codegen-units = 1
 hlcl_parse = { path = "src/hlcl_parse" }
 hlcl_finalize = { path = "src/hlcl_finalize" }
 hlcl_asm = { path = "src/hlcl_asm" }
+hlcl_assembler = { path = "src/hlcl_assembler" }

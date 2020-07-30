@@ -1,24 +1,24 @@
 use crate::token::McToken;
+use std::collections::HashMap;
 use std::iter::FromIterator;
 use std::path::Path;
-use std::collections::HashMap;
 
 pub mod token;
 pub mod translate;
 
 #[derive(Debug)]
-pub struct FunctionWriter {
-    blocks: Vec<(String, String)>
+pub struct CommandWriter {
+    blocks: Vec<(String, String)>,
 }
 
-impl FunctionWriter {
+impl CommandWriter {
     pub fn root_block(&self) -> &str {
         self.blocks[0].1.as_str()
     }
 }
 
-impl<'asm> FromIterator<McToken<'asm>> for FunctionWriter {
-    fn from_iter<T: IntoIterator<Item=McToken<'asm>>>(iter: T) -> Self {
+impl<'asm> FromIterator<McToken<'asm>> for CommandWriter {
+    fn from_iter<T: IntoIterator<Item = McToken<'asm>>>(iter: T) -> Self {
         let mut blocks = vec![(String::new(), String::with_capacity(128))];
         let mut current_file = &mut blocks[0].1;
         let mut parents = vec![0];
@@ -60,15 +60,15 @@ impl<'asm> FromIterator<McToken<'asm>> for FunctionWriter {
             }
         }
 
-        FunctionWriter { blocks }
+        CommandWriter { blocks }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use crate::token::McToken;
+    use crate::CommandWriter;
     use hlcl_asm::selector::Selector;
-    use crate::FunctionWriter;
 
     #[test]
     fn works() {
@@ -91,7 +91,7 @@ mod tests {
             ]
         };
 
-        let writer: FunctionWriter = tokens.into_iter().collect();
+        let writer: CommandWriter = tokens.into_iter().collect();
 
         //println!("{:?}", writer);
         assert_eq!("execute as @s run\nexecute\nexecute", writer.root_block());

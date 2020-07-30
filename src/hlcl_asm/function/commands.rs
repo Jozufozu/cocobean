@@ -1,5 +1,5 @@
-use crate::Tag;
 use crate::function::Target;
+use crate::Tag;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Command {

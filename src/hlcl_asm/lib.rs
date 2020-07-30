@@ -2,14 +2,14 @@
 extern crate derive_more;
 
 use crate::coord::Pos;
-use crate::function::{Function, Op, SubCommand, AnchorMode, Target, Align};
-use crate::selector::{Selector, RangeArg};
-use std::collections::HashMap;
-use std::borrow::Cow;
-use std::slice::Iter;
-use std::collections::VecDeque;
-use hlcl_helpers::resource_name::ResourceName;
+use crate::function::{Align, AnchorMode, ExecuteItem, Function, Op, Target};
+use crate::selector::{RangeArg, Selector};
 use hlcl_helpers::id_map::*;
+use hlcl_helpers::resource_name::ResourceName;
+use std::borrow::Cow;
+use std::collections::HashMap;
+use std::collections::VecDeque;
+use std::slice::Iter;
 
 pub mod coord;
 pub mod function;
@@ -21,9 +21,9 @@ macro_rules! identifiers {
     $($name:ident : $id:ident),* ;
     $($sp_name:ident : $sp:ident -> $sp_map:ident),* ;
     ) => {
-        $(id!($other))*
-        $(id!($id))*
-        $(id!($sp))*
+        $(id!{$other})*
+        $(id!{$id})*
+        $(id!{$sp})*
 
         #[derive(Debug)]
         pub struct Names {
@@ -33,6 +33,19 @@ macro_rules! identifiers {
             $(
             pub $sp_name: IdMap<$sp, $sp_map>,
             )*
+        }
+
+        impl Names {
+            pub fn new() -> Names {
+                Names {
+                    $(
+                    $name: IdMap::new(),
+                    )*
+                    $(
+                    $sp_name: IdMap::new(),
+                    )*
+                }
+            }
         }
     };
 }
@@ -51,7 +64,7 @@ macro_rules! id {
                 $name(::std::num::NonZeroUsize::new(u).unwrap())
             }
         }
-    }
+    };
 }
 
 identifiers!(
@@ -61,19 +74,31 @@ identifiers!(
     scores: Score,
     teams: Team,
     names: Name,
-    tags: Tag,
-    storages: Storage;
+    tags: Tag;
+    storages: Storage -> ResourceName,
     dims: Dimension -> ResourceName;
 );
 
+#[derive(Debug)]
 pub struct Assembly {
-    namespace: Sting,
-    functions: HashMap<FnId, Function>,
+    functions: IdMap<FnId, Function>,
     names: Names,
 }
 
 impl Assembly {
     pub fn resolve_score(&self, score: &Score) -> Option<&str> {
         self.names.scores.get(score).map(|name| name.as_ref())
+    }
+
+    pub fn resolve_tag(&self, score: &Tag) -> Option<&str> {
+        self.names.tags.get(score).map(|name| name.as_ref())
+    }
+
+    pub fn new(functions: IdMap<FnId, Function>, names: Names) -> Self {
+        Assembly { functions, names }
+    }
+
+    pub fn get_fn(&self, id: &FnId) -> Option<&Function> {
+        self.functions.get(id)
     }
 }

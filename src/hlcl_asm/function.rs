@@ -1,13 +1,14 @@
 use hlcl_helpers::static_assert_size;
 
-use crate::selector::Selector;
-use crate::*;
 use crate::coord::Rotation;
 use crate::function::commands::Command;
+use crate::selector::Selector;
+use crate::*;
 use hlcl_helpers::resource_name::ResourceName;
 
 pub mod commands;
 
+#[derive(Debug)]
 pub struct Function {
     pub entity_args: HashMap<u8, Selector>,
     pub registers: IdMap<Register, (Selector, Score)>,
@@ -15,15 +16,26 @@ pub struct Function {
     pub code: Vec<Op>,
 }
 
+impl Function {
+    pub fn new() -> Self {
+        Function {
+            entity_args: HashMap::new(),
+            registers: IdMap::new(),
+            blocks: IdMap::new(),
+            code: Vec::new(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Op {
-    SubCommand(SubCommand),
+    NonTerminal(ExecuteItem),
     /// Calls a function.
     Call(FnId),
 
     BinOp(ScoreOp, Operand, Operand),
 
-    Command(Command),
+    Terminal(Command),
 
     /// Begins a block
     Block(BlockId),
@@ -45,6 +57,13 @@ pub enum Target {
     Selector(Box<Selector>),
     /// A compiler generated entity selector used to pass entities as arguments to functions.
     Argument(u8),
+}
+
+impl Target {
+    #[inline(always)]
+    pub fn executor() -> Self {
+        Target::Selector(Box::new(Selector::executor()))
+    }
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -69,7 +88,7 @@ pub enum ScoreOp {
 /// the sub-commands will be applied to everything in the block. Store operations preceding a
 /// block are applied only to the last terminal in the block.
 #[derive(Debug, Clone, PartialEq)]
-pub enum SubCommand {
+pub enum ExecuteItem {
     Align(Align),
     Anchored(AnchorMode),
     As(Target),

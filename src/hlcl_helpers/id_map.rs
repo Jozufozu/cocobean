@@ -1,20 +1,25 @@
-use std::num::NonZeroUsize;
-use std::collections::HashMap;
-use std::hash::{Hash, BuildHasher};
 use std::collections::hash_map::RandomState;
+use std::collections::HashMap;
+use std::hash::{BuildHasher, Hash};
 use std::marker::PhantomData;
+use std::num::NonZeroUsize;
 
 pub trait Index: Sized + Copy + Eq + Hash {
     fn to_usize(&self) -> usize;
     fn from_usize(u: usize) -> Self;
 }
 
+#[derive(Debug, Default)]
 pub struct IdMap<K: Index, V, S = RandomState> {
     base: HashMap<K, V, S>,
     next: usize,
 }
 
-impl<K, V, S> IdMap<K, V, S> where K: Index, S: BuildHasher {
+impl<K, V, S> IdMap<K, V, S>
+where
+    K: Index,
+    S: BuildHasher,
+{
     #[inline]
     pub fn get(&self, key: &K) -> Option<&V> {
         self.base.get(key)

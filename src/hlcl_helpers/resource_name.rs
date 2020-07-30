@@ -5,10 +5,7 @@ use std::fmt::{self, Display, Formatter};
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum NameError {
     InvalidChar(usize, char),
-    MultipleColons {
-        first: usize,
-        second: usize,
-    },
+    MultipleColons { first: usize, second: usize },
     MissingColon,
     MissingNamespace,
     MissingPath,
@@ -19,8 +16,14 @@ impl Display for NameError {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "error while creating resource name:\n  ")?;
         match self {
-            NameError::InvalidChar(loc, char) => write!(f, "invalid char '{}' at index {}", char, loc),
-            NameError::MultipleColons { first, second } => write!(f, "colon at index {}, but there is already one at index {}", first, second),
+            NameError::InvalidChar(loc, char) => {
+                write!(f, "invalid char '{}' at index {}", char, loc)
+            }
+            NameError::MultipleColons { first, second } => write!(
+                f,
+                "colon at index {}, but there is already one at index {}",
+                first, second
+            ),
             NameError::MissingColon => write!(f, "missing colon"),
             NameError::MissingNamespace => write!(f, "missing namespace"),
             NameError::MissingPath => write!(f, "missing path"),
@@ -68,12 +71,9 @@ impl ResourceName {
             match char {
                 ':' => {
                     if let Some(first) = colon {
-                        return Err(NameError::MultipleColons {
-                            first,
-                            second: i
-                        })
+                        return Err(NameError::MultipleColons { first, second: i });
                     } else if i == 0 {
-                        return Err(NameError::MissingNamespace)
+                        return Err(NameError::MissingNamespace);
                     } else {
                         colon = Some(i);
                     }
@@ -116,8 +116,8 @@ impl AsRef<str> for ResourceName {
 
 #[cfg(test)]
 pub mod tests {
-    use std::convert::{TryInto, TryFrom};
-    use crate::resource_name::{ResourceName, NameError};
+    use crate::resource_name::{NameError, ResourceName};
+    use std::convert::{TryFrom, TryInto};
 
     #[test]
     fn colon_placement() {
@@ -181,4 +181,3 @@ pub mod tests {
         assert_eq!(error, NameError::InvalidChar(4, '.'));
     }
 }
-

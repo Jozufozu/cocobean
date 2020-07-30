@@ -1,11 +1,11 @@
 [package]
-name = "hlcl_asm_lowering"
+name = "hlcl_assembler"
 version = "0.1.0"
 authors = ["JozsefA <jozsefaug@gmail.com>"]
 edition = "2018"
 
 [lib]
-name = "hlcl_asm_lowering"
+name = "hlcl_assembler"
 path = "lib.rs"
 doctest = false
 

@@ -1,8 +1,9 @@
-use hlcl_asm::selector::*;
 use hlcl_asm::coord::*;
+use hlcl_asm::function::commands::TagArgs;
 use hlcl_asm::function::*;
-use std::borrow::Cow;
+use hlcl_asm::selector::*;
 use hlcl_helpers::static_assert_size;
+use std::borrow::Cow;
 use std::num::NonZeroU16;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -113,9 +114,7 @@ impl<'asm> McToken<'asm> {
             McToken::List => Cow::Borrowed("list"),
             McToken::Remove => Cow::Borrowed("remove"),
 
-            McToken::BeginBlock(_)
-            | McToken::EndBlock
-            | McToken::EndLine => Cow::Borrowed(""),
+            McToken::BeginBlock(_) | McToken::EndBlock | McToken::EndLine => Cow::Borrowed(""),
         }
     }
 }
@@ -155,6 +154,16 @@ impl From<&StoreMode> for McToken<'_> {
         match *mode {
             StoreMode::Result => McToken::Result,
             StoreMode::Success => McToken::Success,
+        }
+    }
+}
+
+impl From<&TagArgs> for McToken<'_> {
+    fn from(mode: &TagArgs) -> Self {
+        match *mode {
+            TagArgs::Add(_) => McToken::Add,
+            TagArgs::Remove(_) => McToken::Remove,
+            TagArgs::List => McToken::List,
         }
     }
 }
