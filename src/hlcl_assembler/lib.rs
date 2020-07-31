@@ -1,7 +1,5 @@
 use crate::token::McToken;
-use std::collections::HashMap;
 use std::iter::FromIterator;
-use std::path::Path;
 
 pub mod token;
 pub mod translate;
@@ -41,7 +39,6 @@ impl<'asm> FromIterator<McToken<'asm>> for CommandWriter {
                     current_index = parents[current_index];
                     current_file = &mut blocks[current_index].1;
 
-                    current_file.push('\n');
                     is_new_line = true;
                 }
                 McToken::EndLine => {
@@ -71,7 +68,7 @@ mod tests {
     use hlcl_asm::selector::Selector;
 
     #[test]
-    fn works() {
+    fn writer_works() {
         let data = (Selector::executor(), "name");
 
         let tokens = {
@@ -83,6 +80,7 @@ mod tests {
                 Run,
                 EndLine,
                 Execute,
+                EndLine,
                 BeginBlock(&data.1),
                 Execute,
                 As,
@@ -96,5 +94,59 @@ mod tests {
         //println!("{:?}", writer);
         assert_eq!("execute as @s run\nexecute\nexecute", writer.root_block());
         assert_eq!("execute as", writer.blocks[1].1);
+    }
+
+    #[test]
+    fn no_double_newline() {
+        let data = "dummy";
+
+        let tokens = {
+            use McToken::*;
+            vec![
+                Execute,
+                EndLine,
+                BeginBlock(data),
+                Execute,
+                EndLine,
+                EndBlock,
+                Execute,
+            ]
+        };
+
+        let writer: CommandWriter = tokens.into_iter().collect();
+
+        assert_eq!("execute\nexecute", writer.root_block());
+        assert_eq!("execute\n", writer.blocks[1].1);
+    }
+
+    #[test]
+    fn nested_blocks() {
+        let data = ("dummy", "dummydummy");
+
+        let tokens = {
+            use McToken::*;
+            vec![
+                Execute,
+                EndLine,
+                BeginBlock(data.0),
+                    Execute,
+                    EndLine,
+                    BeginBlock(data.1),
+                        Execute,
+                        EndLine,
+                    EndBlock,
+                    Execute,
+                    EndLine,
+                EndBlock,
+                Execute,
+                EndLine,
+            ]
+        };
+
+        let writer: CommandWriter = tokens.into_iter().collect();
+
+        assert_eq!("execute\nexecute\n", writer.root_block());
+        assert_eq!(("dummy", "execute\nexecute\n"), (writer.blocks[1].0.as_str(), writer.blocks[1].1.as_str()));
+        assert_eq!(("dummydummy", "execute\n"), (writer.blocks[2].0.as_str(), writer.blocks[2].1.as_str()));
     }
 }

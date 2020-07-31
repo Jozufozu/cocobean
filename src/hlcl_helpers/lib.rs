@@ -1,7 +1,6 @@
 use std::hash::{BuildHasher, Hash};
 
 use lasso::{Key, Rodeo, RodeoResolver, Spur, ThreadedRodeo};
-use std::num::NonZeroUsize;
 
 pub mod id_map;
 pub mod resource_name;

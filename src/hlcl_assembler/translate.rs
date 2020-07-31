@@ -1,7 +1,6 @@
-use hlcl_asm::coord::*;
 use hlcl_asm::function::*;
 use hlcl_asm::selector::*;
-use hlcl_asm::Assembly;
+use hlcl_asm::{Assembly, NameResolver};
 use std::collections::VecDeque;
 use std::slice::Iter;
 
@@ -53,6 +52,10 @@ impl<'asm> Iterator for FunctionAssembler<'asm> {
                     self.push(McToken::NamespacedPath(name.as_str()));
                     self.transition(AsmState::Bare);
                     self.push(McToken::BeginBlock(name.path()));
+                }
+                Some(Op::EndBlock) => {
+                    self.push(McToken::EndBlock);
+                    self.transition(AsmState::Bare);
                 }
                 _ => return None,
             }
@@ -111,7 +114,7 @@ impl<'asm> FunctionAssembler<'asm> {
 
                 match args {
                     TagArgs::Add(tag) | TagArgs::Remove(tag) => {
-                        self.push(McToken::Path(self.asm_ctx.resolve_tag(tag).unwrap()))
+                        self.push(McToken::Path(self.asm_ctx.names.resolve(tag).unwrap()))
                     }
                     TagArgs::List => {}
                 }
@@ -123,35 +126,36 @@ impl<'asm> FunctionAssembler<'asm> {
     fn buffer_binop(&mut self, op: ScoreOp, rhs: &'asm Operand, lhs: &'asm Operand) {
         self.transition(AsmState::Terminal);
 
+        self.push(McToken::Scoreboard);
+        self.push(McToken::Players);
+        self.push(McToken::Operation);
+
+        self.buffer_operand(rhs);
+        self.push(McToken::BinOp(op));
+        self.buffer_operand(lhs);
+
         self.transition(AsmState::Bare);
     }
 
     fn buffer_sub_command(&mut self, sub: &'asm ExecuteItem) {
         self.transition(AsmState::Execute);
 
+        self.push(sub.into());
         match sub {
             ExecuteItem::Align(align) => {
                 if align.all_false() {
                     panic!("empty align subcommand"); // TODO: Graceful errors
                 }
 
-                self.push(McToken::Align);
                 self.push(McToken::Swizzle(align));
             }
             ExecuteItem::Anchored(mode) => {
-                self.push(McToken::Anchored);
                 self.push(mode.into())
             }
-            ExecuteItem::As(target) => {
-                self.push(McToken::As);
-                self.push(McToken::Selector(self.resolve_target(target)))
-            }
-            ExecuteItem::At(target) => {
-                self.push(McToken::At);
+            ExecuteItem::As(target) | ExecuteItem::At(target) => {
                 self.push(McToken::Selector(self.resolve_target(target)))
             }
             ExecuteItem::Facing(facing) => {
-                self.push(McToken::Facing);
                 match facing {
                     Facing::Pos(pos) => self.push(McToken::Pos(pos)),
                     Facing::Entity(target, mode) => {
@@ -161,38 +165,20 @@ impl<'asm> FunctionAssembler<'asm> {
                     }
                 }
             }
-            ExecuteItem::In(_) => unimplemented!(),
-            ExecuteItem::Positioned(loc) => {
-                self.push(McToken::Positioned);
-                match loc {
-                    TargetOr::Other(pos) => self.push(McToken::Pos(pos)),
-                    TargetOr::Target(target) => {
-                        self.push(McToken::As);
-                        self.push(McToken::Selector(self.resolve_target(target)))
-                    }
-                }
+            ExecuteItem::In(dim) => {
+                let dim = self.asm_ctx.names.resolve(dim).expect("missing dimension");
+                self.push(McToken::NamespacedPath(dim.as_str()))
+            },
+            ExecuteItem::Positioned(TargetOr::Target(target)) | ExecuteItem::Rotated(TargetOr::Target(target)) => {
+                self.push(McToken::As);
+                self.push(McToken::Selector(self.resolve_target(target)))
             }
-            ExecuteItem::Rotated(rot) => {
-                self.push(McToken::Positioned);
-                match rot {
-                    TargetOr::Other(pos) => self.push(McToken::Rotation(pos)),
-                    TargetOr::Target(target) => {
-                        self.push(McToken::As);
-                        self.push(McToken::Selector(self.resolve_target(target)))
-                    }
-                }
-            }
-            ExecuteItem::If(cond) => {
-                self.push(McToken::If);
-                self.buffer_cond(cond)
-            }
-            ExecuteItem::Unless(cond) => {
-                self.push(McToken::Unless);
+            ExecuteItem::Positioned(TargetOr::Other(pos)) => self.push(McToken::Pos(pos)),
+            ExecuteItem::Rotated(TargetOr::Other(rot)) => self.push(McToken::Rotation(rot)),
+            ExecuteItem::If(cond) | ExecuteItem::Unless(cond) => {
                 self.buffer_cond(cond);
             }
-
             ExecuteItem::Store(mode, loc) => {
-                self.push(McToken::Store);
                 self.push(mode.into());
 
                 match loc {
@@ -256,7 +242,8 @@ impl<'asm> FunctionAssembler<'asm> {
 
         pair.and_then(|(selector, score)| {
             self.asm_ctx
-                .resolve_score(score)
+                .names
+                .resolve(score)
                 .map(|score| (selector, score))
         })
         .expect("invalid operand")

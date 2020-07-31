@@ -4,7 +4,7 @@ use hlcl_asm::function::*;
 use hlcl_asm::selector::*;
 use hlcl_helpers::static_assert_size;
 use std::borrow::Cow;
-use std::num::NonZeroU16;
+use std::fmt::{self, Formatter, Display};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum McToken<'asm> {
@@ -52,6 +52,8 @@ pub enum McToken<'asm> {
     Ge,
     Gt,
 
+    BinOp(ScoreOp),
+
     Function,
 
     Feet,
@@ -61,6 +63,12 @@ pub enum McToken<'asm> {
     Add,
     List,
     Remove,
+
+    Scoreboard,
+    Objectives,
+    Players,
+    Operation,
+
 }
 
 // We want to keep this small
@@ -69,6 +77,8 @@ static_assert_size!(McToken, 24);
 impl<'asm> McToken<'asm> {
     pub fn to_str(&self) -> Cow<'asm, str> {
         match *self {
+            McToken::BeginBlock(_) | McToken::EndBlock | McToken::EndLine => Cow::Borrowed(""),
+
             McToken::Path(name) | McToken::NamespacedPath(name) => Cow::Borrowed(name),
             McToken::Selector(s) => Cow::Owned(s.to_string()),
             McToken::IntRange(range) => Cow::Owned(range.to_string()),
@@ -113,9 +123,26 @@ impl<'asm> McToken<'asm> {
             McToken::Add => Cow::Borrowed("add"),
             McToken::List => Cow::Borrowed("list"),
             McToken::Remove => Cow::Borrowed("remove"),
-
-            McToken::BeginBlock(_) | McToken::EndBlock | McToken::EndLine => Cow::Borrowed(""),
+            McToken::Scoreboard => Cow::Borrowed("scoreboard"),
+            McToken::Objectives => Cow::Borrowed("objectives"),
+            McToken::Players => Cow::Borrowed("players"),
+            McToken::Operation => Cow::Borrowed("operation"),
+            McToken::BinOp(ScoreOp::Add) => Cow::Borrowed("+="),
+            McToken::BinOp(ScoreOp::Sub) => Cow::Borrowed("-="),
+            McToken::BinOp(ScoreOp::Mul) => Cow::Borrowed("*="),
+            McToken::BinOp(ScoreOp::Div) => Cow::Borrowed("/="),
+            McToken::BinOp(ScoreOp::Mod) => Cow::Borrowed("%="),
+            McToken::BinOp(ScoreOp::Min) => Cow::Borrowed("<"),
+            McToken::BinOp(ScoreOp::Max) => Cow::Borrowed(">"),
+            McToken::BinOp(ScoreOp::Swap) => Cow::Borrowed("><"),
+            McToken::BinOp(ScoreOp::Assign) => Cow::Borrowed("="),
         }
+    }
+}
+
+impl Display for McToken<'_> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.write_str(self.to_str().as_ref())
     }
 }
 
@@ -164,6 +191,24 @@ impl From<&TagArgs> for McToken<'_> {
             TagArgs::Add(_) => McToken::Add,
             TagArgs::Remove(_) => McToken::Remove,
             TagArgs::List => McToken::List,
+        }
+    }
+}
+
+impl From<&ExecuteItem> for McToken<'_> {
+    fn from(cond: &ExecuteItem) -> Self {
+        match cond {
+            ExecuteItem::Align(_) => McToken::Align,
+            ExecuteItem::Anchored(_) => McToken::Anchored,
+            ExecuteItem::As(_) => McToken::As,
+            ExecuteItem::At(_) => McToken::At,
+            ExecuteItem::Facing(_) => McToken::Facing,
+            ExecuteItem::In(_) => McToken::In,
+            ExecuteItem::Positioned(_) => McToken::Positioned,
+            ExecuteItem::Rotated(_) => McToken::Rotated,
+            ExecuteItem::If(_) => McToken::If,
+            ExecuteItem::Unless(_) => McToken::Unless,
+            ExecuteItem::Store(_, _) => McToken::Store,
         }
     }
 }

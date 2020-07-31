@@ -1,4 +1,3 @@
-use hlcl_helpers::static_assert_size;
 
 use crate::coord::Rotation;
 use crate::function::commands::Command;
@@ -40,7 +39,7 @@ pub enum Op {
     /// Begins a block
     Block(BlockId),
     /// Ends a block
-    End,
+    EndBlock,
     /// Jumps backwards to the start of a block
     Loop(BlockId),
 }

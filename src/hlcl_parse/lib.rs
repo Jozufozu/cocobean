@@ -13,7 +13,7 @@ use walkdir::{DirEntry, WalkDir};
 
 pub use hlcl::ProgramParser;
 use hlcl_ast::Program;
-use hlcl_project::{Modules, Path as ASTPath, PathMap, Project, SourceFile};
+use hlcl_project::{Modules, Path as ASTPath, PathMap, Project};
 pub use lexer::Lexer;
 
 use crate::err::ParserError;

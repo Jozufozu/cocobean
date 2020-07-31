@@ -46,6 +46,7 @@ impl Selector {
     pub fn executor() -> Self {
         Selector::new(TargetKind::Executor)
     }
+
     pub fn new(target: TargetKind) -> Self {
         Selector {
             target,

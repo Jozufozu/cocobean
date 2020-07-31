@@ -1,8 +1,6 @@
 use std::collections::hash_map::RandomState;
 use std::collections::HashMap;
 use std::hash::{BuildHasher, Hash};
-use std::marker::PhantomData;
-use std::num::NonZeroUsize;
 
 pub trait Index: Sized + Copy + Eq + Hash {
     fn to_usize(&self) -> usize;
