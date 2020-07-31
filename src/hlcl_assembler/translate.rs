@@ -166,7 +166,7 @@ impl<'asm> FunctionAssembler<'asm> {
                 }
             }
             ExecuteItem::In(dim) => {
-                let dim = self.asm_ctx.names.resolve(dim).expect("missing dimension");
+                let dim = self.asm_ctx.resolve(dim).expect("invalid dimension id");
                 self.push(McToken::NamespacedPath(dim.as_str()))
             },
             ExecuteItem::Positioned(TargetOr::Target(target)) | ExecuteItem::Rotated(TargetOr::Target(target)) => {
@@ -242,7 +242,6 @@ impl<'asm> FunctionAssembler<'asm> {
 
         pair.and_then(|(selector, score)| {
             self.asm_ctx
-                .names
                 .resolve(score)
                 .map(|score| (selector, score))
         })

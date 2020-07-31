@@ -35,3 +35,13 @@ impl Assembly {
         self.functions.insert(func)
     }
 }
+
+impl<K, V: ?Sized> NameResolver<K, V> for Assembly
+where
+    Names: NameResolver<K, V>
+{
+    #[inline]
+    fn resolve(&self, key: &K) -> Option<&V> {
+        self.names.resolve(key)
+    }
+}
