@@ -14,11 +14,11 @@ use walkdir::{DirEntry, WalkDir};
 pub use hlcl::ProgramParser;
 use hlcl_ast::Program;
 use hlcl_project::{Modules, Path as ASTPath, PathMap, Project};
+use hlcl_span::SourceFile;
 pub use lexer::Lexer;
 
 use crate::err::ParserError;
 use crate::lexer::Token;
-use hlcl_span::SourceFile;
 
 #[allow(clippy::all)]
 #[cfg_attr(rustfmt, rustfmt_skip)]

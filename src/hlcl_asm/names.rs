@@ -1,7 +1,9 @@
-
 use hlcl_helpers::resource_name::ResourceName;
+use crate::selector::Selector;
+use std::hash::Hash;
+use hlcl_helpers::id_map::Index;
 
-pub trait NameResolver<K, V: ?Sized> {
+pub trait NameResolver<K: Index, V: ?Sized> {
     fn resolve(&self, key: &K) -> Option<&V>;
 }
 
@@ -13,7 +15,7 @@ macro_rules! identifiers {
     (
     $($other:ident),* ;
     $($name:ident : $id:ident),* ;
-    $($sp_name:ident : $sp:ident -> $sp_map:ident),* ;
+    $($sp_name:ident : $sp:ident -> $sp_map:ty),* ;
     ) => {
         $(id!{$other})*
         $(id!{$id})*
@@ -22,10 +24,10 @@ macro_rules! identifiers {
         #[derive(Debug)]
         pub struct Names {
             $(
-            pub $name: ::hlcl_helpers::id_map::IdMap<$id, String>,
+            $name: ::indexmap::set::IndexSet<String>,
             )*
             $(
-            pub $sp_name: ::hlcl_helpers::id_map::IdMap<$sp, $sp_map>,
+            $sp_name: ::indexmap::set::IndexSet<$sp_map>,
             )*
         }
 
@@ -34,10 +36,10 @@ macro_rules! identifiers {
             fn default() -> Self {
                 Names {
                     $(
-                    $name: ::hlcl_helpers::id_map::IdMap::<$id, String>::new(),
+                    $name: ::indexmap::set::IndexSet::<String>::new(),
                     )*
                     $(
-                    $sp_name: ::hlcl_helpers::id_map::IdMap::<$sp, $sp_map>::new(),
+                    $sp_name: ::indexmap::set::IndexSet::<$sp_map>::new(),
                     )*
                 }
             }
@@ -48,10 +50,10 @@ macro_rules! identifiers {
             pub fn new() -> Names {
                 Names {
                     $(
-                    $name: ::hlcl_helpers::id_map::IdMap::<$id, String>::new(),
+                    $name: ::indexmap::set::IndexSet::<String>::new(),
                     )*
                     $(
-                    $sp_name: ::hlcl_helpers::id_map::IdMap::<$sp, $sp_map>::new(),
+                    $sp_name: ::indexmap::set::IndexSet::<$sp_map>::new(),
                     )*
                 }
             }
@@ -61,14 +63,14 @@ macro_rules! identifiers {
         impl NameResolver<$id, str> for Names {
             #[inline(always)]
             fn resolve(&self, key: &$id) -> Option<&str> {
-                self.$name.get(key).map(|s| s.as_str())
+                self.$name.get_index(key.to_usize()).map(|s| s.as_str())
             }
         }
 
         impl NameInterner<$id, String> for Names {
             #[inline(always)]
             fn insert(&mut self, value: String) -> $id {
-                self.$name.insert(value)
+                $id::from_usize(self.$name.insert_full(value).0)
             }
         }
         )*
@@ -76,14 +78,14 @@ macro_rules! identifiers {
         impl NameResolver<$sp, $sp_map> for Names {
             #[inline(always)]
             fn resolve(&self, key: &$sp) -> Option<&$sp_map> {
-                self.$sp_name.get(key)
+                self.$sp_name.get_index(key.to_usize())
             }
         }
 
         impl NameInterner<$sp, $sp_map> for Names {
             #[inline(always)]
             fn insert(&mut self, value: $sp_map) -> $sp {
-                self.$sp_name.insert(value)
+                $sp::from_usize(self.$sp_name.insert_full(value).0)
             }
         }
         )*
@@ -97,24 +99,25 @@ macro_rules! id {
 
         impl ::hlcl_helpers::id_map::Index for $name {
             fn to_usize(&self) -> usize {
-                self.0.get()
+                self.0.get() - 1
             }
 
             fn from_usize(u: usize) -> Self {
-                $name(::std::num::NonZeroUsize::new(u).unwrap())
+                $name(::std::num::NonZeroUsize::new(u + 1).unwrap())
             }
         }
     };
 }
 
 identifiers!(
-    FnId,
+    SelectorId,
     Register,
-    BlockId;
+    FnId;
     scores: Score,
     teams: Team,
     names: Name,
     tags: Tag;
     storages: Storage -> ResourceName,
+    blocks: BlockId -> ResourceName,
     dims: Dimension -> ResourceName;
 );

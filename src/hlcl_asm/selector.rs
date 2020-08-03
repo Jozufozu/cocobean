@@ -1,8 +1,10 @@
-use crate::{Name, Score, Tag, Team};
-use smallvec::SmallVec;
 use std::collections::HashMap;
 use std::fmt::{self, Display, Formatter};
 use std::ops::Range;
+
+use smallvec::SmallVec;
+
+use crate::{Name, Score, Tag, Team};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub enum TargetKind {
@@ -41,6 +43,8 @@ pub struct Selector {
     pub tags: SmallVec<[(ArgumentMode, Tag); 1]>,
     // TODO: NBT, advancements, and predicates
 }
+
+hlcl_helpers::static_assert_size!(Selector, 256);
 
 impl Selector {
     pub fn executor() -> Self {

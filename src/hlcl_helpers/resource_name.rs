@@ -27,14 +27,14 @@ impl Display for NameError {
             NameError::MissingColon => write!(f, "missing colon"),
             NameError::MissingNamespace => write!(f, "missing namespace"),
             NameError::MissingPath => write!(f, "missing path"),
-            NameError::TooLong => write!(f, "must be at most "),
+            NameError::TooLong => write!(f, "must be at most 65535 characters"),
         }
     }
 }
 
 impl Error for NameError {}
 
-#[derive(Debug, Clone, PartialOrd, PartialEq)]
+#[derive(Debug, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
 pub struct ResourceName {
     data: String,
     colon: u16,
@@ -116,8 +116,9 @@ impl AsRef<str> for ResourceName {
 
 #[cfg(test)]
 pub mod tests {
-    use crate::resource_name::{NameError, ResourceName};
     use std::convert::{TryFrom, TryInto};
+
+    use crate::resource_name::{NameError, ResourceName};
 
     #[test]
     fn colon_placement() {

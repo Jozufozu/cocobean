@@ -1,47 +1,38 @@
 #[macro_use]
 extern crate derive_more;
 
+use std::collections::HashMap;
+
 use crate::coord::Pos;
 use crate::function::Function;
 pub use crate::names::*;
 use crate::selector::RangeArg;
-use hlcl_helpers::id_map::*;
-use std::collections::HashMap;
+use indexmap::set::IndexSet;
+use hlcl_helpers::id_map::Index;
 
 pub mod coord;
 pub mod function;
-pub mod selector;
 pub mod names;
+pub mod selector;
 
 #[derive(Debug)]
 pub struct Assembly {
-    functions: IdMap<FnId, Function>,
-    pub names: Names,
+    functions: Vec<Function>,
 }
 
 impl Assembly {
     pub fn new() -> Self {
         Assembly {
-            functions: IdMap::new(),
-            names: Names::new()
+            functions: Vec::new()
         }
     }
 
     pub fn get_fn(&self, id: &FnId) -> Option<&Function> {
-        self.functions.get(id)
+        self.functions.get(id.to_usize() - 1)
     }
 
     pub fn insert_fn(&mut self, func: Function) -> FnId {
-        self.functions.insert(func)
-    }
-}
-
-impl<K, V: ?Sized> NameResolver<K, V> for Assembly
-where
-    Names: NameResolver<K, V>
-{
-    #[inline]
-    fn resolve(&self, key: &K) -> Option<&V> {
-        self.names.resolve(key)
+        self.functions.push(func);
+        FnId::from_usize(self.functions.len())
     }
 }

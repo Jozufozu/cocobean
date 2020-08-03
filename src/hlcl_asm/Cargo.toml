@@ -13,3 +13,4 @@ doctest = false
 hlcl_helpers = { path = "../hlcl_helpers" }
 derive_more = "0.99.9"
 smallvec = "1.4.1"
+indexmap = "1.5.0"

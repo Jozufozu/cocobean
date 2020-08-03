@@ -1,27 +1,31 @@
-use crate::translate::FunctionAssembler;
-use hlcl_asm::function::commands::{Command, TagArgs};
+use std::convert::TryFrom;
+
+use hlcl_asm::{Assembly, NameInterner};
 use hlcl_asm::function::{ExecuteItem, Function, Op, Target};
-use hlcl_asm::Assembly;
+use hlcl_asm::function::commands::{Command, TagArgs};
 use hlcl_asm::selector;
 use hlcl_helpers::resource_name::ResourceName;
-use std::convert::TryFrom;
+
+use crate::translate::FunctionAssembler;
+use hlcl_asm::selector::Selector;
 
 #[test]
 fn works() {
+    let executor = selector::Selector::executor();
     let mut func = Function::new();
 
-    let id = func
-        .blocks
-        .insert(ResourceName::try_from("test:test/test1".to_string()).unwrap());
+    let block = func.insert(ResourceName::try_from("test:test/test1".to_string()).unwrap());
+
+    let executorid = func.selectors.insert(Selector::executor());
 
     func.code = vec![
-        Op::NonTerminal(ExecuteItem::As(Target::executor())),
-        Op::Terminal(Command::Tag(Target::executor(), TagArgs::List)),
-        Op::NonTerminal(ExecuteItem::As(Target::executor())),
-        Op::Block(id),
-        Op::Terminal(Command::Tag(Target::executor(), TagArgs::List)),
+        Op::NonTerminal(ExecuteItem::As(Target::Selector(executorid))),
+        Op::Terminal(Command::Tag(Target::Selector(executorid), TagArgs::List)),
+        Op::NonTerminal(ExecuteItem::As(Target::Selector(executorid))),
+        Op::Block(block),
+        Op::Terminal(Command::Tag(Target::Selector(executorid), TagArgs::List)),
         Op::EndBlock,
-        Op::Terminal(Command::Tag(Target::executor(), TagArgs::List)),
+        Op::Terminal(Command::Tag(Target::Selector(executorid), TagArgs::List)),
     ];
 
     let mut asm = Assembly::new();
@@ -40,27 +44,27 @@ fn works() {
         vec![
             Execute,
             As,
-            Selector(&selector::Selector::executor()),
+            Selector(&executor),
             Run,
             Tag,
-            Selector(&selector::Selector::executor()),
+            Selector(&executor),
             List,
             EndLine,
             Execute,
             As,
-            Selector(&selector::Selector::executor()),
+            Selector(&executor),
             Run,
             Function,
             NamespacedPath("test:test/test1"),
             EndLine,
             BeginBlock("test/test1"),
             Tag,
-            Selector(&selector::Selector::executor()),
+            Selector(&executor),
             List,
             EndLine,
             EndBlock,
             Tag,
-            Selector(&selector::Selector::executor()),
+            Selector(&executor),
             List,
             EndLine,
         ]

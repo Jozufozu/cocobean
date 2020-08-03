@@ -1,12 +1,12 @@
 use lasso::Spur;
 use smallvec::smallvec;
 
-use hlcl_ast::id::AstId;
-use hlcl_ast::mut_visit::{self, MutVisitor};
 use hlcl_ast::{
     Block, Branch, BranchVariant, Class, Expr, FnParam, Item, ItemKind, Mod, Program, Stmt, Struct,
     StructField, Type,
 };
+use hlcl_ast::id::AstId;
+use hlcl_ast::mut_visit::{self, MutVisitor};
 use hlcl_project::{Modules, Path as ProjectPath, PathMap, Project};
 
 pub struct AstFinalizer<'a> {

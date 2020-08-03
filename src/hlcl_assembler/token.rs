@@ -1,10 +1,11 @@
+use std::borrow::Cow;
+use std::fmt::{self, Display, Formatter};
+
 use hlcl_asm::coord::*;
-use hlcl_asm::function::commands::TagArgs;
 use hlcl_asm::function::*;
+use hlcl_asm::function::commands::TagArgs;
 use hlcl_asm::selector::*;
 use hlcl_helpers::static_assert_size;
-use std::borrow::Cow;
-use std::fmt::{self, Formatter, Display};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum McToken<'asm> {
@@ -68,7 +69,6 @@ pub enum McToken<'asm> {
     Objectives,
     Players,
     Operation,
-
 }
 
 // We want to keep this small

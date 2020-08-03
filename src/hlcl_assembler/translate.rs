@@ -1,11 +1,12 @@
-use hlcl_asm::function::*;
-use hlcl_asm::selector::*;
-use hlcl_asm::{Assembly, NameResolver};
 use std::collections::VecDeque;
 use std::slice::Iter;
 
-use crate::token::*;
+use hlcl_asm::{Assembly, NameResolver};
+use hlcl_asm::function::*;
 use hlcl_asm::function::commands::{Command, TagArgs};
+use hlcl_asm::selector::*;
+
+use crate::token::*;
 
 #[cfg(test)]
 mod tests;
@@ -45,8 +46,11 @@ impl<'asm> Iterator for FunctionAssembler<'asm> {
                 Some(Op::NonTerminal(sub)) => self.buffer_sub_command(sub),
                 Some(Op::Terminal(cmd)) => self.buffer_command(cmd),
                 Some(Op::BinOp(op, lhs, rhs)) => self.buffer_binop(*op, lhs, rhs),
+                Some(Op::Call(id)) => {
+
+                }
                 Some(Op::Block(id)) => {
-                    let name = self.func.blocks.get(id).expect("invalid block id");
+                    let name = self.func.resolve(id).expect("invalid block id");
                     self.transition(AsmState::Terminal);
                     self.push(McToken::Function);
                     self.push(McToken::NamespacedPath(name.as_str()));
@@ -114,7 +118,7 @@ impl<'asm> FunctionAssembler<'asm> {
 
                 match args {
                     TagArgs::Add(tag) | TagArgs::Remove(tag) => {
-                        self.push(McToken::Path(self.asm_ctx.names.resolve(tag).unwrap()))
+                        self.push(McToken::Path(self.func.names.resolve(tag).unwrap()))
                     }
                     TagArgs::List => {}
                 }
@@ -149,27 +153,24 @@ impl<'asm> FunctionAssembler<'asm> {
 
                 self.push(McToken::Swizzle(align));
             }
-            ExecuteItem::Anchored(mode) => {
-                self.push(mode.into())
-            }
+            ExecuteItem::Anchored(mode) => self.push(mode.into()),
             ExecuteItem::As(target) | ExecuteItem::At(target) => {
                 self.push(McToken::Selector(self.resolve_target(target)))
             }
-            ExecuteItem::Facing(facing) => {
-                match facing {
-                    Facing::Pos(pos) => self.push(McToken::Pos(pos)),
-                    Facing::Entity(target, mode) => {
-                        self.push(McToken::Entity);
-                        self.push(McToken::Selector(self.resolve_target(target)));
-                        self.push(mode.into());
-                    }
+            ExecuteItem::Facing(facing) => match facing {
+                Facing::Pos(pos) => self.push(McToken::Pos(pos)),
+                Facing::Entity(target, mode) => {
+                    self.push(McToken::Entity);
+                    self.push(McToken::Selector(self.resolve_target(target)));
+                    self.push(mode.into());
                 }
-            }
-            ExecuteItem::In(dim) => {
-                let dim = self.asm_ctx.resolve(dim).expect("invalid dimension id");
-                self.push(McToken::NamespacedPath(dim.as_str()))
             },
-            ExecuteItem::Positioned(TargetOr::Target(target)) | ExecuteItem::Rotated(TargetOr::Target(target)) => {
+            ExecuteItem::In(dim) => {
+                let dim = self.func.resolve(dim).expect("invalid dimension id");
+                self.push(McToken::NamespacedPath(dim.as_str()))
+            }
+            ExecuteItem::Positioned(TargetOr::Target(target))
+            | ExecuteItem::Rotated(TargetOr::Target(target)) => {
                 self.push(McToken::As);
                 self.push(McToken::Selector(self.resolve_target(target)))
             }
@@ -241,16 +242,14 @@ impl<'asm> FunctionAssembler<'asm> {
         };
 
         pair.and_then(|(selector, score)| {
-            self.asm_ctx
-                .resolve(score)
-                .map(|score| (selector, score))
+            self.func.resolve(score).map(|score| (selector, score))
         })
         .expect("invalid operand")
     }
 
     fn resolve_target(&self, target: &'asm Target) -> &'asm Selector {
         match target {
-            Target::Selector(s) => s.as_ref(),
+            Target::Selector(s) => self.func.selectors.get(s).expect("invalid selector id"),
             Target::Argument(id) => self.func.entity_args.get(id).expect("invalid argument id"),
         }
     }

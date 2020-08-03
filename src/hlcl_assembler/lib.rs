@@ -1,5 +1,6 @@
-use crate::token::McToken;
 use std::iter::FromIterator;
+
+use crate::token::McToken;
 
 pub mod token;
 pub mod translate;
@@ -63,9 +64,10 @@ impl<'asm> FromIterator<McToken<'asm>> for CommandWriter {
 
 #[cfg(test)]
 mod tests {
-    use crate::token::McToken;
-    use crate::CommandWriter;
     use hlcl_asm::selector::Selector;
+
+    use crate::CommandWriter;
+    use crate::token::McToken;
 
     #[test]
     fn writer_works() {
@@ -129,14 +131,14 @@ mod tests {
                 Execute,
                 EndLine,
                 BeginBlock(data.0),
-                    Execute,
-                    EndLine,
-                    BeginBlock(data.1),
-                        Execute,
-                        EndLine,
-                    EndBlock,
-                    Execute,
-                    EndLine,
+                Execute,
+                EndLine,
+                BeginBlock(data.1),
+                Execute,
+                EndLine,
+                EndBlock,
+                Execute,
+                EndLine,
                 EndBlock,
                 Execute,
                 EndLine,
@@ -146,7 +148,13 @@ mod tests {
         let writer: CommandWriter = tokens.into_iter().collect();
 
         assert_eq!("execute\nexecute\n", writer.root_block());
-        assert_eq!(("dummy", "execute\nexecute\n"), (writer.blocks[1].0.as_str(), writer.blocks[1].1.as_str()));
-        assert_eq!(("dummydummy", "execute\n"), (writer.blocks[2].0.as_str(), writer.blocks[2].1.as_str()));
+        assert_eq!(
+            ("dummy", "execute\nexecute\n"),
+            (writer.blocks[1].0.as_str(), writer.blocks[1].1.as_str())
+        );
+        assert_eq!(
+            ("dummydummy", "execute\n"),
+            (writer.blocks[2].0.as_str(), writer.blocks[2].1.as_str())
+        );
     }
 }

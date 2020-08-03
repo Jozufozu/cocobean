@@ -1,28 +1,58 @@
-
+use crate::*;
 use crate::coord::Rotation;
 use crate::function::commands::Command;
 use crate::selector::Selector;
-use crate::*;
 use hlcl_helpers::resource_name::ResourceName;
+use hlcl_helpers::id_map::{IdMap, Index};
 
 pub mod commands;
+pub mod dsl;
 
 #[derive(Debug)]
 pub struct Function {
     pub entity_args: HashMap<u8, Selector>,
     pub registers: IdMap<Register, (Selector, Score)>,
-    pub blocks: IdMap<BlockId, ResourceName>,
+    pub selectors: IdMap<SelectorId, Selector>,
+    pub names: Names,
     pub code: Vec<Op>,
 }
 
+impl Default for Function {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Function {
+    #[inline(always)]
     pub fn new() -> Self {
         Function {
             entity_args: HashMap::new(),
             registers: IdMap::new(),
-            blocks: IdMap::new(),
+            selectors: IdMap::new(),
+            names: Names::default(),
             code: Vec::new(),
         }
+    }
+}
+
+impl<K: Index, V: ?Sized> NameResolver<K, V> for Function
+    where
+        Names: NameResolver<K, V>,
+{
+    #[inline(always)]
+    fn resolve(&self, key: &K) -> Option<&V> {
+        self.names.resolve(key)
+    }
+}
+
+impl<K: Index, V> NameInterner<K, V> for Function
+    where
+        Names: NameInterner<K, V>,
+{
+    #[inline(always)]
+    fn insert(&mut self, value: V) -> K {
+        self.names.insert(value)
     }
 }
 
@@ -44,25 +74,18 @@ pub enum Op {
     Loop(BlockId),
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Operand {
     Register(Register),
     Entity(Target, Score),
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Target {
     /// An arbitrary entity selector.
-    Selector(Box<Selector>),
+    Selector(SelectorId),
     /// A compiler generated entity selector used to pass entities as arguments to functions.
     Argument(u8),
-}
-
-impl Target {
-    #[inline(always)]
-    pub fn executor() -> Self {
-        Target::Selector(Box::new(Selector::executor()))
-    }
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -124,13 +147,13 @@ pub enum AnchorMode {
     Eyes,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum TargetOr<T> {
     Other(T),
     Target(Target),
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Facing {
     Pos(Pos),
     Entity(Target, AnchorMode),
