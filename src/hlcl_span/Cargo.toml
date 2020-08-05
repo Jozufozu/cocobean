@@ -9,6 +9,13 @@ name = "hlcl_span"
 path = "lib.rs"
 doctest = false
 
+[dev-dependencies]
+criterion = "0.3"
+
+[[bench]]
+name = "sourcemap"
+harness = false
+
 [dependencies]
 derive_more = "0.99.9"
 fxhash = "0.2.1"

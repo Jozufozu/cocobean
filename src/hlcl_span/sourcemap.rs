@@ -1,5 +1,5 @@
 use std::collections::{BTreeSet, HashMap};
-use std::ops::Range;
+use std::ops::{Range, Div};
 
 use crate::Span;
 
@@ -17,8 +17,12 @@ impl SourceMap {
                 let cap = cap.next_power_of_two();
                 let mut string = String::with_capacity(cap);
 
-                for _ in 0..cap {
-                    string.push(' ');
+                if cap == 2 {
+                    string.push_str("  ");
+                } else {
+                    for _ in 0..cap.div(4) {
+                        string.push_str("    ");
+                    }
                 }
 
                 string
@@ -57,4 +61,9 @@ impl SourceFile {
             map_span,
         }
     }
+}
+
+#[cfg(test)]
+mod tests {
+
 }
