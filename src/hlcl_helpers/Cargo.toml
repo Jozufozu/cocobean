@@ -10,5 +10,5 @@ path = "lib.rs"
 doctest = false
 
 [dependencies]
-lasso = { version = "0.2.2", features = ["multi-threaded"] }
+hlcl_span = { path = "../hlcl_span" }
 smallvec = "1.4.1"

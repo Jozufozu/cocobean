@@ -4,7 +4,8 @@ use lalrpop_util::{ParseError, ErrorRecovery};
 
 use hlcl_ast::{*, id::AstId, BinOpKind as BinOp};
 use hlcl_span::*;
-use super::{util::*, lexer::Token, err::ParserError, Interner};
+use hlcl_span::kw::Interner;
+use super::{util::*, lexer::Token, err::ParserError};
 
 grammar<'input>(input: &'input str, intr: &Interner, errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>);
 

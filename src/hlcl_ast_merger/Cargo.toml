@@ -1,11 +1,11 @@
 [package]
-name = "hlcl_finalize"
+name = "hlcl_ast_merger"
 version = "0.1.0"
 authors = ["JozsefA <jozsefaug@gmail.com>"]
 edition = "2018"
 
 [lib]
-name = "hlcl_finalize"
+name = "hlcl_ast_merger"
 path = "lib.rs"
 doctest = false
 
@@ -13,5 +13,4 @@ doctest = false
 hlcl_span = { path = "../hlcl_span" }
 hlcl_ast = { path = "../hlcl_ast" }
 hlcl_project = { path = "../hlcl_project" }
-lasso = "0.2.2"
 smallvec = "1.4.1"

@@ -1,6 +1,6 @@
 use std::hash::{BuildHasher, Hash};
 
-use lasso::{Key, Rodeo, RodeoResolver, Spur, ThreadedRodeo};
+use hlcl_span::lasso::{Key, Rodeo, RodeoResolver, Spur, ThreadedRodeo};
 
 pub mod id_map;
 pub mod resource_name;

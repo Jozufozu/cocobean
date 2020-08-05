@@ -1,42 +1,32 @@
+// auto-generated: "lalrpop 0.19.0"
+// sha256: d430f38260a5473f947e4eb045b47b80be5f9fb563109c3519ac293bedbbdc82
+use std::str::FromStr;
+use lalrpop_util::{ParseError, ErrorRecovery};
+use hlcl_ast::{*, id::AstId, BinOpKind as BinOp};
+use hlcl_span::*;
+use hlcl_span::kw::Interner;
+use super::{util::*, lexer::Token, err::ParserError};
 #[allow(unused_extern_crates)]
 extern crate lalrpop_util as __lalrpop_util;
-
-// auto-generated: "lalrpop 0.19.0"
-// sha256: 2e251a2bc6c8d3d9fae842ffd8bae269ff11ac134b16bcb29788e11c5a7ef9
-use std::str::FromStr;
-
-use lalrpop_util::{ErrorRecovery, ParseError};
-
-use hlcl_ast::{*, BinOpKind as BinOp, id::AstId};
-use hlcl_span::*;
-
-use super::{err::ParserError, Interner, lexer::Token, util::*};
-
 #[allow(unused_imports)]
 use self::__lalrpop_util::state_machine as __state_machine;
-pub use self::__parse__Program::ProgramParser;
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
 mod __parse__Program {
 #![allow(non_snake_case, non_camel_case_types, unused_mut, unused_variables, unused_imports, unused_parens)]
 
-    use std::str::FromStr;
-
-    use lalrpop_util::{ErrorRecovery, ParseError};
-
-    use hlcl_ast::{*, BinOpKind as BinOp, id::AstId};
-    use hlcl_span::*;
-
-    use super::__ToTriple;
-    use super::super::{err::ParserError, Interner, lexer::Token, util::*};
-
-    #[allow(unused_imports)]
-    use self::__lalrpop_util::state_machine as __state_machine;
-
-    #[allow(unused_extern_crates)]
+use std::str::FromStr;
+use lalrpop_util::{ParseError, ErrorRecovery};
+use hlcl_ast::{*, id::AstId, BinOpKind as BinOp};
+use hlcl_span::*;
+use hlcl_span::kw::Interner;
+use super::super::{util::*, lexer::Token, err::ParserError};
+#[allow(unused_extern_crates)]
 extern crate lalrpop_util as __lalrpop_util;
-
-    #[allow(dead_code)]
+#[allow(unused_imports)]
+use self::__lalrpop_util::state_machine as __state_machine;
+use super::__ToTriple;
+#[allow(dead_code)]
 pub enum __Symbol<'input>
  {
 Variant0(Token<'input>),
@@ -9413,6 +9403,7 @@ __symbols.push((__start, __Symbol::Variant52(__nt), __end));
 (0, 119)
 }
 }
+pub use self::__parse__Program::ProgramParser;
 
 #[allow(unused_variables)]
 fn __action0<

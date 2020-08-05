@@ -2,11 +2,9 @@ use crate::*;
 use crate::coord::Rotation;
 use crate::function::commands::Command;
 use crate::selector::Selector;
-use hlcl_helpers::resource_name::ResourceName;
 use hlcl_helpers::id_map::{IdMap, Index};
 
 pub mod commands;
-pub mod dsl;
 
 #[derive(Debug)]
 pub struct Function {

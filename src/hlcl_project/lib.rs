@@ -1,27 +1,31 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, BTreeMap, BTreeSet};
 
-use lasso::{RodeoResolver, Spur};
+use hlcl_span::lasso::{RodeoResolver, Spur, RodeoReader};
 use smallvec::SmallVec;
 
 use hlcl_ast::Program;
-use hlcl_span::SourceFile;
+use hlcl_span::{SourceFile, SourceMap, Span};
+use fxhash::FxBuildHasher;
 
+// This is a simpler structure for making reasoning about project files more closely related to the ast
 pub type Path = SmallVec<[Spur; 2]>;
 
 pub type PathMap<T> = HashMap<Path, T>;
 
+pub type Resolver = RodeoResolver<Spur>;
+
 pub struct Modules {
     main: Program,
-    modules: PathMap<Result<Program, ()>>,
+    modules: PathMap<Result<Program, String>>,
 }
 
 impl Modules {
-    pub fn new(main: Program, modules: PathMap<Result<Program, ()>>) -> Self {
+    pub fn new(main: Program, modules: PathMap<Result<Program, String>>) -> Self {
         Modules { main, modules }
     }
 }
 
-impl From<Modules> for (Program, PathMap<Result<Program, ()>>) {
+impl From<Modules> for (Program, PathMap<Result<Program, String>>) {
     #[inline]
     fn from(Modules { main, modules }: Modules) -> Self {
         (main, modules)
@@ -30,16 +34,14 @@ impl From<Modules> for (Program, PathMap<Result<Program, ()>>) {
 
 #[derive(Debug)]
 pub struct Project {
-    pub names: RodeoResolver,
-    pub project_name: Spur,
-    sources: PathMap<SourceFile>,
+    pub names: Resolver,
+    pub sources: SourceMap,
 }
 
 impl Project {
-    pub fn new(names: RodeoResolver, project_name: Spur, sources: PathMap<SourceFile>) -> Self {
+    pub fn new(names: Resolver, sources: SourceMap) -> Self {
         Project {
             names,
-            project_name,
             sources,
         }
     }

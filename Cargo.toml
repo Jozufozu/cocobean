@@ -10,7 +10,7 @@ members = [
     "src/hlcl_span",
     "src/hlcl_ast",
     "src/hlcl_helpers",
-    "src/hlcl_finalize",
+    "src/hlcl_ast_merger",
     "src/hlcl_project",
     "src/hlcl_asm",
     "src/hlcl_assembler",
@@ -23,6 +23,6 @@ codegen-units = 1
 
 [dependencies]
 hlcl_parse = { path = "src/hlcl_parse" }
-hlcl_finalize = { path = "src/hlcl_finalize" }
+hlcl_ast_merger = { path = "src/hlcl_ast_merger" }
 hlcl_asm = { path = "src/hlcl_asm" }
 hlcl_assembler = { path = "src/hlcl_assembler" }

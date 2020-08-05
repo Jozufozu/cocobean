@@ -1,4 +1,4 @@
-use lasso::Spur;
+use hlcl_span::kw;
 use smallvec::smallvec;
 
 use hlcl_ast::{
@@ -8,10 +8,11 @@ use hlcl_ast::{
 use hlcl_ast::id::AstId;
 use hlcl_ast::mut_visit::{self, MutVisitor};
 use hlcl_project::{Modules, Path as ProjectPath, PathMap, Project};
+use hlcl_span::lasso::Spur;
 
 pub struct AstFinalizer<'a> {
     project: &'a mut Project,
-    modules: PathMap<Result<Program, ()>>,
+    modules: PathMap<Result<Program, String>>,
     next_id: AstId,
     current_path: ProjectPath,
     discovered: Vec<ProjectPath>,
@@ -20,7 +21,7 @@ pub struct AstFinalizer<'a> {
 impl<'a> AstFinalizer<'a> {
     pub fn unify(main: Modules, project: &'a mut Project) -> Program {
         let (mut main, modules) = main.into();
-        let current_path = smallvec![project.project_name];
+        let current_path = smallvec![*kw::PACK];
         let mut unifier = AstFinalizer {
             project,
             modules,
@@ -40,11 +41,11 @@ impl<'a> AstFinalizer<'a> {
                 Ok(source) => {
                     return Some(source);
                 }
-                Err(()) => {}
+                Err(msg) => println!("{}", msg)
             }
         }
 
-        return None;
+        None
     }
 
     fn next_id(&mut self) -> AstId {
@@ -71,24 +72,21 @@ impl<'a> MutVisitor for AstFinalizer<'a> {
     fn visit_item(&mut self, item: &mut Item) {
         item.id = self.next_id();
 
-        match &mut item.kind {
-            ItemKind::Mod(Mod { items, inline }) => {
-                self.push_mod_path(item.name.spur);
+        if let ItemKind::Mod(Mod { items, inline }) = &mut item.kind {
+            self.push_mod_path(item.name.spur);
 
-                if !(*inline) {
-                    let path = self.current_path.clone();
-                    if let Some(program) = self.discover(&path) {
-                        *items = program.items
-                    }
+            if !(*inline) {
+                let path = self.current_path.clone();
+                if let Some(program) = self.discover(&path) {
+                    *items = program.items
                 }
-
-                for item in items {
-                    self.visit_item(item);
-                }
-
-                self.pop_mod_path();
             }
-            _ => (),
+
+            for item in items {
+                self.visit_item(item);
+            }
+
+            self.pop_mod_path();
         }
     }
 

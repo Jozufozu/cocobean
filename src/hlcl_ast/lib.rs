@@ -6,11 +6,11 @@ use std::fmt::{Display, Formatter};
 use std::iter::FromIterator;
 
 use itertools::*;
-use lasso::Spur;
 
 use hlcl_helpers::InternResolver;
 use hlcl_helpers::static_assert_size;
 use hlcl_span::*;
+use hlcl_span::lasso::Spur;
 
 use crate::id::AstId;
 
@@ -24,7 +24,7 @@ macro_rules! new_spanned_id {
             #[inline]
             pub fn new(l: usize, r: usize, $field: $kind) -> Self {
                 Self {
-                    span: Span { l, r },
+                    span: Span::new(l, r),
                     $field,
                     id: AstId::DUMMY,
                 }
@@ -236,7 +236,7 @@ pub struct Expr {
     pub id: AstId,
 }
 
-static_assert_size!(Expr, 96);
+static_assert_size!(Expr, 80);
 new_spanned_id!(Expr, kind, ExprKind);
 
 #[derive(Debug)]

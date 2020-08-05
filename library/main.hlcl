@@ -14,7 +14,7 @@ pub struct Item {
     pub tag: nbt,
 }
 
-fn append(self) {
+fn append() {
     
 }
 
@@ -26,7 +26,7 @@ pub branch GameMode: player {
     InGame { // thing
         pub kills: int,
         pub cooldown: int,
-        thing = true,
+        thing: bool,
         pub health: int,
     },
     Spectator {
