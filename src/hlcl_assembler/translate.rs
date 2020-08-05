@@ -46,9 +46,7 @@ impl<'asm> Iterator for FunctionAssembler<'asm> {
                 Some(Op::NonTerminal(sub)) => self.buffer_sub_command(sub),
                 Some(Op::Terminal(cmd)) => self.buffer_command(cmd),
                 Some(Op::BinOp(op, lhs, rhs)) => self.buffer_binop(*op, lhs, rhs),
-                Some(Op::Call(id)) => {
-
-                }
+                Some(Op::Call(id)) => {}
                 Some(Op::Block(id)) => {
                     let name = self.func.resolve(id).expect("invalid block id");
                     self.transition(AsmState::Terminal);
@@ -241,10 +239,8 @@ impl<'asm> FunctionAssembler<'asm> {
             Operand::Entity(target, score) => Some((self.resolve_target(target), score)),
         };
 
-        pair.and_then(|(selector, score)| {
-            self.func.resolve(score).map(|score| (selector, score))
-        })
-        .expect("invalid operand")
+        pair.and_then(|(selector, score)| self.func.resolve(score).map(|score| (selector, score)))
+            .expect("invalid operand")
     }
 
     fn resolve_target(&self, target: &'asm Target) -> &'asm Selector {

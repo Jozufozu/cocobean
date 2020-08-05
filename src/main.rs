@@ -1,3 +1,6 @@
+use std::ops::Range;
+use std::slice::SliceIndex;
+
 use hlcl_asm::selector::Selector;
 use hlcl_ast_merger::AstFinalizer;
 use hlcl_parse::ParsingSession;
@@ -23,6 +26,14 @@ fn main() {
 
     let program = AstFinalizer::unify(mods, &mut project);
 
-    println!("{:#?}", project.sources);
+    let map = &project.sources;
+
+    println!("{}", map.data);
+    for sp in &map.spans {
+        println!("{:?}", sp);
+        println!("{}\n", map.data.get(Range::from(*sp)).unwrap());
+    }
+
+    //println!("{:#?}", project.sources);
     //println!("{:#?}", program);
 }

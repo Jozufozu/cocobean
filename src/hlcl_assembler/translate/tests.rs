@@ -4,10 +4,10 @@ use hlcl_asm::{Assembly, NameInterner};
 use hlcl_asm::function::{ExecuteItem, Function, Op, Target};
 use hlcl_asm::function::commands::{Command, TagArgs};
 use hlcl_asm::selector;
+use hlcl_asm::selector::Selector;
 use hlcl_helpers::resource_name::ResourceName;
 
 use crate::translate::FunctionAssembler;
-use hlcl_asm::selector::Selector;
 
 #[test]
 fn works() {

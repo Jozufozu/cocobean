@@ -1,13 +1,12 @@
-use std::collections::{HashMap, BTreeMap, BTreeSet};
+use std::collections::HashMap;
 
-use hlcl_span::lasso::{RodeoResolver, Spur, RodeoReader};
 use smallvec::SmallVec;
 
 use hlcl_ast::Program;
-use hlcl_span::{SourceFile, SourceMap, Span};
-use fxhash::FxBuildHasher;
+use hlcl_span::sourcemap::SourceMap;
+use hlcl_span::lasso::{RodeoResolver, Spur};
 
-// This is a simpler structure for making reasoning about project files more closely related to the ast
+/// This is a simpler structure for making reasoning about project files more closely related to the ast
 pub type Path = SmallVec<[Spur; 2]>;
 
 pub type PathMap<T> = HashMap<Path, T>;
@@ -40,9 +39,6 @@ pub struct Project {
 
 impl Project {
     pub fn new(names: Resolver, sources: SourceMap) -> Self {
-        Project {
-            names,
-            sources,
-        }
+        Project { names, sources }
     }
 }

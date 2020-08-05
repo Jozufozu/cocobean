@@ -1,5 +1,6 @@
-use hlcl_span::Span;
 use std::fmt;
+
+use hlcl_span::Span;
 
 #[derive(Debug)]
 pub enum ParserError {

@@ -1,14 +1,13 @@
-use derive_more::*;
-
+use std::fmt;
+use std::fmt::{Display, Formatter};
 use std::mem;
+use std::ops::Range;
+
+use derive_more::*;
 pub use lasso;
 
 pub mod kw;
-
-use std::fmt;
-use std::fmt::{Display, Formatter};
-use std::collections::{HashMap, BTreeSet};
-use std::ops::{RangeBounds, Bound, Range};
+pub mod sourcemap;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Span {
@@ -21,7 +20,10 @@ pub struct BytePos(pub u32);
 
 #[allow(clippy::len_without_is_empty)]
 impl Span {
-    pub const DUMMY: Span = Span { l: BytePos(0), r: BytePos(0) };
+    pub const DUMMY: Span = Span {
+        l: BytePos(0),
+        r: BytePos(0),
+    };
 
     #[inline]
     pub fn new(mut l: usize, mut r: usize) -> Span {
@@ -46,7 +48,7 @@ impl Span {
 
     #[inline]
     pub const fn hi_idx(&self) -> usize {
-        self.l.0 as usize
+        self.r.0 as usize
     }
 }
 
@@ -97,38 +99,25 @@ impl<T: Display> Display for Spanned<T> {
     }
 }
 
-#[derive(Debug)]
-pub struct SourceMap {
-    data: String,
-    file_names: HashMap<Span, String>,
-    spans: BTreeSet<Span>,
-}
+#[cfg(test)]
+mod tests {
+    use crate::Span;
 
-impl SourceMap {
-    pub fn with_capacity(cap: usize) -> Self {
-        SourceMap {
-            data: String::with_capacity(cap),
-            file_names: HashMap::new(),
-            spans: BTreeSet::new(),
-        }
+    #[test]
+    fn reverse() {
+        assert_eq!(Span::new(0, 20), Span::new(20, 0));
     }
 
-    pub fn insert_source(&mut self, SourceFile { source, file_name, map_span }: SourceFile) {
-        self.data.replace_range(Range::from(map_span), &source);
-        self.spans.insert(map_span);
-        self.file_names.insert(map_span, file_name);
+    #[test]
+    fn lo_hi() {
+        let span = Span::new(0, 20);
+        assert_eq!(span.hi_idx(), 20);
+        assert_eq!(span.lo_idx(), 0);
     }
-}
 
-#[derive(Debug)]
-pub struct SourceFile {
-    pub source: String,
-    pub file_name: String,
-    pub map_span: Span,
-}
-
-impl SourceFile {
-    pub fn new(source: String, file_name: String, map_span: Span) -> Self {
-        SourceFile { source, file_name, map_span }
+    #[test]
+    fn len() {
+        let span = Span::new(0, 20);
+        assert_eq!(span.len(), 20);
     }
 }

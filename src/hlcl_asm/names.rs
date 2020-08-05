@@ -1,7 +1,9 @@
-use hlcl_helpers::resource_name::ResourceName;
-use crate::selector::Selector;
 use std::hash::Hash;
+
 use hlcl_helpers::id_map::Index;
+use hlcl_helpers::resource_name::ResourceName;
+
+use crate::selector::Selector;
 
 pub trait NameResolver<K: Index, V: ?Sized> {
     fn resolve(&self, key: &K) -> Option<&V>;

@@ -1,14 +1,11 @@
-#[macro_use]
-extern crate derive_more;
-
 use std::collections::HashMap;
+
+use hlcl_helpers::id_map::Index;
 
 use crate::coord::Pos;
 use crate::function::Function;
 pub use crate::names::*;
 use crate::selector::RangeArg;
-use indexmap::set::IndexSet;
-use hlcl_helpers::id_map::Index;
 
 pub mod coord;
 pub mod function;
@@ -23,7 +20,7 @@ pub struct Assembly {
 impl Assembly {
     pub fn new() -> Self {
         Assembly {
-            functions: Vec::new()
+            functions: Vec::new(),
         }
     }
 

@@ -1,3 +1,4 @@
+use std::fmt;
 use std::iter::Peekable;
 use std::str::CharIndices;
 
@@ -7,7 +8,6 @@ use hlcl_ast::BinOpKind;
 use hlcl_span::Span;
 
 use crate::err::ParserError;
-use std::fmt;
 
 pub type Spanned<Token, Loc, Error> = Result<(Loc, Token, Loc), Error>;
 
@@ -173,7 +173,12 @@ impl<'input> Lexer<'input> {
     }
 
     #[inline(always)]
-    fn token<'a>(&self, l: usize, r: usize, tok: Token<'a>) -> Option<Spanned<Token<'a>, usize, ParserError>> {
+    fn token<'a>(
+        &self,
+        l: usize,
+        r: usize,
+        tok: Token<'a>,
+    ) -> Option<Spanned<Token<'a>, usize, ParserError>> {
         let l = self.start_pos + l;
         let r = self.start_pos + r;
         Some(Ok((l, tok, r)))
@@ -228,7 +233,10 @@ impl<'input> Iterator for Lexer<'input> {
                                 last_was_escape = false;
                             }
                         } else {
-                            return Some(Err(ParserError::EofInString(Span::new(start, self.input.len()))));
+                            return Some(Err(ParserError::EofInString(Span::new(
+                                start,
+                                self.input.len(),
+                            ))));
                         }
                     }
 
@@ -250,11 +258,7 @@ impl<'input> Iterator for Lexer<'input> {
                         }
                     }
 
-                    return self.token(
-                        start,
-                        end + 1,
-                        Token::IntLiteral(&self.input[start..=end]),
-                    );
+                    return self.token(start, end + 1, Token::IntLiteral(&self.input[start..=end]));
                 }
                 Some((i, '+')) => {
                     return match self.chars.peek() {

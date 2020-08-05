@@ -1,4 +1,3 @@
-use hlcl_span::kw;
 use smallvec::smallvec;
 
 use hlcl_ast::{
@@ -8,6 +7,7 @@ use hlcl_ast::{
 use hlcl_ast::id::AstId;
 use hlcl_ast::mut_visit::{self, MutVisitor};
 use hlcl_project::{Modules, Path as ProjectPath, PathMap, Project};
+use hlcl_span::kw;
 use hlcl_span::lasso::Spur;
 
 pub struct AstFinalizer<'a> {
@@ -41,7 +41,7 @@ impl<'a> AstFinalizer<'a> {
                 Ok(source) => {
                     return Some(source);
                 }
-                Err(msg) => println!("{}", msg)
+                Err(msg) => println!("{}", msg),
             }
         }
 

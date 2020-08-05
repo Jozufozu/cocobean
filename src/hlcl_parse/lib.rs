@@ -3,22 +3,21 @@ use std::io::Read;
 use std::path::{Path, PathBuf};
 
 use crossbeam::crossbeam_channel;
-use fxhash::FxBuildHasher;
 use lalrpop_util::ErrorRecovery;
 use lalrpop_util::ParseError;
 use rayon::{ThreadPool, ThreadPoolBuilder};
-use smallvec::smallvec;
 use walkdir::{DirEntry, WalkDir};
 
 pub use hlcl::ProgramParser;
 use hlcl_ast::Program;
 use hlcl_project::{Modules, Path as ASTPath, PathMap, Project};
-use hlcl_span::{SourceFile, SourceMap, Span};
+use hlcl_span::Span;
+use hlcl_span::sourcemap::{SourceMap, SourceFile};
+use hlcl_span::kw::{self, Interner};
 pub use lexer::Lexer;
 
 use crate::err::ParserError;
 use crate::lexer::Token;
-use hlcl_span::kw::{self, Interner};
 
 #[allow(clippy::all)]
 #[cfg_attr(rustfmt, rustfmt_skip)]
@@ -115,8 +114,10 @@ impl ParsingSession {
                 let sender = psend.clone();
                 let interner = &interner;
 
-                let length = path.metadata()
-                    .map(|met| met.len()).expect("could not get the length of a file") as usize;
+                let length =
+                    path.metadata()
+                        .map(|met| met.len())
+                        .expect("could not get the length of a file") as usize;
 
                 let span = Span::new(total_len, total_len + length);
 
@@ -133,13 +134,16 @@ impl ParsingSession {
 
         let mut main_module = None;
         let mut modules = PathMap::new();
-        let mut the_source = SourceMap::with_capacity(total_len);
+        let mut the_source = SourceMap::with_capacity(total_len.next_power_of_two());
 
         for (mut module_path, result) in prc.iter() {
             match result {
                 Ok((source, program)) => {
-                    if main_module.is_none() && module_path.len() == 1 && *kw::MAIN == module_path[0] {
-                        main_module = Some(program.unwrap());
+                    if  main_module.is_none()
+                        && module_path.len() == 1
+                        && *kw::MAIN == module_path[0]
+                    {
+                        main_module = Some(program.expect("malformed main file"));
                     } else {
                         module_path.insert(0, *kw::PACK);
                         modules.insert(module_path.clone(), program);
@@ -147,9 +151,7 @@ impl ParsingSession {
 
                     the_source.insert_source(source);
                 }
-                Err(e) => {
-                    println!("{:}", e)
-                }
+                Err(e) => println!("{:}", e),
             }
 
             found -= 1;
@@ -182,8 +184,7 @@ impl ParsingSession {
             .and_then(|mut file| {
                 let mut source = String::with_capacity(file_span.len() as usize);
 
-                file.read_to_string(&mut source)
-                    .map(|_| source)
+                file.read_to_string(&mut source).map(|_| source)
             })
             .map(|source| {
                 let (soft_errs, result) = Self::parse_string(file_span.lo_idx(), interner, &source);
@@ -193,7 +194,10 @@ impl ParsingSession {
                 }
 
                 let program = result.map_err(|e| format!("{}", e)); // TODO: Process this error too
-                (SourceFile::new(source, name.as_ref().to_string(), file_span), program)
+                (
+                    SourceFile::new(source, name.as_ref().to_string(), file_span),
+                    program,
+                )
             })
     }
 
@@ -223,11 +227,19 @@ impl ParsingSession {
         rev
     }
 
-    fn parse_string<'input>(start_pos: usize, interner: &Interner, source: &'input str) -> ParserResult<'input> {
+    fn parse_string<'input>(
+        start_pos: usize,
+        interner: &Interner,
+        source: &'input str,
+    ) -> ParserResult<'input> {
         let mut errs = Vec::new();
 
-        let program =
-            ProgramParser::new().parse(&source, &interner, &mut errs, Lexer::new(&source, start_pos));
+        let program = ProgramParser::new().parse(
+            &source,
+            &interner,
+            &mut errs,
+            Lexer::new(&source, start_pos),
+        );
 
         (errs, program)
     }

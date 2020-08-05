@@ -1,8 +1,9 @@
+use hlcl_helpers::id_map::{IdMap, Index};
+
 use crate::*;
 use crate::coord::Rotation;
 use crate::function::commands::Command;
 use crate::selector::Selector;
-use hlcl_helpers::id_map::{IdMap, Index};
 
 pub mod commands;
 
@@ -35,8 +36,8 @@ impl Function {
 }
 
 impl<K: Index, V: ?Sized> NameResolver<K, V> for Function
-    where
-        Names: NameResolver<K, V>,
+where
+    Names: NameResolver<K, V>,
 {
     #[inline(always)]
     fn resolve(&self, key: &K) -> Option<&V> {
@@ -45,8 +46,8 @@ impl<K: Index, V: ?Sized> NameResolver<K, V> for Function
 }
 
 impl<K: Index, V> NameInterner<K, V> for Function
-    where
-        Names: NameInterner<K, V>,
+where
+    Names: NameInterner<K, V>,
 {
     #[inline(always)]
     fn insert(&mut self, value: V) -> K {

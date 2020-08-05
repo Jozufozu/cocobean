@@ -116,7 +116,7 @@ impl AsRef<str> for ResourceName {
 
 #[cfg(test)]
 pub mod tests {
-    use std::convert::{TryFrom, TryInto};
+    use std::convert::TryFrom;
 
     use crate::resource_name::{NameError, ResourceName};
 

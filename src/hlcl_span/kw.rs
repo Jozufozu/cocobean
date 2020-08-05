@@ -1,5 +1,5 @@
 use fxhash::FxBuildHasher;
-use lasso::{Key, ThreadedRodeo, Spur, Capacity};
+use lasso::{Capacity, Key, Spur, ThreadedRodeo};
 
 pub type Interner = ThreadedRodeo<Spur, FxBuildHasher>;
 
@@ -13,7 +13,8 @@ lazy_static::lazy_static! {
 }
 
 pub fn create_interner() -> Interner {
-    let rodeo = Interner::with_capacity_and_hasher(Capacity::for_strings(256), FxBuildHasher::default());
+    let rodeo =
+        Interner::with_capacity_and_hasher(Capacity::for_strings(256), FxBuildHasher::default());
     for kw in ["main", "pack", "int", "bool", "string", "pos"].iter() {
         rodeo.get_or_intern_static(kw);
     }
