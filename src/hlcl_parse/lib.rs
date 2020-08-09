@@ -134,7 +134,7 @@ impl ParsingSession {
 
         let mut main_module = None;
         let mut modules = PathMap::new();
-        let mut the_source = SourceMap::with_capacity(total_len.next_power_of_two());
+        let mut the_source = SourceMap::with_length(total_len.next_power_of_two());
 
         for (mut module_path, result) in prc.iter() {
             match result {

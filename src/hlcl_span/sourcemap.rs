@@ -11,18 +11,15 @@ pub struct SourceMap {
 }
 
 impl SourceMap {
-    pub fn with_capacity(cap: usize) -> Self {
+    pub fn with_length(len: usize) -> Self {
         SourceMap {
             data: {
-                let cap = cap.next_power_of_two();
-                let mut string = String::with_capacity(cap);
+                let len = len + len % 8;
+                let mut string = String::with_capacity(len);
 
-                if cap == 2 {
-                    string.push_str("  ");
-                } else {
-                    for _ in 0..cap.div(4) {
-                        string.push_str("    ");
-                    }
+                // fill the string with empty bytes so we can randomly index into the entire thing
+                for _ in 0..len.div(8) {
+                    string.push_str("        ");
                 }
 
                 string
@@ -43,6 +40,11 @@ impl SourceMap {
         self.data.replace_range(Range::from(map_span), &source);
         self.spans.insert(map_span);
         self.file_names.insert(map_span, file_name);
+    }
+
+    #[inline]
+    pub fn get_span(&self, span: Span) -> Option<&str> {
+        self.data.get(Range::from(span))
     }
 }
 
