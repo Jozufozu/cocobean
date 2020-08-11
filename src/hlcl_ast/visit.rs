@@ -21,11 +21,15 @@ pub trait Visitor<'ast>: Sized {
     }
 
     fn visit_program(&mut self, program: &'ast Program) {
-        walk_program(self, program)
+        walk_mod(self, &program.module)
     }
 
     fn visit_item(&mut self, item: &'ast Item) {
         walk_item(self, item)
+    }
+
+    fn visit_use_tree(&mut self, item: &'ast UseTree) {
+        walk_use_tree(self, item)
     }
 
     fn visit_mod(&mut self, module: &'ast Mod) {
@@ -81,13 +85,6 @@ pub fn walk_path<'ast, T: Visitor<'ast>>(visitor: &mut T, Path { items }: &'ast 
     walk_list!(visitor, visit_ident, items)
 }
 
-pub fn walk_program<'ast, T: Visitor<'ast>>(
-    visitor: &mut T,
-    Program { items, id: _ }: &'ast Program,
-) {
-    walk_list!(visitor, visit_item, items)
-}
-
 pub fn walk_item<'ast, T: Visitor<'ast>>(
     visitor: &mut T,
     Item {
@@ -100,11 +97,12 @@ pub fn walk_item<'ast, T: Visitor<'ast>>(
 ) {
     visitor.visit_ident(name);
 
-    match kind {
-        ItemKind::Mod(ref item) => visitor.visit_mod(item),
-        ItemKind::Struct(ref item) => visitor.visit_struct(item),
-        ItemKind::Class(ref item) => visitor.visit_class(item),
-        ItemKind::Branch(ref item) => visitor.visit_branch(item),
+    match &kind {
+        ItemKind::Use(tree) => visitor.visit_use_tree(tree),
+        ItemKind::Mod(item) => visitor.visit_mod(item),
+        ItemKind::Struct(item) => visitor.visit_struct(item),
+        ItemKind::Class(item) => visitor.visit_class(item),
+        ItemKind::Branch(item) => visitor.visit_branch(item),
         ItemKind::Fn(FnSig { params, ret }, block) => {
             walk_list!(visitor, visit_fn_param, params);
 
@@ -117,6 +115,15 @@ pub fn walk_item<'ast, T: Visitor<'ast>>(
             }
         }
         ItemKind::Err => {}
+    }
+}
+
+pub fn walk_use_tree<'ast, T: Visitor<'ast>>(visitor: &mut T, UseTree { span, path, kind, id }: &'ast UseTree) {
+    visitor.visit_path(path, *id);
+    match &kind {
+        UseTreeKind::Rebind(ident) => visitor.visit_ident(ident),
+        UseTreeKind::Tree(items) => walk_list!(visitor, visit_use_tree, items),
+        _ => (),
     }
 }
 

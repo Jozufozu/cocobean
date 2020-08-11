@@ -11,7 +11,7 @@ pub builtin class item: entity {
 pub struct Item {
     pub id: string,
     pub count: int,
-    pub tag: nbt,
+    pub tag: ,
 }
 
 fn append() {

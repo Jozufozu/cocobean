@@ -15,6 +15,7 @@ members = [
     "src/hlcl_asm",
     "src/hlcl_assembler",
     "src/hlcl_error",
+    "src/hlcl_resolve",
 ]
 
 [profile.release]

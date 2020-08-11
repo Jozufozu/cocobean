@@ -9,6 +9,10 @@ name = "hlcl_asm"
 path = "lib.rs"
 doctest = false
 
+[dev-dependencies]
+arbitrary = { version = "0.4", features = ["derive"] }
+criterion = "0.3"
+
 [dependencies]
 hlcl_helpers = { path = "../hlcl_helpers" }
 derive_more = "0.99.9"

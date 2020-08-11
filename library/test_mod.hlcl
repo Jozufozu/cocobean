@@ -1,9 +1,10 @@
+use proj::{test, player;
 
 mod test2;
 mod test3;
 
 // comment
 
-pub fn dummy() {
+pub fn dummy(pl: player) {
 
 }

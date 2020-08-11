@@ -20,20 +20,11 @@ use hlcl_parse::ParsingSession;
 /// TODO: DOCUMENTATION (both language support and documenting the compiler)
 ///
 fn main() {
-    let session = ParsingSession::new("../../library", "library").unwrap();
+    let session = ParsingSession::new("./library", "library").unwrap();
 
     let (mods, mut project) = session.parse_project().unwrap();
 
     let program = AstFinalizer::unify(mods, &mut project);
 
     let map = &project.sources;
-
-    println!("{}", map.data);
-    for sp in &map.spans {
-        println!("{:?}", sp);
-        println!("{}\n", map.data.get(Range::from(*sp)).unwrap());
-    }
-
-    //println!("{:#?}", project.sources);
-    //println!("{:#?}", program);
 }

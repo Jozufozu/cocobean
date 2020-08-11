@@ -1,26 +1,24 @@
 use smallvec::smallvec;
 
-use hlcl_ast::{
-    Block, Branch, BranchVariant, Class, Expr, FnParam, Item, ItemKind, Mod, Program, Stmt, Struct,
-    StructField, Type,
-};
+use hlcl_ast::{Block, Branch, BranchVariant, Class, Expr, FnParam, Item, ItemKind, Mod, Program, Stmt, Struct, StructField, Type, UseTree, Path};
 use hlcl_ast::id::AstId;
 use hlcl_ast::mut_visit::{self, MutVisitor};
 use hlcl_project::{Modules, Path as ProjectPath, PathMap, Project};
 use hlcl_span::kw;
 use hlcl_span::lasso::Spur;
+use radix_trie::Trie;
 
 pub struct AstFinalizer<'a> {
     project: &'a mut Project,
-    modules: PathMap<Result<Program, String>>,
+    modules: PathMap<(Result<Program, String>, Vec<String>)>,
     next_id: AstId,
     current_path: ProjectPath,
     discovered: Vec<ProjectPath>,
 }
 
 impl<'a> AstFinalizer<'a> {
-    pub fn unify(main: Modules, project: &'a mut Project) -> Program {
-        let (mut main, modules) = main.into();
+    pub fn unify(Modules { main, modules }: Modules, project: &'a mut Project) -> Program {
+        let (mut main, errs) = main;
         let current_path = smallvec![*kw::PACK];
         let mut unifier = AstFinalizer {
             project,
@@ -30,13 +28,20 @@ impl<'a> AstFinalizer<'a> {
             discovered: Vec::new(),
         };
 
+        for err in errs {
+            println!("{}", err);
+        }
+
         unifier.visit_program(&mut main);
 
         main
     }
 
     fn discover(&mut self, path: &ProjectPath) -> Option<Program> {
-        if let Some(result) = self.modules.remove(path) {
+        if let Some((result, errs)) = self.modules.remove(path) {
+            for err in errs {
+                println!("{}", err);
+            }
             match result {
                 Ok(source) => {
                     return Some(source);
@@ -66,71 +71,60 @@ impl<'a> AstFinalizer<'a> {
 impl<'a> MutVisitor for AstFinalizer<'a> {
     fn visit_program(&mut self, program: &mut Program) {
         program.id = self.next_id();
-        mut_visit::walk_program(self, program);
+        mut_visit::walk_mod(self, &mut program.module);
     }
 
     fn visit_item(&mut self, item: &mut Item) {
         item.id = self.next_id();
 
-        if let ItemKind::Mod(Mod { items, inline }) = &mut item.kind {
+        if let ItemKind::Mod(module) = &mut item.kind {
             self.push_mod_path(item.name.spur);
 
-            if !(*inline) {
+            if !module.inline {
                 let path = self.current_path.clone();
                 if let Some(program) = self.discover(&path) {
-                    *items = program.items
+                    module.items = program.module.items
                 }
             }
 
-            for item in items {
+            for item in &mut module.items {
                 self.visit_item(item);
             }
 
             self.pop_mod_path();
+            return;
         }
+
+        mut_visit::walk_item(self, item);
     }
 
-    fn visit_mod(&mut self, module: &mut Mod) {
-        unimplemented!()
-    }
-
-    fn visit_struct(&mut self, struc: &mut Struct) {
-        unimplemented!()
-    }
-
-    fn visit_struct_field(&mut self, field: &mut StructField) {
-        unimplemented!()
-    }
-
-    fn visit_class(&mut self, class: &mut Class) {
-        unimplemented!()
-    }
-
-    fn visit_branch(&mut self, branch: &mut Branch) {
-        unimplemented!()
+    fn visit_use_tree(&mut self, tree: &mut UseTree) {
+        tree.id = self.next_id();
+        mut_visit::walk_use_tree(self, tree);
     }
 
     fn visit_branch_variant(&mut self, variant: &mut BranchVariant) {
-        unimplemented!()
+        variant.id = self.next_id();
+        mut_visit::walk_branch_variant(self, variant);
     }
 
     fn visit_type(&mut self, ty: &mut Type) {
-        unimplemented!()
+        ty.id = self.next_id();
+        mut_visit::walk_type(self, ty);
     }
 
     fn visit_block(&mut self, block: &mut Block) {
-        unimplemented!()
+        block.id = self.next_id();
+        mut_visit::walk_block(self, block);
     }
 
     fn visit_expr(&mut self, expr: &mut Expr) {
-        unimplemented!()
+        expr.id = self.next_id();
+        mut_visit::walk_expr(self, expr);
     }
 
     fn visit_stmt(&mut self, stmt: &mut Stmt) {
         stmt.id = self.next_id();
-    }
-
-    fn visit_fn_param(&mut self, param: &mut FnParam) {
-        unimplemented!()
+        mut_visit::walk_stmt(self, stmt);
     }
 }

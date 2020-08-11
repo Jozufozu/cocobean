@@ -8,11 +8,15 @@ pub trait MutVisitor: Sized {
     }
 
     fn visit_program(&mut self, program: &mut Program) {
-        walk_program(self, program)
+        walk_mod(self, &mut program.module)
     }
 
     fn visit_item(&mut self, item: &mut Item) {
         walk_item(self, item)
+    }
+
+    fn visit_use_tree(&mut self, tree: &mut UseTree) {
+        walk_use_tree(self, tree);
     }
 
     fn visit_mod(&mut self, module: &mut Mod) {
@@ -74,10 +78,6 @@ pub fn walk_path<T: MutVisitor>(visitor: &mut T, Path { items }: &mut Path, _id:
     visit_vec(items, |elem| visitor.visit_ident(elem))
 }
 
-pub fn walk_program<T: MutVisitor>(visitor: &mut T, Program { items, id: _ }: &mut Program) {
-    visit_vec(items, |elem| visitor.visit_item(elem))
-}
-
 pub fn walk_item<T: MutVisitor>(
     visitor: &mut T,
     Item {
@@ -91,6 +91,7 @@ pub fn walk_item<T: MutVisitor>(
     visitor.visit_ident(name);
 
     match kind {
+        ItemKind::Use(tree) => visitor.visit_use_tree(tree),
         ItemKind::Mod(item) => visitor.visit_mod(item),
         ItemKind::Struct(item) => visitor.visit_struct(item),
         ItemKind::Class(item) => visitor.visit_class(item),
@@ -107,6 +108,15 @@ pub fn walk_item<T: MutVisitor>(
             }
         }
         ItemKind::Err => {}
+    }
+}
+
+pub fn walk_use_tree<T: MutVisitor>(visitor: &mut T, UseTree { span: _, path, kind, id }: &mut UseTree) {
+    visitor.visit_path(path, *id);
+    match kind {
+        UseTreeKind::Rebind(ident) => visitor.visit_ident(ident),
+        UseTreeKind::Tree(items) => visit_vec(items, |tree| visitor.visit_use_tree(tree)),
+        _ => (),
     }
 }
 

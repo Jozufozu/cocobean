@@ -40,6 +40,8 @@ pub enum Token<'input> {
     Break,
     Continue,
 
+    Use,
+    As,
     Mod,
     Trait,
     Struct,
@@ -101,6 +103,8 @@ impl fmt::Display for Token<'_> {
             Token::Return => write!(f, "return"),
             Token::Break => write!(f, "break"),
             Token::Continue => write!(f, "continue"),
+            Token::Use => write!(f, "use"),
+            Token::As => write!(f, "as"),
             Token::Mod => write!(f, "mod"),
             Token::Trait => write!(f, "trait"),
             Token::Struct => write!(f, "struct"),
@@ -155,6 +159,8 @@ static KEYWORDS: phf::Map<&'static str, Token> = phf_map! {
     "enum" => Token::Enum,
     "builtin" => Token::Builtin,
     "mod" => Token::Mod,
+    "use" => Token::Use,
+    "as" => Token::As,
 };
 
 pub struct Lexer<'input> {
@@ -172,7 +178,7 @@ impl<'input> Lexer<'input> {
         }
     }
 
-    #[inline(always)]
+    #[inline]
     fn token<'a>(
         &self,
         l: usize,

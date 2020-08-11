@@ -10,9 +10,11 @@ use itertools::*;
 use hlcl_helpers::InternResolver;
 use hlcl_helpers::static_assert_size;
 use hlcl_span::*;
-use hlcl_span::lasso::Spur;
+use hlcl_span::lasso::{Spur, Key};
+use hlcl_span::lazy_static::lazy_static;
 
 use crate::id::AstId;
+use radix_trie::TrieKey;
 
 pub mod id;
 pub mod mut_visit;
@@ -37,6 +39,13 @@ macro_rules! new_spanned_id {
 pub struct Identifier {
     pub span: Span,
     pub spur: Spur,
+}
+
+lazy_static! {
+    pub static ref DUMMY_IDENT: Identifier = Identifier {
+        span: Span::DUMMY,
+        spur: *kw::DUMMY,
+    };
 }
 
 impl Identifier {
@@ -71,7 +80,23 @@ pub struct Path {
     pub items: Vec<Identifier>,
 }
 
+impl TrieKey for Path {
+    fn encode_bytes(&self) -> Vec<u8> {
+        self.items
+            .iter()
+            .map(|ident| unsafe { ident.spur.into_usize() })
+            .flat_map(|v| v.encode_bytes())
+            .collect()
+    }
+}
+
 impl Path {
+    pub fn empty() -> Self {
+        Path {
+            items: vec![],
+        }
+    }
+
     pub fn to_string<R: InternResolver<Spur>>(&self, names: &R) -> String {
         self.items
             .iter()
@@ -96,7 +121,7 @@ pub enum Visibility {
 
 #[derive(Debug)]
 pub struct Program {
-    pub items: Vec<Item>,
+    pub module: Mod,
     pub id: AstId,
 }
 
@@ -111,11 +136,30 @@ pub struct Item {
 
 #[derive(Debug)]
 pub enum ItemKind {
+    Use(UseTree),
     Mod(Mod),
     Struct(Struct),
     Class(Class),
     Branch(Branch),
     Fn(FnSig, Option<Block>),
+
+    Err,
+}
+
+#[derive(Debug)]
+pub struct UseTree {
+    pub span: Span,
+    pub path: Path,
+    pub kind: UseTreeKind,
+    pub id: AstId,
+}
+
+#[derive(Debug)]
+pub enum UseTreeKind {
+    Name,
+    Rebind(Identifier),
+    Tree(Vec<UseTree>),
+    Glob,
 
     Err,
 }

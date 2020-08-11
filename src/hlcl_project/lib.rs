@@ -14,20 +14,13 @@ pub type PathMap<T> = HashMap<Path, T>;
 pub type Resolver = RodeoResolver<Spur>;
 
 pub struct Modules {
-    main: Program,
-    modules: PathMap<Result<Program, String>>,
+    pub main: (Program, Vec<String>),
+    pub modules: PathMap<(Result<Program, String>, Vec<String>)>,
 }
 
 impl Modules {
-    pub fn new(main: Program, modules: PathMap<Result<Program, String>>) -> Self {
+    pub fn new(main: (Program, Vec<String>), modules: PathMap<(Result<Program, String>, Vec<String>)>) -> Self {
         Modules { main, modules }
-    }
-}
-
-impl From<Modules> for (Program, PathMap<Result<Program, String>>) {
-    #[inline]
-    fn from(Modules { main, modules }: Modules) -> Self {
-        (main, modules)
     }
 }
 

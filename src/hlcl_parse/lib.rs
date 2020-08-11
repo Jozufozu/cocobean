@@ -11,13 +11,14 @@ use walkdir::{DirEntry, WalkDir};
 pub use hlcl::ProgramParser;
 use hlcl_ast::Program;
 use hlcl_project::{Modules, Path as ASTPath, PathMap, Project};
-use hlcl_span::Span;
-use hlcl_span::sourcemap::{SourceMap, SourceFile};
 use hlcl_span::kw::{self, Interner};
+use hlcl_span::sourcemap::{InputSource, SourceMap};
+use hlcl_span::Span;
 pub use lexer::Lexer;
 
 use crate::err::ParserError;
 use crate::lexer::Token;
+use itertools::Itertools;
 
 #[allow(clippy::all)]
 #[cfg_attr(rustfmt, rustfmt_skip)]
@@ -29,10 +30,7 @@ pub mod util;
 pub const ROOT_FILE: &str = "main.hlcl";
 pub const EXTENSION: &str = ".hlcl";
 
-type ParserResult<'input> = (
-    Vec<ErrorRecovery<usize, Token<'input>, ParserError>>,
-    Result<Program, ParseError<usize, Token<'input>, ParserError>>,
-);
+type ParserResult<'input> = (Vec<String>, Result<Program, String>);
 
 #[derive(Debug)]
 pub struct ParsingSession {
@@ -92,7 +90,7 @@ impl ParsingSession {
 
     pub fn parse_project(self) -> Result<(Modules, Project), ()> {
         let ParsingSession {
-            mut interner,
+            interner,
             project_name,
             project_path,
             workers,
@@ -123,7 +121,8 @@ impl ParsingSession {
 
                 workers.install(|| {
                     let ast_path = Self::dir_to_module_path(&path, interner);
-                    let result = ParsingSession::process_file(path.path(), name, span, interner);
+                    let name = path.path().to_string_lossy().replace("\\", "/");
+                    let result = ParsingSession::process_file(path.path(), name.trim_start_matches("./"), span, interner);
 
                     sender.send((ast_path, result)).unwrap();
                 });
@@ -138,15 +137,15 @@ impl ParsingSession {
 
         for (mut module_path, result) in prc.iter() {
             match result {
-                Ok((source, program)) => {
-                    if  main_module.is_none()
+                Ok((source, program, errs)) => {
+                    if main_module.is_none()
                         && module_path.len() == 1
                         && *kw::MAIN == module_path[0]
                     {
-                        main_module = Some(program.expect("malformed main file"));
+                        main_module = Some((program.expect("malformed main file"), errs));
                     } else {
                         module_path.insert(0, *kw::PACK);
-                        modules.insert(module_path.clone(), program);
+                        modules.insert(module_path.clone(), (program, errs));
                     }
 
                     the_source.insert_source(source);
@@ -175,7 +174,7 @@ impl ParsingSession {
         name: S,
         file_span: Span,
         interner: &Interner,
-    ) -> Result<(SourceFile, Result<Program, String>), std::io::Error>
+    ) -> Result<(InputSource, Result<Program, String>, Vec<String>), std::io::Error>
     where
         S: AsRef<str>,
         P: AsRef<Path>,
@@ -189,14 +188,14 @@ impl ParsingSession {
             .map(|source| {
                 let (soft_errs, result) = Self::parse_string(file_span.lo_idx(), interner, &source);
 
-                for _err in soft_errs.into_iter() {
-                    // TODO: Process and store errors to be displayed later. Send them to the main thread separately?
-                }
-
                 let program = result.map_err(|e| format!("{}", e)); // TODO: Process this error too
                 (
-                    SourceFile::new(source, name.as_ref().to_string(), file_span),
+                    InputSource::new(source, name.as_ref().to_string(), file_span),
                     program,
+                    soft_errs
+                        .into_iter()
+                        .map(|err| format!("{}", err))
+                        .collect(),
                 )
             })
     }
@@ -217,10 +216,13 @@ impl ParsingSession {
     }
 
     fn dir_to_module_path(path: &DirEntry, interner: &Interner) -> ASTPath {
+        ParsingSession::path_to_module_path(path.path(), path.depth(), interner)
+    }
+
+    fn path_to_module_path(path: &Path, depth: usize, interner: &Interner) -> ASTPath {
         let mut rev: ASTPath = path
-            .path()
             .ancestors()
-            .take(path.depth())
+            .take(depth)
             .map(|part| interner.get_or_intern(part.file_stem().unwrap().to_string_lossy()))
             .collect();
         rev.reverse();
@@ -241,6 +243,26 @@ impl ParsingSession {
             Lexer::new(&source, start_pos),
         );
 
-        (errs, program)
+        (errs, program.map_err(|err| format!("{}", err)))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::Path;
+    use crate::ParsingSession;
+    use hlcl_span::lasso::Rodeo;
+    use hlcl_span::kw;
+    use walkdir::DirEntry;
+    use fxhash::FxBuildHasher;
+
+    #[test]
+    fn dir_to_module_path() {
+        let mut rodeo = kw::create_interner();
+        let path = Path::new("module/test.hlcl");
+        let module_path = ParsingSession::path_to_module_path(path, 2, &rodeo);
+
+        assert_eq!(module_path[0], rodeo.get_or_intern_static("module"));
+        assert_eq!(module_path[1], rodeo.get_or_intern_static("test"));
     }
 }

@@ -5,24 +5,32 @@ use std::ops::Range;
 
 use derive_more::*;
 pub use lasso;
+pub use lazy_static;
 
 pub mod kw;
 pub mod sourcemap;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Span {
-    pub l: BytePos,
-    pub r: BytePos,
+    pub lo: BytePos,
+    pub hi: BytePos,
 }
 
 #[derive(Debug, Copy, Clone, Add, Sub, Ord, PartialOrd, Eq, PartialEq, From, Into, Hash)]
 pub struct BytePos(pub u32);
 
+impl From<usize> for BytePos {
+    #[inline(always)]
+    fn from(u: usize) -> Self {
+        BytePos(u as u32)
+    }
+}
+
 #[allow(clippy::len_without_is_empty)]
 impl Span {
     pub const DUMMY: Span = Span {
-        l: BytePos(0),
-        r: BytePos(0),
+        lo: BytePos(0),
+        hi: BytePos(0),
     };
 
     #[inline]
@@ -31,24 +39,33 @@ impl Span {
             mem::swap(&mut l, &mut r);
         }
         Span {
-            l: BytePos::from(l as u32),
-            r: BytePos::from(r as u32),
+            lo: BytePos::from(l),
+            hi: BytePos::from(r),
         }
     }
 
     #[inline]
     pub const fn len(&self) -> u32 {
-        self.r.0 - self.l.0
+        self.hi.0 - self.lo.0
     }
 
     #[inline]
     pub const fn lo_idx(&self) -> usize {
-        self.l.0 as usize
+        self.lo.0 as usize
     }
 
     #[inline]
     pub const fn hi_idx(&self) -> usize {
-        self.r.0 as usize
+        self.hi.0 as usize
+    }
+
+    pub fn is_subspan_of(&self, other: Span) -> bool {
+        other.lo <= self.lo && other.hi >= self.hi
+    }
+
+    #[inline]
+    pub fn contains(&self, pos: BytePos) -> bool {
+        pos >= self.lo && pos <= self.hi
     }
 }
 
@@ -119,5 +136,13 @@ mod tests {
     fn len() {
         let span = Span::new(0, 20);
         assert_eq!(span.len(), 20);
+    }
+
+    #[test]
+    fn contains() {
+        let big = Span::new(5, 20);
+        assert!(Span::new(10, 14).is_subspan_of(big));
+        assert!(big.is_subspan_of(big));
+        assert!(!Span::new(0, 30).is_subspan_of(big));
     }
 }

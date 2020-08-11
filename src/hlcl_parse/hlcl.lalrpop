@@ -7,9 +7,9 @@ use hlcl_span::*;
 use hlcl_span::kw::Interner;
 use super::{util::*, lexer::Token, err::ParserError};
 
-grammar<'input>(input: &'input str, intr: &Interner, errs: &mut Vec<ErrorRecovery<usize, Token<'input>, ParserError>>);
+grammar<'input>(input: &'input str, intr: &Interner, errs: &mut Vec<String>);
 
-pub Program: Program = <items:Item*> => Program { items, id: AstId::DUMMY };
+pub Program: Program = <items:Item*> => Program { module: Mod { items, inline: true }, id: AstId::DUMMY };
 
 Vis: Visibility = {
     <pb:(<@L> "pub" <@R>)?> => match pb {
@@ -22,6 +22,7 @@ Identifier: Identifier = {
     <l:@L> <n:TokenIdentifier> <r:@R> => Identifier::new(l, r, intr.get_or_intern(n))
 };
 
+#[inline]
 Path: Path = {
     <one:Identifier> <v:("::" <Identifier>)*> => {
         let mut v = v;
@@ -34,11 +35,62 @@ Path: Path = {
 };
 
 Item: Item = {
+    Use,
     ModDefinition,
     StructDefinition,
     ClassDefinition,
     BranchDefinition,
     FunctionDefinition,
+};
+
+Use: Item = {
+    <l:@L> <vis:Vis> "use" <u:UseTree> ";" <r:@R> => Item {
+        name: DUMMY_IDENT.clone(),
+        vis,
+        kind: ItemKind::Use(u),
+        span: Span::new(l, r),
+        id: AstId::DUMMY,
+    }
+};
+
+UseTree: UseTree = {
+    <l:@L> <path:Path> <r:@R> => UseTree {
+        span: Span::new(l, r),
+        path,
+        kind: UseTreeKind::Name,
+        id: AstId::DUMMY,
+    },
+    <l:@L> <path:Path> "as" <ident:Identifier> <r:@R> => UseTree {
+        span: Span::new(l, r),
+        path,
+        kind: UseTreeKind::Rebind(ident),
+        id: AstId::DUMMY,
+    },
+    <l:@L> <path:Path> "::" "*" <r:@R> => UseTree {
+        span: Span::new(l, r),
+        path,
+        kind: UseTreeKind::Glob,
+        id: AstId::DUMMY,
+    },
+    <l:@L> <path:Path> "::" "{" <one: UseTree> <rest:("," <UseTree>)*> ","? "}" <r:@R> => UseTree {
+        span: Span::new(l, r),
+        path,
+        kind: UseTreeKind::Tree({
+            let mut rest = rest;
+            rest.insert(0, one);
+            rest
+        }),
+        id: AstId::DUMMY,
+    },
+    <l:@L> <err:!> <r:@R> => {
+        errs.push(err.error.to_string());
+        UseTree {
+            span: Span::new(l, r),
+            path: Path::empty(),
+            kind: UseTreeKind::Err,
+            id: AstId::DUMMY,
+        }
+    }
 };
 
 ModItemsOrSemi: Vec<Item> = {
@@ -135,11 +187,11 @@ StructField: StructField = {
 };
 
 FunctionDefinition: Item = {
-    <l:@L> <vis:Vis>  "fn" <name:Identifier> "(" <params:Comma<FnParam>> ")" <retty:(":" <Type>)?> <block:BlockOrSemi> <r:@R> => {
-        let ret = if let Some(ty) = retty {
-            FnReturn::Ty(ty)
-        } else {
-            FnReturn::Default
+    <l:@L> <vis:Vis>  "fn" <name:Identifier> <sig:FnSig> <r:@R> => {
+        let (params, retty, block) = sig;
+        let ret = match retty {
+            Some(ty) => FnReturn::Ty(ty),
+            None => FnReturn::Default,
         };
 
         let sig = FnSig {
@@ -156,6 +208,9 @@ FunctionDefinition: Item = {
         }
     },
 };
+
+FnSig = "(" <Comma<FnParam>> ")" <(":" <Type>)?> <BlockOrSemi>;
+
 
 FnParam: FnParam = {
     <name:Identifier> ":" <ty:Type> => FnParam{name, ty},
@@ -341,7 +396,7 @@ Expr0: Expr = {
         })
     },
 
-    <l:@L> <err:!> <r:@R> => { errs.push(err); Expr::new(l, r, ExprKind::Err) }
+    <l:@L> <err:!> <r:@R> => { errs.push(err.error.to_string()); Expr::new(l, r, ExprKind::Err) }
 };
 
 Lit: Lit = {
@@ -353,12 +408,7 @@ Lit: Lit = {
         match i32::from_str(&s) {
             Ok(i) => Lit::Int(i),
             Err(_) => {
-                errs.push(ErrorRecovery {
-                    error: ParseError::User{ 
-                        error: ParserError::IntTooBig(Span::new(l, r))
-                    },
-                    dropped_tokens: vec![(l, Token::IntLiteral(tok.clone()), r)]
-                });
+                errs.push(ParserError::IntTooBig(Span::new(l, r)).to_string());
 
                 Lit::Err
             }
@@ -384,7 +434,7 @@ Type: Type = {
         }
     },
 
-    <l:@L> <err:!> <r:@R> => { errs.push(err); Type::new(l, r, TypeKind::Err) }
+    <l:@L> <err:!> <r:@R> => { errs.push(err.error.to_string()); Type::new(l, r, TypeKind::Err) }
 };
 
 Comma<T> = Many0<",", T>;
@@ -440,6 +490,8 @@ extern {
         "break" => Token::Break,
         "continue" => Token::Continue,
         "mod" => Token::Mod,
+        "use" => Token::Use,
+        "as" => Token::As,
         "struct" => Token::Struct,
         "branch" => Token::Branch,
         "class" => Token::Class,

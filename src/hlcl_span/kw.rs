@@ -10,12 +10,13 @@ lazy_static::lazy_static! {
     pub static ref BOOL: Spur = Spur::try_from_usize(3).unwrap();
     pub static ref STRING: Spur = Spur::try_from_usize(4).unwrap();
     pub static ref POS: Spur = Spur::try_from_usize(5).unwrap();
+    pub static ref DUMMY: Spur = Spur::try_from_usize(6).unwrap();
 }
 
 pub fn create_interner() -> Interner {
     let rodeo =
         Interner::with_capacity_and_hasher(Capacity::for_strings(256), FxBuildHasher::default());
-    for kw in ["main", "pack", "int", "bool", "string", "pos"].iter() {
+    for kw in ["main", "pack", "int", "bool", "string", "pos", ""].iter() {
         rodeo.get_or_intern_static(kw);
     }
 
