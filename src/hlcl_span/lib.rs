@@ -1,5 +1,4 @@
 use std::fmt;
-use std::fmt::{Display, Formatter};
 use std::mem;
 use std::ops::Range;
 
@@ -16,6 +15,10 @@ pub struct Span {
     pub hi: BytePos,
 }
 
+/// A `SourceMap` global position.
+///
+/// Positions in the `SourceMap` should never be serialized. The compiler does not guarantee
+/// that the same positions will refer to the same file locations across different compilations.
 #[derive(Debug, Copy, Clone, Add, Sub, Ord, PartialOrd, Eq, PartialEq, From, Into, Hash)]
 pub struct BytePos(pub u32);
 
@@ -110,8 +113,8 @@ impl<T: PartialEq> PartialEq for Spanned<T> {
 
 impl<T: Eq + PartialEq> Eq for Spanned<T> {}
 
-impl<T: Display> Display for Spanned<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+impl<T: fmt::Display> fmt::Display for Spanned<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.val.fmt(f)
     }
 }

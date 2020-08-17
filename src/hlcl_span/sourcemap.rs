@@ -9,18 +9,25 @@ use std::num::NonZeroUsize;
 #[cfg(test)]
 mod tests;
 
+/// Contains information about a given location in the `SourceMap`.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Loc<'s> {
+    /// The project relative file name this location is in.
     pub file_name: &'s str,
+    /// The (0-based) column number of the location.
     pub col: usize,
+    /// The (1-based) line number of the location.
     pub line: usize,
 }
 
 #[derive(Debug)]
 pub struct FileInfo {
+    /// The part of the `SourceMap` that contains the data annotated by this `FileInfo`.
     pub span: Span,
+    /// The project relative file name of the file.
     pub name: String,
-    pub lines: Vec<BytePos>,
+    /// The start positions of each line in the file.
+    lines: Vec<BytePos>,
 }
 
 impl FileInfo {
@@ -39,6 +46,9 @@ impl FileInfo {
         }
     }
 
+    /// Gets the (1-based) line number for the given byte pos.
+    ///
+    /// Returns `None` if this file is empty.
     pub fn lookup_line(&self, pos: BytePos) -> Option<NonZeroUsize> {
         if self.lines.is_empty() {
             return None
