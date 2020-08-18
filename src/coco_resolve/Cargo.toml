@@ -1,0 +1,16 @@
+[package]
+name = "coco_resolve"
+version = "0.1.0"
+authors = ["JozsefA <jozsefaug@gmail.com>"]
+edition = "2018"
+
+[lib]
+name = "coco_resolve"
+path = "lib.rs"
+doctest = false
+
+[dependencies]
+coco_span = { path = "../coco_span" }
+coco_ast = { path = "../coco_ast" }
+coco_project = { path = "../coco_project" }
+smallvec = "1.4.1"

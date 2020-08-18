@@ -1,0 +1,23 @@
+[package]
+name = "coco_span"
+version = "0.1.0"
+authors = ["JozsefA <jozsefaug@gmail.com>"]
+edition = "2018"
+
+[lib]
+name = "coco_span"
+path = "lib.rs"
+doctest = false
+
+[dev-dependencies]
+criterion = "0.3"
+
+[[bench]]
+name = "sourcemap"
+harness = false
+
+[dependencies]
+derive_more = "0.99.9"
+fxhash = "0.2.1"
+lazy_static = "1.4.0"
+lasso = { version = "0.3.1", features = ["multi-threaded"] }

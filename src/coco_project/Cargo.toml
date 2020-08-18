@@ -1,0 +1,16 @@
+[package]
+name = "coco_project"
+version = "0.1.0"
+authors = ["JozsefA <jozsefaug@gmail.com>"]
+edition = "2018"
+
+[lib]
+name = "coco_project"
+path = "lib.rs"
+doctest = false
+
+[dependencies]
+coco_span = { path = "../coco_span" }
+coco_ast = { path = "../coco_ast" }
+smallvec = "1.4.1"
+fxhash = "0.2.1"

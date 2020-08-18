@@ -1,9 +1,9 @@
 use std::ops::Range;
 use std::slice::SliceIndex;
 
-use hlcl_asm::selector::Selector;
-use hlcl_ast_merger::AstFinalizer;
-use hlcl_parse::ParsingSession;
+use coco_asm::selector::Selector;
+use coco_ast_merger::AstFinalizer;
+use coco_parse::ParsingSession;
 
 /// TODO: Collect names and item signatures
 /// TODO: Perform sanity check

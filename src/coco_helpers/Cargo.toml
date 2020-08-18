@@ -1,0 +1,14 @@
+[package]
+name = "coco_helpers"
+version = "0.1.0"
+authors = ["JozsefA <jozsefaug@gmail.com>"]
+edition = "2018"
+
+[lib]
+name = "coco_helpers"
+path = "lib.rs"
+doctest = false
+
+[dependencies]
+coco_span = { path = "../coco_span" }
+smallvec = "1.4.1"

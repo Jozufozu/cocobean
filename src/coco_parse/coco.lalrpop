@@ -1,0 +1,540 @@
+use std::str::FromStr;
+
+use lalrpop_util::{ParseError, ErrorRecovery};
+
+use coco_ast::{*, id::AstId, BinOpKind as BinOp};
+use coco_span::*;
+use coco_span::kw::Interner;
+use super::{util::*, lexer::Token, err::ParserError};
+
+grammar<'input>(input: &'input str, intr: &Interner, errs: &mut Vec<String>);
+
+pub Program: Program = <items:Item*> => Program { module: Mod { items, inline: true }, id: AstId::DUMMY };
+
+Vis: Visibility = {
+    <pb:(<@L> "pub" <@R>)?> => match pb {
+        Some((l, r)) => Visibility::Pub(Span::new(l, r)),
+        None => Visibility::Private,
+    },
+};
+
+Identifier: Identifier = {
+    <l:@L> <n:TokenIdentifier> <r:@R> => Identifier::new(l, r, intr.get_or_intern(n))
+};
+
+#[inline]
+Path: Path = {
+    <one:Identifier> <v:("::" <Identifier>)*> => {
+        let mut v = v;
+        v.insert(0, one);
+
+        Path {
+            items: v
+        }
+    }
+};
+
+Item: Item = {
+    Use,
+    ModDefinition,
+    StructDefinition,
+    ClassDefinition,
+    BranchDefinition,
+    FunctionDefinition,
+};
+
+Use: Item = {
+    <l:@L> <vis:Vis> "use" <u:UseTree> ";" <r:@R> => Item {
+        name: DUMMY_IDENT.clone(),
+        vis,
+        kind: ItemKind::Use(u),
+        span: Span::new(l, r),
+        id: AstId::DUMMY,
+    }
+};
+
+UseTree: UseTree = {
+    <l:@L> <path:Path> <r:@R> => UseTree {
+        span: Span::new(l, r),
+        path,
+        kind: UseTreeKind::Name,
+        id: AstId::DUMMY,
+    },
+    <l:@L> <path:Path> "as" <ident:Identifier> <r:@R> => UseTree {
+        span: Span::new(l, r),
+        path,
+        kind: UseTreeKind::Rebind(ident),
+        id: AstId::DUMMY,
+    },
+    <l:@L> <path:Path> "::" "*" <r:@R> => UseTree {
+        span: Span::new(l, r),
+        path,
+        kind: UseTreeKind::Glob,
+        id: AstId::DUMMY,
+    },
+    <l:@L> <path:Path> "::" "{" <one: UseTree> <rest:("," <UseTree>)*> ","? "}" <r:@R> => UseTree {
+        span: Span::new(l, r),
+        path,
+        kind: UseTreeKind::Tree({
+            let mut rest = rest;
+            rest.insert(0, one);
+            rest
+        }),
+        id: AstId::DUMMY,
+    },
+    <l:@L> <err:!> <r:@R> => {
+        errs.push(err.error.to_string());
+        UseTree {
+            span: Span::new(l, r),
+            path: Path::empty(),
+            kind: UseTreeKind::Err,
+            id: AstId::DUMMY,
+        }
+    }
+};
+
+ModItemsOrSemi: Vec<Item> = {
+    "{" <Item*> "}",
+    ";" => Vec::with_capacity(0),
+}
+
+ModDefinition: Item = {
+    <l:@L> <vis:Vis> "mod" <name:Identifier> <items:ModItemsOrSemi> <r:@R> => {
+        let inline = items.capacity() != 0;
+        Item {
+            name,
+            vis,
+            kind: ItemKind::Mod(Mod {
+                items,
+                inline,
+            }),
+            span: Span::new(l, r),
+            id: AstId::DUMMY,
+        }
+    }
+};
+
+StructDefinition: Item = {
+    <l:@L> <vis:Vis> "struct" <name:Identifier> "{" <members:Comma<StructField>> "}" <r:@R> => {
+        Item {
+            name,
+            vis,
+            kind: ItemKind::Struct(Struct {
+                members
+            }),
+            span: Span::new(l, r),
+            id: AstId::DUMMY,
+        }
+    }, 
+};
+
+ClassDefinition: Item = {
+    <l:@L> <vis:Vis> <b:(<@L> "builtin" <@R>)?> "class" <name:Identifier> <bounds:(":" <Type>)?> "{" <members:Comma<StructField>> "}" <r:@R> => {
+        let bounds = if let Some(ty) = bounds {
+            ClassBounds::Ty(ty)
+        } else {
+            ClassBounds::Default
+        };
+        
+        Item {
+            name,
+            vis,
+            kind: ItemKind::Class(Class {
+                builtin: b.map(|(l, r)| Span::new(l, r)), 
+                bounds, 
+                members
+            }),
+            span: Span::new(l, r),
+            id: AstId::DUMMY,
+        }
+    }, 
+};
+
+BranchDefinition: Item = {
+    <l:@L> <vis:Vis> "branch" <name:Identifier> <bounds:(":" <Type>)?> "{" <variants:Comma<BranchVariant>> "}" <r:@R> => {
+        let bounds = if let Some(ty) = bounds {
+            ClassBounds::Ty(ty)
+        } else {
+            ClassBounds::Default
+        };
+        
+        Item {
+            name,
+            vis,
+            kind: ItemKind::Branch(Branch {
+                bounds, 
+                variants
+            }),
+            span: Span::new(l, r),
+            id: AstId::DUMMY,
+        }
+    },
+};
+
+BranchVariant: BranchVariant = {
+    <l:@L> <name:Identifier> "{" <members:Comma<StructField>> "}" <r:@R> => {
+        BranchVariant {
+            span: Span::new(l, r),
+            name,
+            members,
+            id: AstId::DUMMY,
+        }
+    },
+};
+
+StructField: StructField = {
+    <vis:Vis> <name:Identifier> ":" <ty:Type> => StructField{name, ty, vis},
+};
+
+FunctionDefinition: Item = {
+    <l:@L> <vis:Vis>  "fn" <name:Identifier> <sig:FnSig> <r:@R> => {
+        let (params, retty, block) = sig;
+        let ret = match retty {
+            Some(ty) => FnReturn::Ty(ty),
+            None => FnReturn::Default,
+        };
+
+        let sig = FnSig {
+            params,
+            ret
+        };
+
+        Item {
+            name,
+            vis,
+            kind: ItemKind::Fn(sig, block),
+            span: Span::new(l, r),
+            id: AstId::DUMMY,
+        }
+    },
+};
+
+FnSig = "(" <Comma<FnParam>> ")" <(":" <Type>)?> <BlockOrSemi>;
+
+
+FnParam: FnParam = {
+    <name:Identifier> ":" <ty:Type> => FnParam{name, ty},
+};
+
+Block: Block = {
+    <l:@L> "{" <s:Stmt*> <e:(<@L> <ExprWithoutBlock> <@R>)?> "}" <r:@R> => {
+        let mut s = s;
+        if let Some((l, e, r)) = e {
+            s.push(Stmt::new(l, r, StmtKind::Expr(bx(e))));
+        }
+        Block::new(l, r, s)
+    },
+};
+
+BlockOrSemi: Option<Block> = {
+    Block => Some(<>),
+    ";" => None,
+};
+
+MaybeExprSemi: Option<Expr> = {
+    <Expr> ";" => Some(<>),
+    ";"? => None
+}
+
+
+Stmt: Stmt = {
+    <l:@L> <item:Item> <r:@R> => Stmt::new(l, r, StmtKind::Item(bx(item))),
+    <l:@L> "let" <id:Identifier> <ty:(":" <Type>)?> "=" <e:Expr> ";" <r:@R> => Stmt::new(l, r, StmtKind::Let(id, box_opt(ty), bx(e))),
+    <l:@L> "return" <e:Expr?> ";" <r:@R> => Stmt::new(l, r, StmtKind::Ret(box_opt(e))),
+    <l:@L> "break" <e:Expr?> ";" <r:@R> => Stmt::new(l, r, StmtKind::Break(box_opt(e))),
+    <l:@L> "continue" ";"? <r:@R> => Stmt::new(l, r, StmtKind::Continue),
+    <l:@L> <e:ExprWithoutBlock> ";" <r:@R> => {
+        Stmt::new(l, r, StmtKind::Semi(bx(e)))
+    },
+    <l:@L> <e:ExprWithBlock> <semi:";"?> <r:@R> => match semi {
+        Some(_) => Stmt::new(l, r, StmtKind::Semi(bx(e))),
+        None => Stmt::new(l, r, StmtKind::Expr(bx(e))),
+    },
+};
+
+Spanned<T>: Spanned<T> = {
+    <l:@L> <val:T> <r:@R> => Spanned::new(l, r, val),
+}
+
+Either<T, U>: T = {
+    T,
+    U,
+};
+
+BinOpExpr<Op, Next>: Expr = {
+    <l:@L> <lhs:BinOpExpr<Op, Next>> <op:Spanned<Op>> <rhs:Next> <r:@R> => Expr::new(l, r, ExprKind::BinOp(op, bx(lhs), bx(rhs))),
+    Next,
+};
+
+UnOpExpr<Op, Next>: Expr = {
+    <l:@L> <op:Spanned<Op>> <rhs:UnOpExpr<Op, Next>> <r:@R> => Expr::new(l, r, ExprKind::UnOp(op, bx(rhs))),
+    Next,
+};
+
+Expr: Expr = {
+    ExprWithoutBlock,
+    ExprWithBlock,
+};
+
+ExprWithBlock: Expr = {
+    IfExpr,
+    BlockExpr,
+    LoopExpr,
+};
+
+BlockExpr: Expr = {
+    <l:@L> <e:Block> <r:@R> => Expr::new(l, r, ExprKind::Block(e))
+};
+
+IfExpr: Expr = {
+    <l:@L> "if" <cond:Expr> <iftrue:Block> <r:@R> => {
+        Expr::new(l, r, ExprKind::If(bx(cond), iftrue, None))
+    },
+    <l:@L> "if" <cond:Expr> <iftrue:Block> "else" <iffalse:Either<IfExpr, BlockExpr>> <r:@R> => {
+        Expr::new(l, r, ExprKind::If(bx(cond), iftrue, Some(bx(iffalse))))
+    },
+};
+
+LoopExpr: Expr = {
+    <l:@L> "loop" <block:Block> <r:@R> => Expr::new(l, r, ExprKind::Loop(block)),
+    <l:@L> "while" <cond:Expr> <block:Block> <r:@R> => Expr::new(l, r, ExprKind::While(bx(cond), block)),
+};
+
+ExprWithoutBlock: Expr = {
+    Expr10,
+};
+
+Expr10: Expr = {
+    <lo:@L> <lhs:Expr9> <l:@L> "=" <r:@R> <rhs:Expr10> <ro:@R> => Expr::new(lo, ro, ExprKind::Assign(Span::new(l, r), bx(lhs), bx(rhs))),
+    <l:@L> <lhs:Expr9> <op:Spanned<OpAssign>> <rhs:Expr10> <r:@R> => Expr::new(l, r, ExprKind::AssignOp(op, bx(lhs), bx(rhs))),
+    Expr9,
+};
+OpAssign: BinOp = {
+    "+=" => BinOp::Add,
+    "-=" => BinOp::Sub,
+    "*=" => BinOp::Mul,
+    "/=" => BinOp::Div,
+    "%=" => BinOp::Rem,
+    "&=" => BinOp::Rem,
+    "|=" => BinOp::Rem,
+};
+
+Expr9 = BinOpExpr<OpOr, Expr8>;
+OpOr: BinOp = {
+    "|" => BinOp::Or,
+};
+
+Expr8 = BinOpExpr<OpAnd, Expr7>;
+OpAnd: BinOp = {
+    "&" => BinOp::And,
+};
+
+Expr7 = BinOpExpr<Op7, Expr6>;
+Op7: BinOp = {
+    "==" => BinOp::Eq,
+    "!=" => BinOp::Ne,
+};
+
+Expr6 = BinOpExpr<Op6, Expr5>;
+Op6: BinOp = {
+    "<" => BinOp::Lt,
+    ">" => BinOp::Gt,
+    "<=" => BinOp::Le,
+    ">=" => BinOp::Ge,
+};
+
+Expr5: Expr = {
+    <l:@L> <e:Expr5> <op:Spanned<IsOp>> <ty:Type> <r:@R> => Expr::new(l, r, ExprKind::Is(op, bx(e), bx(ty))),
+    Expr4,
+};
+IsOp: IsOpKind = {
+    "!" "is" => IsOpKind::NotIs,
+    "is" => IsOpKind::Is,
+};
+
+Expr4 = BinOpExpr<Op4, Expr3>;
+Op4: BinOp = {
+    "+" => BinOp::Add,
+    "-" => BinOp::Sub,
+};
+
+Expr3 = BinOpExpr<Op3, Expr2>;
+Op3: BinOp = {
+    "*" => BinOp::Mul,
+    "/" => BinOp::Div,
+    "%" => BinOp::Rem,
+};
+
+Expr2 = UnOpExpr<Op2, Expr0>;
+Op2: UnOpKind = {
+    "-" => UnOpKind::Neg,
+    "!" => UnOpKind::Not,
+};
+
+Call: Expr = {
+    <l:@L> <name:Path> "(" <exprs:Comma<Expr>> ")" <r:@R> => {
+        Expr::new(l, r, ExprKind::Call(name, exprs))
+    },
+};
+
+Disambiguator: Disambiguator = {
+    <l:@L> "@" <name:Path> <r:@R> => Disambiguator::new(l, r, name)
+};
+
+Expr0: Expr = {
+    <l:@L> <lit:Lit> <r:@R> => Expr::new(l, r, ExprKind::Lit(lit)),
+    <l:@L> <ident:Identifier> <r:@R> => Expr::new(l, r, ExprKind::Variable(ident)),
+    <l:@L> <e:Expr0> <disambiguator:Disambiguator?> "." <field:Identifier> <r:@R> => Expr::new(l, r, ExprKind::FieldAccess(bx(e), disambiguator.map(|d| bx(d)), field)),
+    Call,
+
+    <l:@L> "(" <exprs:Many1<",", Expr>> ")" <r:@R> => {
+        Expr::new(l, r, if exprs.len() == 1 {
+            let mut exprs = exprs;
+            ExprKind::Paren(bx(exprs.remove(0)))
+        } else {
+            ExprKind::Tuple(exprs)
+        })
+    },
+
+    <l:@L> <err:!> <r:@R> => { errs.push(err.error.to_string()); Expr::new(l, r, ExprKind::Err) }
+};
+
+Lit: Lit = {
+    "true" => Lit::Bool(true),
+    "false" => Lit::Bool(false),
+    <s:TokenString> => Lit::String(s.to_string()),
+    <l:@L> <tok:TokenInt> <r:@R> => {
+        let s: String = tok.chars().filter(|v| *v != '_').collect();
+        match i32::from_str(&s) {
+            Ok(i) => Lit::Int(i),
+            Err(_) => {
+                errs.push(ParserError::IntTooBig(Span::new(l, r)).to_string());
+
+                Lit::Err
+            }
+        }
+    }
+};
+
+Type: Type = {
+    <l:@L> "!" <r:@R> => Type::new(l, r, TypeKind::Never),
+    <l:@L> "(" <tys:Many0<",", Type>> ")" <r:@R> => {
+        if tys.is_empty() {
+            Type::new(l, r, TypeKind::Unit)
+        } else {
+            Type::new(l, r, TypeKind::Tuple(tys))
+        }
+    },
+    <l:@L> <ty:Many1<"+", Path>> <r:@R> => {
+        if ty.len() == 1 {
+            let mut ty = ty;
+            Type::new(l, r, TypeKind::Named(ty.remove(0)))
+        } else {
+            Type::new(l, r, TypeKind::And(ty.into_iter().map(|name| TypeRef {name, id: AstId::DUMMY}).collect()))
+        }
+    },
+
+    <l:@L> <err:!> <r:@R> => { errs.push(err.error.to_string()); Type::new(l, r, TypeKind::Err) }
+};
+
+Comma<T> = Many0<",", T>;
+
+Many0<SEP, T>: Vec<T> = {
+    <v:(<T> SEP)*> <e:T?> => match e {
+        None => v,
+        Some(e) => {
+            let mut v = v;
+            v.push(e);
+            v
+        }
+    }
+};
+
+Many1<SEP, T>: Vec<T> = {
+    <e:T> <v:(SEP <T>)*> => {
+        let mut v = v;
+        v.insert(0, e);
+        v
+    }
+};
+
+Many2<SEP, T>: Vec<T> = {
+    <e:T> <v:(SEP <T>)+> => {
+        let mut v = v;
+        v.insert(0, e);
+        v
+    }
+};
+
+extern {
+    type Location = usize;
+    type Error = ParserError;
+
+    enum Token<'input> {
+        TokenIdentifier => Token::Identifier(<&'input str>),
+        TokenString => Token::StringLiteral(<&'input str>),
+        TokenInt => Token::IntLiteral(<&'input str>),
+        "true" => Token::True,
+        "false" => Token::False,
+        "const" => Token::Const,
+        "pub" => Token::Pub,
+        "do" => Token::Do,
+        "while" => Token::While,
+        "loop" => Token::Loop,
+        "if" => Token::If,
+        "else" => Token::Else,
+        "is" => Token::Is,
+        "fn" => Token::Fn,
+        "let" => Token::Let,
+        "return" => Token::Return,
+        "break" => Token::Break,
+        "continue" => Token::Continue,
+        "mod" => Token::Mod,
+        "use" => Token::Use,
+        "as" => Token::As,
+        "struct" => Token::Struct,
+        "branch" => Token::Branch,
+        "class" => Token::Class,
+        "trait" => Token::Trait,
+        "enum" => Token::Enum,
+        "builtin" => Token::Builtin,
+        "fn" => Token::Fn,
+        "," => Token::Comma,
+        ";" => Token::Semicolon,
+        "." => Token::Dot,
+        ":" => Token::Colon,
+        "::" => Token::PathSeg,
+        "." => Token::Dot,
+        "!" => Token::Exclamation,
+        "^" => Token::Caret,
+        "{" => Token::OpenBlock,
+        "}" => Token::CloseBlock,
+        "(" => Token::OpenParen,
+        ")" => Token::CloseParen,
+        "[" => Token::OpenBracket,
+        "]" => Token::CloseBracket,
+        "#" => Token::Hash,
+        "@" => Token::At,
+        "&" => Token::BinOp(BinOp::And),
+        "|" => Token::BinOp(BinOp::Or),
+        "+" => Token::BinOp(BinOp::Add),
+        "-" => Token::BinOp(BinOp::Sub),
+        "*" => Token::BinOp(BinOp::Mul),
+        "/" => Token::BinOp(BinOp::Div),
+        "%" => Token::BinOp(BinOp::Rem),
+        "==" => Token::BinOp(BinOp::Eq),
+        "!=" => Token::BinOp(BinOp::Ne),
+        "<" => Token::BinOp(BinOp::Lt),
+        ">" => Token::BinOp(BinOp::Gt),
+        "<=" => Token::BinOp(BinOp::Le),
+        ">=" => Token::BinOp(BinOp::Ge),
+        "=" => Token::Assign,
+        "+=" => Token::AssignOp(BinOp::Add),
+        "-=" => Token::AssignOp(BinOp::Sub),
+        "*=" => Token::AssignOp(BinOp::Mul),
+        "/=" => Token::AssignOp(BinOp::Div),
+        "%=" => Token::AssignOp(BinOp::Rem),
+        "|=" => Token::AssignOp(BinOp::Or),
+        "&=" => Token::AssignOp(BinOp::And),
+    }
+}

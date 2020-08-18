@@ -1,0 +1,19 @@
+[package]
+name = "coco_error"
+version = "0.1.0"
+authors = ["JozsefA <jozsefaug@gmail.com>"]
+edition = "2018"
+
+[lib]
+name = "coco_error"
+path = "lib.rs"
+doctest = false
+
+[dependencies]
+coco_span = { path = "../coco_span" }
+coco_helpers = { path = "../coco_helpers" }
+itertools = "0.9.0"
+lasso = "0.2.2"
+derive_more = "0.99.9"
+annotate-snippets = "0.9.0"
+crossbeam-channel = "0.4.3"
