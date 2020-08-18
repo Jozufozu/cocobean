@@ -1,1 +1,3 @@
 /target
+/src/coco_span/target
+Cargo.lock
