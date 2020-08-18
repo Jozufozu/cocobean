@@ -27,8 +27,8 @@ pub mod err;
 pub mod lexer;
 pub mod util;
 
-pub const ROOT_FILE: &str = "main.coco";
-pub const EXTENSION: &str = ".coco";
+pub const ROOT_FILE: &str = "main.cb";
+pub const EXTENSION: &str = ".cb";
 
 type ParserResult<'input> = (Vec<String>, Result<Program, String>);
 
